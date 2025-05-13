@@ -1,0 +1,85 @@
+<!-- app-button.component.html -->
+<div class="filter-button-container" [class.filter-active]="type === 'filter' && selectedFilters.length > 0">
+  <!-- Botón estándar -->
+  <button
+    mat-button
+    *ngIf="type === 'button'"
+    [disabled]="disabled || loading"
+    class="app-button"
+    [class.app-button--primary]="variant === 'primary'"
+    [class.app-button--secondary]="variant === 'secondary'"
+    [class.app-button--text]="variant === 'text'"
+    [class.app-button--back]="variant === 'back'"
+    [class.app-button--small]="size === 'small'"
+    [class.app-button--normal]="size === 'normal'"
+    [class.app-button--large]="size === 'large'"
+    [class.app-button--full-width]="fullWidth"
+    [class.app-button--loading]="loading"
+    (click)="handleClick($event)"
+  >
+    <mat-icon *ngIf="icon && !loading">{{icon}}</mat-icon>
+    <mat-spinner *ngIf="loading" diameter="20" class="loading-spinner"></mat-spinner>
+    <span class="button-label" [class.invisible]="loading">{{label}}</span>
+    <ng-content></ng-content>
+  </button>
+
+  <!-- Botón de filtro -->
+  <button
+    mat-button
+    *ngIf="type === 'filter'"
+    [matMenuTriggerFor]="filterMenu"
+    [disabled]="disabled || loading"
+    class="app-button"
+    [class.app-button--primary]="variant === 'primary'"
+    [class.app-button--secondary]="variant === 'secondary'"
+    [class.app-button--text]="variant === 'text'"
+    [class.app-button--back]="variant === 'back'"
+    [class.app-button--small]="size === 'small'"
+    [class.app-button--normal]="size === 'normal'"
+    [class.app-button--large]="size === 'large'"
+    [class.app-button--full-width]="fullWidth"
+    [class.app-button--active]="selectedFilters.length > 0"
+  >
+    <mat-icon *ngIf="icon">{{icon}}</mat-icon>
+    <span class="button-label">{{label}}</span>
+  </button>
+
+  <!-- Menú de filtro -->
+  <mat-menu #filterMenu="matMenu" class="filter-menu">
+    <div class="filter-menu-header" (click)="$event.stopPropagation()">
+      <h4 class="filter-menu-title">Filtros</h4>
+      <button mat-button class="filter-menu-clear" (click)="clearFilters()">Limpiar</button>
+    </div>
+
+    <div class="filter-menu-content" (click)="$event.stopPropagation()">
+      <div
+        *ngFor="let option of filterOptions"
+        class="filter-option"
+        [class.selected]="isFilterSelected(option)"
+        (click)="toggleFilterOption(option)"
+      >
+        <mat-checkbox
+          [checked]="isFilterSelected(option)"
+          (change)="toggleFilterOption(option)"
+          (click)="$event.stopPropagation()"
+        ></mat-checkbox>
+        <span>{{ option.label }}</span>
+      </div>
+
+      <div *ngIf="filterOptions.length === 0" class="filter-no-options">
+        No hay filtros disponibles
+      </div>
+    </div>
+
+    <div class="filter-menu-footer" (click)="$event.stopPropagation()">
+      <button
+        mat-raised-button
+        color="primary"
+        class="app-button app-button--primary app-button--small"
+        (click)="applyFilters()"
+      >
+        Aplicar
+      </button>
+    </div>
+  </mat-menu>
+</div>

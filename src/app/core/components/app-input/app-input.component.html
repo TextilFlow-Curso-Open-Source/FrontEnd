@@ -1,0 +1,219 @@
+<!-- app-input.component.html -->
+<div class="app-input-container" [class.full-width]="fullWidth">
+  <!-- Etiqueta común para todos los tipos -->
+  <label *ngIf="label" class="app-input-label">
+    {{ label }}
+    <span *ngIf="required" class="required-mark">*</span>
+  </label>
+
+  <!-- Campo según el tipo -->
+  <ng-container [ngSwitch]="type">
+
+    <!-- Inputs estándar (text, number, email, password, tel, url, search) -->
+    <mat-form-field *ngSwitchCase="'text'" appearance="outline" [class.full-width]="fullWidth">
+      <input
+        matInput
+        type="text"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [required]="required"
+        [value]="value"
+        (input)="updateValue($event)"
+        (focus)="handleFocus($event)"
+        (blur)="handleBlur($event)"
+      >
+      <mat-error *ngIf="error">{{ error }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field *ngSwitchCase="'number'" appearance="outline" [class.full-width]="fullWidth">
+      <input
+        matInput
+        type="number"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [required]="required"
+        [value]="value"
+        (input)="updateValue($event)"
+        (focus)="handleFocus($event)"
+        (blur)="handleBlur($event)"
+      >
+      <mat-error *ngIf="error">{{ error }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field *ngSwitchCase="'email'" appearance="outline" [class.full-width]="fullWidth">
+      <input
+        matInput
+        type="email"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [required]="required"
+        [value]="value"
+        (input)="updateValue($event)"
+        (focus)="handleFocus($event)"
+        (blur)="handleBlur($event)"
+      >
+      <mat-error *ngIf="error">{{ error }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field *ngSwitchCase="'password'" appearance="outline" [class.full-width]="fullWidth">
+      <input
+        matInput
+        type="password"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [required]="required"
+        [value]="value"
+        (input)="updateValue($event)"
+        (focus)="handleFocus($event)"
+        (blur)="handleBlur($event)"
+      >
+      <mat-error *ngIf="error">{{ error }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field *ngSwitchCase="'tel'" appearance="outline" [class.full-width]="fullWidth">
+      <input
+        matInput
+        type="tel"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [required]="required"
+        [value]="value"
+        (input)="updateValue($event)"
+        (focus)="handleFocus($event)"
+        (blur)="handleBlur($event)"
+      >
+      <mat-error *ngIf="error">{{ error }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field *ngSwitchCase="'url'" appearance="outline" [class.full-width]="fullWidth">
+      <input
+        matInput
+        type="url"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [required]="required"
+        [value]="value"
+        (input)="updateValue($event)"
+        (focus)="handleFocus($event)"
+        (blur)="handleBlur($event)"
+      >
+      <mat-error *ngIf="error">{{ error }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field *ngSwitchCase="'search'" appearance="outline" [class.full-width]="fullWidth">
+      <input
+        matInput
+        type="search"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [required]="required"
+        [value]="value"
+        (input)="updateValue($event)"
+        (focus)="handleFocus($event)"
+        (blur)="handleBlur($event)"
+      >
+      <mat-error *ngIf="error">{{ error }}</mat-error>
+    </mat-form-field>
+
+    <!-- Textarea -->
+    <mat-form-field *ngSwitchCase="'textarea'" appearance="outline" [class.full-width]="fullWidth">
+      <textarea
+        matInput
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [required]="required"
+        [value]="value"
+        (input)="updateValue($event)"
+        (focus)="handleFocus($event)"
+        (blur)="handleBlur($event)"
+      ></textarea>
+      <mat-error *ngIf="error">{{ error }}</mat-error>
+    </mat-form-field>
+
+    <!-- Select/Dropdown -->
+    <mat-form-field *ngSwitchCase="'select'" appearance="outline" [class.full-width]="fullWidth">
+      <mat-select
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [required]="required"
+        [value]="value"
+        (selectionChange)="updateSelectValue($event)"
+        (focus)="handleFocus($event)"
+        (blur)="handleBlur($event)"
+      >
+        <mat-option *ngFor="let option of options" [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="error">{{ error }}</mat-error>
+    </mat-form-field>
+
+    <!-- Fecha -->
+    <mat-form-field *ngSwitchCase="'date'" appearance="outline" [class.full-width]="fullWidth">
+      <input
+        matInput
+        [matDatepicker]="picker"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [required]="required"
+        [value]="value"
+        (dateChange)="updateDateValue($event)"
+        (focus)="handleFocus($event)"
+        (blur)="handleBlur($event)"
+      >
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+      <mat-error *ngIf="error">{{ error }}</mat-error>
+    </mat-form-field>
+
+    <!-- File upload -->
+    <div *ngSwitchCase="'file'" class="app-file-container">
+      <app-button
+        label="Seleccionar archivo"
+        icon="upload"
+        variant="primary"
+        size="normal"
+        [disabled]="disabled"
+        (click)="triggerFileInput()"
+      ></app-button>
+
+      <input
+        id="fileInput"
+        type="file"
+        class="hidden-uploader"
+        [disabled]="disabled"
+        (change)="handleFileSelect($event)"
+      />
+
+      <div *ngIf="selectedFile" class="selected-file">
+        {{ selectedFile.name }}
+      </div>
+
+      <div *ngIf="error" class="app-input-error">{{ error }}</div>
+    </div>
+
+    <!-- Photo upload -->
+    <div *ngSwitchCase="'photo'" class="app-photo-upload">
+      <div
+        class="app-photo-circle"
+        [class.has-error]="error"
+        [class.has-preview]="photoPreviewUrl"
+        (click)="triggerFileInput()"
+      >
+        <img *ngIf="photoPreviewUrl" [src]="photoPreviewUrl" alt="Vista previa" class="photo-preview" />
+        <mat-icon *ngIf="!photoPreviewUrl">photo_camera</mat-icon>
+      </div>
+
+      <input
+        id="fileInput"
+        type="file"
+        accept="image/*"
+        class="hidden-uploader"
+        [disabled]="disabled"
+        (change)="handleFileSelect($event)"
+      />
+
+      <div *ngIf="error" class="app-input-error">{{ error }}</div>
+    </div>
+  </ng-container>
+</div>

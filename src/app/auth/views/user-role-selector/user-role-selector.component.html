@@ -1,0 +1,43 @@
+<!-- /src/app/auth/views/user-role-selector/user-role-selector.component.html -->
+<div class="auth-layout">
+  <!-- Columna izquierda (contenido) -->
+  <div class="content-col">
+    <div class="logo">
+      <img src="/assets/textil-flow-logo.svg" alt="TextilFlow Logo">
+    </div>
+
+    <div class="form-container">
+      <h2>Bienvenido a TextilFlow!!</h2>
+      <p>Selecciona tu tipo de usuario para comenzar</p>
+
+      <div class="role-options">
+        <app-button
+          label="Empresario / Manufacturador"
+          [loading]="isLoading"
+          [disabled]="isLoading"
+          [fullWidth]="true"
+          variant="primary"
+          (click)="selectRole('businessman')">
+        </app-button>
+
+        <app-button
+          label="Proveedor"
+          [loading]="isLoading"
+          [disabled]="isLoading"
+          [fullWidth]="true"
+          variant="primary"
+          (click)="selectRole('supplier')">
+        </app-button>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Columna derecha (imagen) -->
+  <div class="image-col">
+    <!-- La imagen se aplica como background en CSS -->
+  </div>
+</div>

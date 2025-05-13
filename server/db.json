@@ -1,0 +1,126 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Usuario de Prueba",
+      "email": "test@example.com",
+      "password": "123456",
+      "role": "businessman",
+      "country": "Perú",
+      "city": "Lima",
+      "address": "Av. Principal 123",
+      "phone": "123456789"
+    },
+    {
+      "name": "Mathew",
+      "email": "mathew@gmail.com",
+      "password": "290506",
+      "country": "Andorra",
+      "city": "Canillo",
+      "address": "Av. salaverry",
+      "phone": "123547895",
+      "id": 1747119343364,
+      "role": "businessman"
+    },
+    {
+      "name": "Juan",
+      "email": "juan@gmail.com",
+      "password": "654321",
+      "country": "Andorra",
+      "city": "Engordany",
+      "address": "av. Peru",
+      "phone": "574852218565",
+      "id": 1747125838395,
+      "role": "supplier"
+    },
+    {
+      "name": "aasdasd",
+      "email": "mateo@gmail.com",
+      "password": "1234567",
+      "country": "Algeria",
+      "city": "Annaba",
+      "address": "anaba",
+      "phone": "847514578",
+      "id": 1747126728765,
+      "role": "supplier"
+    },
+    {
+      "name": "Maylhy",
+      "email": "maylhy@gmail.com",
+      "password": "300905",
+      "country": "Peru",
+      "city": "Ayacucho",
+      "address": "Pampa de quinua",
+      "phone": "124578954",
+      "id": 1747127476096,
+      "role": "businessman"
+    }
+  ],
+  "businessman": [
+    {
+      "id": 1,
+      "userId": 1,
+      "companyName": "Empresa Ejemplo",
+      "ruc": "20123456789",
+      "businessType": "Manufactura",
+      "industry": "Textil",
+      "employeeCount": 50,
+      "foundingYear": 2010,
+      "website": "https://ejemplo.com",
+      "description": "Empresa dedicada a la manufactura textil",
+      "logo": ""
+    },
+    {
+      "userId": 1747119343364,
+      "companyName": "",
+      "ruc": "",
+      "businessType": "",
+      "industry": "",
+      "employeeCount": 0,
+      "foundingYear": 2025,
+      "website": "",
+      "description": "",
+      "logo": "",
+      "id": 2
+    },
+    {
+      "userId": 1747127476096,
+      "companyName": "",
+      "ruc": "",
+      "businessType": "",
+      "industry": "",
+      "employeeCount": 0,
+      "foundingYear": 2025,
+      "website": "",
+      "description": "",
+      "logo": "",
+      "id": 3
+    }
+  ],
+  "suppliers": [
+    {
+      "userId": 1747125838395,
+      "companyName": "",
+      "ruc": "",
+      "specialization": "",
+      "productCategories": [],
+      "yearsFounded": 2025,
+      "warehouseLocation": "",
+      "minimumOrderQuantity": 0,
+      "logo": "",
+      "id": 1
+    },
+    {
+      "userId": 1747126728765,
+      "companyName": "",
+      "ruc": "",
+      "specialization": "",
+      "productCategories": [],
+      "yearsFounded": 2025,
+      "warehouseLocation": "",
+      "minimumOrderQuantity": 0,
+      "logo": "",
+      "id": 2
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+/* /src/app/auth/views/user-register/user-register.component.css */
+.auth-layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* Columna izquierda (contenido) */
+.content-col {
+  flex: 1;
+  max-width: 50%;
+  padding: 2rem;
+  position: relative;
+  overflow-y: auto;
+}
+
+/* Logo */
+.logo {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+}
+
+.logo img {
+  width: 170px;
+  height: auto;
+}
+
+/* Contenedor del formulario */
+.form-container {
+  max-width: 450px;
+  margin: 0 auto;
+  margin-top: 120px; /* Espacio para el logo */
+  padding-bottom: 3rem;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+form app-input {
+  display: block;
+  margin-bottom: 1.25rem;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+app-button {
+  margin-bottom: 1.5rem;
+}
+
+.login-link {
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.login-link a {
+  color: #866C52;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* Columna derecha (imagen) */
+.image-col {
+  flex: 1;
+  background-image: url('/assets/login-image.png');
+  background-size: cover;
+  background-position: center;
+}
+
+/* Responsividad */
+@media (max-width: 992px) {
+  .content-col {
+    max-width: 100%;
+    flex: 100%;
+  }
+
+  .image-col {
+    display: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .content-col {
+    padding: 1.5rem;
+  }
+
+  .logo {
+    top: 1.5rem;
+    left: 1.5rem;
+  }
+
+  .logo img {
+    width: 60px;
+  }
+
+  .form-container {
+    margin-top: 100px;
+  }
+}
+
+@media (min-width: 768px) {
+  .row-fields {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .row-fields app-input {
+    flex: 1;
+  }
+}

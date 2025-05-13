@@ -1,0 +1,115 @@
+<!-- /src/app/auth/views/user-register/user-register.component.html -->
+<div class="auth-layout">
+  <!-- Columna izquierda (contenido) -->
+  <div class="content-col">
+    <div class="logo">
+      <img src="/assets/textil-flow-logo.svg" alt="TextilFlow Logo">
+    </div>
+
+    <div class="form-container">
+      <h2>Empieza ahora!!</h2>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <app-input
+          label="Nombre"
+          type="text"
+          placeholder="Ingrese su nombre"
+          [required]="true"
+          [error]="registerForm.get('name')?.touched && registerForm.get('name')?.invalid ? 'El nombre es requerido' : ''"
+          [fullWidth]="true"
+          formControlName="name">
+        </app-input>
+
+        <app-input
+          label="Email"
+          type="email"
+          placeholder="Ingrese su email"
+          [required]="true"
+          [error]="registerForm.get('email')?.touched && registerForm.get('email')?.invalid ?
+                  (registerForm.get('email')?.errors?.['required'] ? 'El email es requerido' :
+                   registerForm.get('email')?.errors?.['email'] ? 'Ingrese un email válido' : '') : ''"
+          [fullWidth]="true"
+          formControlName="email">
+        </app-input>
+
+        <app-input
+          label="Contraseña"
+          type="password"
+          placeholder="Ingrese su contraseña"
+          [required]="true"
+          [error]="registerForm.get('password')?.touched && registerForm.get('password')?.invalid ?
+                  (registerForm.get('password')?.errors?.['required'] ? 'La contraseña es requerida' :
+                   registerForm.get('password')?.errors?.['minlength'] ? 'La contraseña debe tener al menos 6 caracteres' : '') : ''"
+          [fullWidth]="true"
+          formControlName="password">
+        </app-input>
+
+        <app-input
+          label="País"
+          type="select"
+          [options]="countries"
+          placeholder="Seleccione un país"
+          [required]="true"
+          [error]="registerForm.get('country')?.touched && registerForm.get('country')?.invalid ? 'El país es requerido' : ''"
+          [fullWidth]="true"
+          formControlName="country">
+        </app-input>
+
+        <app-input
+          label="Ciudad"
+          type="select"
+          [options]="cities"
+          placeholder="Seleccione una ciudad"
+          [required]="true"
+          [disabled]="!registerForm.get('country')?.value || loadingCities"
+          [error]="registerForm.get('city')?.touched && registerForm.get('city')?.invalid ? 'La ciudad es requerida' : ''"
+          [fullWidth]="true"
+          formControlName="city">
+        </app-input>
+
+        <app-input
+          label="Dirección"
+          type="text"
+          placeholder="Ingrese su dirección"
+          [required]="true"
+          [error]="registerForm.get('address')?.touched && registerForm.get('address')?.invalid ? 'La dirección es requerida' : ''"
+          [fullWidth]="true"
+          formControlName="address">
+        </app-input>
+
+        <app-input
+          label="Teléfono"
+          type="tel"
+          placeholder="Ingrese su teléfono"
+          [required]="true"
+          [error]="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid ? 'El teléfono es requerido' : ''"
+          [fullWidth]="true"
+          formControlName="phone">
+        </app-input>
+
+        <div class="error-message" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <app-button
+          label="Registrarse"
+          [loading]="isLoading"
+          [disabled]="registerForm.invalid"
+          [fullWidth]="true"
+          variant="primary"
+          (click)="onSubmit()">
+        </app-button>
+
+        <div class="login-link">
+          <span>¿Tienes cuenta? </span>
+          <a routerLink="/login">Iniciar sesión</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Columna derecha (imagen) -->
+  <div class="image-col">
+    <!-- La imagen se aplica como background en CSS -->
+  </div>
+</div>

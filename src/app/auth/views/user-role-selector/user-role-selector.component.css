@@ -1,0 +1,106 @@
+/* /src/app/auth/views/user-role-selector/user-role-selector.component.css */
+.auth-layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* Columna izquierda (contenido) */
+.content-col {
+  flex: 1;
+  max-width: 50%;
+  padding: 2rem;
+  position: relative;
+  overflow-y: auto;
+}
+
+/* Logo */
+.logo {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+}
+
+.logo img {
+  width: 170px;
+  height: auto;
+}
+
+/* Contenedor del formulario */
+.form-container {
+  max-width: 400px;
+  margin: 0 auto;
+  margin-top: 120px; /* Espacio para el logo */
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+  text-align: center;
+}
+
+p {
+  color: #666;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.role-options {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  margin-bottom: 2rem;
+  align-items:center;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Columna derecha (imagen) */
+.image-col {
+  flex: 1;
+  background-image: url('/assets/login-image.png');
+  background-size: cover;
+  background-position: center;
+}
+
+/* Responsividad */
+@media (max-width: 992px) {
+  .content-col {
+    max-width: 100%;
+    flex: 100%;
+  }
+
+  .image-col {
+    display: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .content-col {
+    padding: 1.5rem;
+  }
+
+  .logo {
+    top: 1.5rem;
+    left: 1.5rem;
+  }
+
+  .logo img {
+    width: 60px;
+  }
+
+  .form-container {
+    margin-top: 100px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+}

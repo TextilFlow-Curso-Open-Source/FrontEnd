@@ -1,0 +1,46 @@
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo-container">
+      <div class="logo"></div>
+    </div>
+
+    <nav class="sidebar-menu">
+      <ul class="menu-list">
+        <li *ngFor="let item of menuItems"
+            [ngClass]="['menu-item', isRouteActive(item.route) ? 'active' : '']"
+            (click)="navigateTo(item.route)">
+          <mat-icon class="menu-icon">{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Separador -->
+    <div class="sidebar-divider"></div>
+
+    <!-- Opciones de perfil -->
+    <nav class="sidebar-profile">
+      <ul class="menu-list">
+        <li *ngFor="let item of profileItems"
+            [ngClass]="['menu-item', isRouteActive(item.route) ? 'active' : '']"
+            (click)="navigateTo(item.route)">
+          <mat-icon class="menu-icon">{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Contenido principal -->
+  <div class="main-wrapper">
+    <!-- Barra superior con título -->
+    <header class="header-bar">
+      <h1 class="page-title">{{ currentPageTitle }}</h1>
+    </header>
+
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

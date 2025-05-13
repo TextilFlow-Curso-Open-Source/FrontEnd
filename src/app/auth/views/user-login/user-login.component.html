@@ -1,0 +1,67 @@
+<!-- /src/app/auth/views/user-login/user-login.component.html -->
+<div class="auth-layout">
+  <!-- Columna izquierda (contenido) -->
+  <div class="content-col">
+    <div class="logo">
+      <img src="/assets/textil-flow-logo.svg" alt="TextilFlow Logo">
+    </div>
+
+    <div class="form-container">
+      <h2>Bienvenido de nuevo</h2>
+      <p>Introduce tus datos para iniciar sesión</p>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <app-input
+          label="Email"
+          type="email"
+          placeholder="Ingrese su email"
+          [required]="true"
+          [error]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid ?
+                  (loginForm.get('email')?.errors?.['required'] ? 'El email es requerido' :
+                   loginForm.get('email')?.errors?.['email'] ? 'Ingrese un email válido' : '') : ''"
+          [fullWidth]="true"
+          formControlName="email">
+        </app-input>
+
+        <app-input
+          label="Contraseña"
+          type="password"
+          placeholder="Ingrese su contraseña"
+          [required]="true"
+          [error]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid ?
+                  (loginForm.get('password')?.errors?.['required'] ? 'La contraseña es requerida' :
+                   loginForm.get('password')?.errors?.['minlength'] ? 'La contraseña debe tener al menos 6 caracteres' : '') : ''"
+          [fullWidth]="true"
+          formControlName="password">
+        </app-input>
+
+        <div class="forgot-password">
+          <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <div class="error-message" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <app-button
+          label="Iniciar sesión"
+          [loading]="isLoading"
+          [disabled]="loginForm.invalid"
+          [fullWidth]="true"
+          variant="primary"
+          (click)="onSubmit()">
+        </app-button>
+
+        <div class="register-link">
+          <span>¿No tienes cuenta? </span>
+          <a routerLink="/register">Registrarse</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Columna derecha (imagen) -->
+  <div class="image-col">
+    <!-- La imagen se aplica como background en CSS -->
+  </div>
+</div>

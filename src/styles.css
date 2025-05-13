@@ -1,1 +1,110 @@
-/* You can add global styles to this file, and also import other style files */
+/* Importación de fuentes */
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+/* Variables de colores personalizados */
+:root {
+  --primary-color: #866C52;
+  --primary-dark: #6e573f;
+  --primary-light: rgba(134, 108, 82, 0.1);
+  --text-dark: #2A1905;
+  --error-color: #f44336;
+
+  /* Configuración general de tipografía */
+  font-family: 'Lato', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  background-color: var(--background-color);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Estilos generales */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Manrope', sans-serif;
+  margin-bottom: 16px;
+}
+
+
+
+
+/* Personalización global de Material */
+.mat-button.app-button--primary,
+.mat-raised-button.app-button--primary,
+.mat-flat-button.app-button--primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.mat-button.app-button--secondary,
+.mat-raised-button.app-button--secondary,
+.mat-flat-button.app-button--secondary {
+  background-color: transparent;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.mat-form-field-appearance-outline .mat-form-field-outline {
+  color: var(--primary-color);
+}
+
+.mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+  color: var(--primary-color);
+}
+
+.mat-form-field-appearance-outline.mat-form-field-invalid.mat-form-field-invalid .mat-form-field-outline-thick {
+  color: var(--error-color);
+}
+
+.mat-input-element {
+  color: var(--text-dark);
+}
+
+.mat-form-field-label {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.mat-form-field.mat-focused .mat-form-field-label {
+  color: var(--primary-color);
+}
+
+.mat-form-field.mat-form-field-invalid .mat-form-field-label {
+  color: var(--error-color);
+}
+
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+
+
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+
+
+/* Contenedor principal */
+.app-container {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Tema oscuro básico
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-color: rgba(255, 255, 255, 0.87);
+    --background-color: #121212;
+  }
+}*/
