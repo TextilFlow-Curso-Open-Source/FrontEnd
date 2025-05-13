@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { BaseService } from '../../core/services/base.service.service';
 import { Businessman } from '../models/businessman.entity'; // Cambié entity por model para coincidir con tus archivos
 import { environment } from '../../../environments/environment';
+import { Observable, map } from 'rxjs';
 
 /**
  * API endpoint path for businessmen obtained from environment configuration.
@@ -66,5 +67,27 @@ export class BusinessmanService extends BaseService<Businessman> {
           }
         }
       });
+  }
+
+  /**
+   * Obtiene el perfil de empresario asociado a un ID de usuario como Observable
+   * @param userId ID del usuario cuyo perfil se quiere obtener
+   * @returns Observable con el perfil de empresario
+   */
+  getProfileByUserIdObservable(userId: number): Observable<Businessman | null> {
+    return this.http.get<Businessman[]>(`${this.serverBaseUrl}${this.resourceEndpoint}?userId=${userId}`)
+      .pipe(
+        map(profiles => profiles && profiles.length > 0 ? profiles[0] : null)
+      );
+  }
+
+  /**
+   * Actualiza el perfil de un empresario
+   * @param id ID del perfil a actualizar
+   * @param profile Datos actualizados del perfil
+   * @returns Observable con el perfil actualizado
+   */
+  updateProfile(id: number, profile: Businessman): Observable<Businessman> {
+    return this.update(id, profile);
   }
 }
