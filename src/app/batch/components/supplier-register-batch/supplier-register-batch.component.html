@@ -1,1 +1,133 @@
-<p>supplier-register-batch works!</p>
+<!-- supplier-register-batch.component.html -->
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container">
+  <app-input
+    label="Código del Lote"
+    type="text"
+    [required]="true"
+    [fullWidth]="true"
+    placeholder="Ingrese el código del lote"
+    formControlName="code">
+  </app-input>
+
+  <app-input
+    label="Cliente"
+    type="text"
+    [required]="true"
+    [fullWidth]="true"
+    placeholder="Ingrese el cliente"
+    formControlName="client">
+  </app-input>
+
+  <app-input
+    label="Tipo de tela"
+    type="text"
+    [required]="true"
+    [fullWidth]="true"
+    placeholder="Ingrese el tipo de tela"
+    formControlName="fabricType">
+  </app-input>
+
+  <app-input
+    label="Color"
+    type="text"
+    [required]="true"
+    [fullWidth]="true"
+    placeholder="Ingrese el color del lote"
+    formControlName="color">
+  </app-input>
+
+  <app-input
+    label="Cantidad"
+    type="number"
+    [required]="true"
+    [fullWidth]="true"
+    placeholder="Ingrese la cantidad"
+    formControlName="quantity">
+  </app-input>
+
+  <app-input
+    label="Precio"
+    type="number"
+    [required]="true"
+    [fullWidth]="true"
+    placeholder="Ingrese el precio"
+    formControlName="price">
+  </app-input>
+
+  <app-input
+    label="Observaciones"
+    type="textarea"
+    [fullWidth]="true"
+    placeholder="Ingrese observaciones"
+    formControlName="observations">
+  </app-input>
+
+  <app-input
+    label="Fecha de registro"
+    type="date"
+    [required]="true"
+    [fullWidth]="true"
+    formControlName="date">
+  </app-input>
+
+  <!-- Si más adelante conectás una imagen o archivo -->
+  <app-input
+    label="Imagen"
+    type="file"
+    [fullWidth]="true"
+    formControlName="imageUrl">
+  </app-input>
+
+  <div class="button-group">
+    <app-button
+      label="Cancelar"
+      icon="close"
+      variant="secondary"
+      size="normal"
+      (click)="onCancel()">
+    </app-button>
+
+    <app-button
+      label="Guardar"
+      icon="save"
+      variant="primary"
+      size="normal"
+      [attr.type]="'submit'"
+      [disabled]="form.invalid">
+    </app-button>
+
+  </div>
+  <!-- Notificación de éxito -->
+  <app-notification
+    [show]="showSuccessNotification"
+    (showChange)="showSuccessNotification = $event"
+    message=" ¡Lote guardado exitosamente!"
+    type="success"
+    [autoClose]="true"
+    [duration]="2500"
+    buttonText="Aceptar"
+  ></app-notification>
+
+
+  <app-notification
+    [show]="showErrorNotification"
+    (showChange)="showErrorNotification = $event"
+    message=" Ocurrió un error al guardar el lote."
+    type="error"
+    [autoClose]="true"
+    [duration]="3000"
+    buttonText="Cerrar"
+  ></app-notification>
+
+  <app-notification
+    [show]="showCancelNotification"
+    (showChange)="showCancelNotification = $event"
+    message=" Registro cancelado correctamente."
+    type="info"
+    [autoClose]="true"
+    [duration]="2500"
+    buttonText="OK"
+  ></app-notification>
+
+
+</form>

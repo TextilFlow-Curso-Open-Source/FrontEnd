@@ -8,6 +8,8 @@ import { MatDatepickerModule, MatDatepickerInputEvent } from '@angular/material/
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { AppButtonComponent } from '../app-button/app-button.component';
+import { ViewChild, ElementRef } from '@angular/core';
+
 
 @Component({
   selector: 'app-input',
@@ -46,6 +48,7 @@ export class AppInputComponent implements ControlValueAccessor {
   @Output() focus = new EventEmitter<FocusEvent>();
   @Output() blur = new EventEmitter<FocusEvent>();
   @Output() change = new EventEmitter<any>();
+  @ViewChild('fileInputRef') fileInputRef!: ElementRef<HTMLInputElement>;
 
   value: any = '';
   photoPreviewUrl: string = '';
@@ -123,10 +126,15 @@ export class AppInputComponent implements ControlValueAccessor {
     }
   }
 
-  triggerFileInput(): void {
-    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.click();
+  onUploadButtonClick(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (this.fileInputRef && this.fileInputRef.nativeElement) {
+      this.fileInputRef.nativeElement.value = ''; // permite subir el mismo archivo nuevamente
+      this.fileInputRef.nativeElement.click();
     }
   }
+
+
 }
