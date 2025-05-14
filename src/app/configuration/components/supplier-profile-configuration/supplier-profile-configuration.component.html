@@ -1,1 +1,144 @@
-<p>supplier-profile-configuration works!</p>
+<div class="profile-container">
+  <h2>Configuración de Perfil de Proveedor</h2>
+  
+  <div *ngIf="saveSuccess" class="alert alert-success">
+    Perfil guardado correctamente
+  </div>
+  
+  <div *ngIf="saveError" class="alert alert-danger">
+    Error al guardar el perfil. Por favor, inténtalo de nuevo.
+  </div>
+
+  <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+    <div class="form-section">
+      <div class="logo-section">
+        <div class="logo-preview">
+          <img *ngIf="imagePreview" [src]="imagePreview" alt="Logo de la empresa">
+          <div *ngIf="!imagePreview" class="no-logo">
+            <span>Sin logo</span>
+          </div>
+        </div>
+        <div class="logo-upload">
+          <label for="logo-input" class="btn btn-outline">Cambiar logo</label>
+          <input 
+            type="file" 
+            id="logo-input" 
+            accept="image/*" 
+            (change)="onFileChange($event)" 
+            style="display: none;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="companyName">Nombre de la Empresa *</label>
+        <input 
+          type="text" 
+          id="companyName" 
+          formControlName="companyName" 
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('companyName')">
+        <div *ngIf="isFieldInvalid('companyName')" class="error-message">
+          {{ getErrorMessage('companyName') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="ruc">RUC *</label>
+        <input 
+          type="text" 
+          id="ruc" 
+          formControlName="ruc" 
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('ruc')">
+        <div *ngIf="isFieldInvalid('ruc')" class="error-message">
+          {{ getErrorMessage('ruc') }}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="specialization">Especialización *</label>
+          <select 
+            id="specialization" 
+            formControlName="specialization" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('specialization')">
+            <option value="" disabled>Seleccione una especialización</option>
+            <option *ngFor="let spec of specializations" [value]="spec">{{ spec }}</option>
+          </select>
+          <div *ngIf="isFieldInvalid('specialization')" class="error-message">
+            {{ getErrorMessage('specialization') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="productCategories">Categorías de Productos *</label>
+          <select 
+            id="productCategories" 
+            formControlName="productCategories" 
+            class="form-control"
+            multiple
+            [class.is-invalid]="isFieldInvalid('productCategories')">
+            <option *ngFor="let category of productCategories" [value]="category">{{ category }}</option>
+          </select>
+          <div *ngIf="isFieldInvalid('productCategories')" class="error-message">
+            {{ getErrorMessage('productCategories') }}
+          </div>
+          <small class="form-text text-muted">
+            Mantenga presionada la tecla Ctrl (o Cmd en Mac) para seleccionar múltiples categorías
+          </small>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="yearsFounded">Año de Fundación *</label>
+          <input 
+            type="number" 
+            id="yearsFounded" 
+            formControlName="yearsFounded" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('yearsFounded')">
+          <div *ngIf="isFieldInvalid('yearsFounded')" class="error-message">
+            {{ getErrorMessage('yearsFounded') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="minimumOrderQuantity">Cantidad Mínima de Pedido *</label>
+          <input 
+            type="number" 
+            id="minimumOrderQuantity" 
+            formControlName="minimumOrderQuantity" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('minimumOrderQuantity')">
+          <div *ngIf="isFieldInvalid('minimumOrderQuantity')" class="error-message">
+            {{ getErrorMessage('minimumOrderQuantity') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="warehouseLocation">Ubicación del Almacén *</label>
+        <input 
+          type="text" 
+          id="warehouseLocation" 
+          formControlName="warehouseLocation" 
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('warehouseLocation')">
+        <div *ngIf="isFieldInvalid('warehouseLocation')" class="error-message">
+          {{ getErrorMessage('warehouseLocation') }}
+        </div>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || isSaving">
+        {{ isSaving ? 'Guardando...' : 'Guardar Perfil' }}
+      </button>
+      <button type="button" class="btn btn-secondary" routerLink="/supplier">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</div>
