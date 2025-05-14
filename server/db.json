@@ -125,16 +125,16 @@
   ],
   "batches": [
     {
-      "code": "12",
+      "code": "14",
       "client": "sanchez",
       "fabricType": "lana",
       "color": "blanco",
-      "quantity": "5",
-      "price": "40",
+      "quantity": "12",
+      "price": "45",
       "observations": "buena lana",
       "date": "2025-05-14",
       "imageUrl": "",
-      "status": "Por enviar",
+      "status": "Enviado",
       "supplierId": 1747126728765,
       "id": 1
     },
@@ -162,12 +162,23 @@
       "observations": "la tela esta en buen estado mando evidencia",
       "date": "2025-05-14T05:00:00.000Z",
       "imageUrl": null,
-      "status": "Por enviar",
+      "status": "Enviado",
       "supplierId": 1747126728765,
       "id": 3
+    },
+    {
+      "code": "L004",
+      "client": "Empresa Textil Perez",
+      "fabricType": "lino",
+      "color": "verde",
+      "quantity": "20",
+      "price": "10",
+      "observations": "Se entrega la tela con buen estado \n10 m de distancia y el color es verde pastel",
+      "date": "2025-05-07T05:00:00.000Z",
+      "imageUrl": {},
+      "status": "Enviado",
+      "supplierId": 1747126728765,
+      "id": 4
     }
-
-
-
   ]
 }
