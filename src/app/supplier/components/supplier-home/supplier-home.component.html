@@ -1,1 +1,42 @@
-<p>supplier-home works!</p>
+<div class="dashboard-container">
+  <div class="welcome-section">
+    <h1>Bienvenido, {{ supplierName }}</h1>
+    <p>Aquí tienes un resumen de tu actividad actual en TextilFlow.</p>
+  </div>
+
+  <div class="stats-container">
+    <div class="stat-card">
+      <h2>Lotes por enviar</h2>
+      <p class="stat-number">{{ lotSummary.pending }} lotes</p>
+      <button class="btn-details" (click)="viewDetails('pendientes')">Ver detalles</button>
+    </div>
+
+    <div class="stat-card">
+      <h2>Lotes enviados</h2>
+      <p class="stat-number">{{ lotSummary.sent }} lotes</p>
+      <button class="btn-details" (click)="viewDetails('enviados')">Ver detalles</button>
+    </div>
+
+    <div class="stat-card">
+      <h2>Lotes confirmados</h2>
+      <p class="stat-number">{{ lotSummary.confirmed }} lotes</p>
+      <button class="btn-details" (click)="viewDetails('confirmados')">Ver detalles</button>
+    </div>
+  </div>
+
+  <div class="notifications-container">
+    <div class="notifications-header">
+      <div class="notifications-title">
+        <span class="notification-icon">ⓘ</span>
+        <h3>Notificaciones recientes</h3>
+      </div>
+      <button class="close-btn" (click)="closeNotifications()">✕</button>
+    </div>
+
+    <ul class="notifications-list">
+      <li *ngFor="let notification of notifications">{{ notification.message }}</li>
+    </ul>
+
+    <button class="btn-more-details" (click)="viewMoreNotifications()">Ver más detalles</button>
+  </div>
+</div>
