@@ -179,6 +179,76 @@
       "status": "Enviado",
       "supplierId": 1747126728765,
       "id": 4
+    },
+    {
+      "code": "L-010",
+      "client": "Juan",
+      "fabricType": "Seda",
+      "color": "Verde",
+      "quantity": "10",
+      "price": "50",
+      "observations": "",
+      "date": "2025-05-13T05:00:00.000Z",
+      "imageUrl": "",
+      "status": "Enviado",
+      "supplierId": 1747125838395,
+      "id": 5
+    },
+    {
+      "code": "L-011",
+      "client": "Juan",
+      "fabricType": "Malla",
+      "color": "Azul",
+      "quantity": "20",
+      "price": "59",
+      "observations": "",
+      "date": "2025-05-15T05:00:00.000Z",
+      "imageUrl": "",
+      "status": "Enviado",
+      "supplierId": 1747125838395,
+      "id": 6
+    },
+    {
+      "code": "L-012",
+      "client": "Juan",
+      "fabricType": "Seda",
+      "color": "Rojo",
+      "quantity": "40",
+      "price": "30",
+      "observations": "",
+      "date": "2025-05-17T05:00:00.000Z",
+      "imageUrl": "",
+      "status": "Enviado",
+      "supplierId": 1747125838395,
+      "id": 7
+    },
+    {
+      "code": "L-013",
+      "client": "Juan",
+      "fabricType": "Seda",
+      "color": "Rojo",
+      "quantity": "30",
+      "price": "60",
+      "observations": "Envio proximo",
+      "date": "2025-05-15T05:00:00.000Z",
+      "imageUrl": "",
+      "status": "Enviado",
+      "supplierId": 1747125838395,
+      "id": 8
+    },
+    {
+      "code": "L-014",
+      "client": "Juan",
+      "fabricType": "Seda",
+      "color": "Amarillo",
+      "quantity": "30",
+      "price": "50",
+      "observations": "Buena tela",
+      "date": "2025-05-16T05:00:00.000Z",
+      "imageUrl": "",
+      "status": "Enviado",
+      "supplierId": 1747125838395,
+      "id": 9
     }
   ]
 }
