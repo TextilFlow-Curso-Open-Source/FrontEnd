@@ -1,0 +1,25 @@
+/* supplier-register-batch.component.css */
+
+.form-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem 2rem;
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+/* Para que ciertos campos (como textarea, file, botones) ocupen ancho completo */
+.full-width {
+  grid-column: span 2;
+}
+
+/* Contenedor de botones abajo */
+.button-group {
+  grid-column: span 2;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}

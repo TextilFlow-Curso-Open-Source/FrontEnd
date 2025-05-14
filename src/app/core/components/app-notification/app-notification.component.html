@@ -1,0 +1,36 @@
+<div
+  *ngIf="show"
+  class="app-notification-overlay"
+  (click)="handleClose()"
+>
+  <div
+    class="app-notification"
+    [ngClass]="'app-notification--' + type"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="app-notification-content">
+      <div class="app-notification-icon">
+        <mat-icon *ngIf="type === 'success'">check_circle</mat-icon>
+        <mat-icon *ngIf="type === 'error'">cancel</mat-icon>
+        <mat-icon *ngIf="type === 'warning'">warning</mat-icon>
+        <mat-icon *ngIf="type === 'info'">info</mat-icon>
+      </div>
+      <div class="app-notification-message">{{ message }}</div>
+      <button
+        class="app-notification-close"
+        (click)="handleClose()"
+        aria-label="Cerrar notificación"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="app-notification-actions">
+      <app-button
+        [label]="buttonText"
+        variant="primary"
+        (click)="handleClose()"
+      ></app-button>
+    </div>
+  </div>
+</div>

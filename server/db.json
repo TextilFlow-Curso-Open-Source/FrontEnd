@@ -122,5 +122,52 @@
       "logo": "",
       "id": 2
     }
+  ],
+  "batches": [
+    {
+      "code": "12",
+      "client": "sanchez",
+      "fabricType": "lana",
+      "color": "blanco",
+      "quantity": "5",
+      "price": "40",
+      "observations": "buena lana",
+      "date": "2025-05-14",
+      "imageUrl": "",
+      "status": "Por enviar",
+      "supplierId": 1747126728765,
+      "id": 1
+    },
+    {
+      "code": "234",
+      "client": "mathew",
+      "fabricType": "franela",
+      "color": "rojo",
+      "quantity": "30",
+      "price": "27",
+      "observations": "la franela esta limpia",
+      "date": "2025-05-14",
+      "imageUrl": "",
+      "status": "Por enviar",
+      "supplierId": 1747126728765,
+      "id": 2
+    },
+    {
+      "code": "1457",
+      "client": "Empresa TextileraSureña",
+      "fabricType": "Tela corrugada",
+      "color": "azul",
+      "quantity": "32",
+      "price": "12",
+      "observations": "la tela esta en buen estado mando evidencia",
+      "date": "2025-05-14T05:00:00.000Z",
+      "imageUrl": null,
+      "status": "Por enviar",
+      "supplierId": 1747126728765,
+      "id": 3
+    }
+
+
+
   ]
 }
