@@ -100,25 +100,29 @@
   "suppliers": [
     {
       "userId": 1747125838395,
-      "companyName": "",
-      "ruc": "",
-      "specialization": "",
-      "productCategories": [],
+      "companyName": "TextGo",
+      "ruc": "12819012345",
+      "specialization": "Textiles",
+      "productCategories": [
+        "Ropa y Textiles"
+      ],
       "yearsFounded": 2025,
-      "warehouseLocation": "",
-      "minimumOrderQuantity": 0,
+      "warehouseLocation": "Av La Mar",
+      "minimumOrderQuantity": 3,
       "logo": "",
       "id": 1
     },
     {
       "userId": 1747126728765,
-      "companyName": "",
-      "ruc": "",
-      "specialization": "",
-      "productCategories": [],
-      "yearsFounded": 2025,
-      "warehouseLocation": "",
-      "minimumOrderQuantity": 0,
+      "companyName": "TextFlujo",
+      "ruc": "12819012345",
+      "specialization": "Materias Primas",
+      "productCategories": [
+        "Productos Fibrados"
+      ],
+      "yearsFounded": 2020,
+      "warehouseLocation": "Av Pacifico",
+      "minimumOrderQuantity": 5,
       "logo": "",
       "id": 2
     }
