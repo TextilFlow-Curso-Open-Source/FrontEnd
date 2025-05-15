@@ -1,15 +1,35 @@
 <div class="profile-container">
   <h2>Configuración de Perfil de Proveedor</h2>
-  
+
   <div *ngIf="saveSuccess" class="alert alert-success">
-    Perfil guardado correctamente
-  </div>
-  
-  <div *ngIf="saveError" class="alert alert-danger">
-    Error al guardar el perfil. Por favor, inténtalo de nuevo.
+    Cambios guardados correctamente
   </div>
 
-  <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+  <div *ngIf="saveError" class="alert alert-danger">
+    Error al guardar los cambios. Por favor, inténtalo de nuevo.
+  </div>
+
+  <!-- Tabs navigation -->
+  <div class="tabs-container">
+    <div class="tabs">
+      <button
+        [class.active]="activeTab === 'profile'"
+        (click)="setActiveTab('profile')"
+        class="tab-button">
+        Perfil
+      </button>
+      <button
+        [class.active]="activeTab === 'config'"
+        (click)="setActiveTab('config')"
+        class="tab-button">
+        Configuración
+      </button>
+    </div>
+  </div>
+
+  <!-- Profile Tab Content -->
+  <div *ngIf="activeTab === 'profile'">
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
     <div class="form-section">
       <div class="logo-section">
         <div class="logo-preview">
@@ -20,21 +40,21 @@
         </div>
         <div class="logo-upload">
           <label for="logo-input" class="btn btn-outline">Cambiar logo</label>
-          <input 
-            type="file" 
-            id="logo-input" 
-            accept="image/*" 
-            (change)="onFileChange($event)" 
+          <input
+            type="file"
+            id="logo-input"
+            accept="image/*"
+            (change)="onFileChange($event)"
             style="display: none;">
         </div>
       </div>
 
       <div class="form-group">
         <label for="companyName">Nombre de la Empresa *</label>
-        <input 
-          type="text" 
-          id="companyName" 
-          formControlName="companyName" 
+        <input
+          type="text"
+          id="companyName"
+          formControlName="companyName"
           class="form-control"
           [class.is-invalid]="isFieldInvalid('companyName')">
         <div *ngIf="isFieldInvalid('companyName')" class="error-message">
@@ -44,10 +64,10 @@
 
       <div class="form-group">
         <label for="ruc">RUC *</label>
-        <input 
-          type="text" 
-          id="ruc" 
-          formControlName="ruc" 
+        <input
+          type="text"
+          id="ruc"
+          formControlName="ruc"
           class="form-control"
           [class.is-invalid]="isFieldInvalid('ruc')">
         <div *ngIf="isFieldInvalid('ruc')" class="error-message">
@@ -58,9 +78,9 @@
       <div class="form-row">
         <div class="form-group">
           <label for="specialization">Especialización *</label>
-          <select 
-            id="specialization" 
-            formControlName="specialization" 
+          <select
+            id="specialization"
+            formControlName="specialization"
             class="form-control"
             [class.is-invalid]="isFieldInvalid('specialization')">
             <option value="" disabled>Seleccione una especialización</option>
@@ -73,9 +93,9 @@
 
         <div class="form-group">
           <label for="productCategories">Categorías de Productos *</label>
-          <select 
-            id="productCategories" 
-            formControlName="productCategories" 
+          <select
+            id="productCategories"
+            formControlName="productCategories"
             class="form-control"
             multiple
             [class.is-invalid]="isFieldInvalid('productCategories')">
@@ -93,10 +113,10 @@
       <div class="form-row">
         <div class="form-group">
           <label for="yearsFounded">Año de Fundación *</label>
-          <input 
-            type="number" 
-            id="yearsFounded" 
-            formControlName="yearsFounded" 
+          <input
+            type="number"
+            id="yearsFounded"
+            formControlName="yearsFounded"
             class="form-control"
             [class.is-invalid]="isFieldInvalid('yearsFounded')">
           <div *ngIf="isFieldInvalid('yearsFounded')" class="error-message">
@@ -106,10 +126,10 @@
 
         <div class="form-group">
           <label for="minimumOrderQuantity">Cantidad Mínima de Pedido *</label>
-          <input 
-            type="number" 
-            id="minimumOrderQuantity" 
-            formControlName="minimumOrderQuantity" 
+          <input
+            type="number"
+            id="minimumOrderQuantity"
+            formControlName="minimumOrderQuantity"
             class="form-control"
             [class.is-invalid]="isFieldInvalid('minimumOrderQuantity')">
           <div *ngIf="isFieldInvalid('minimumOrderQuantity')" class="error-message">
@@ -120,10 +140,10 @@
 
       <div class="form-group">
         <label for="warehouseLocation">Ubicación del Almacén *</label>
-        <input 
-          type="text" 
-          id="warehouseLocation" 
-          formControlName="warehouseLocation" 
+        <input
+          type="text"
+          id="warehouseLocation"
+          formControlName="warehouseLocation"
           class="form-control"
           [class.is-invalid]="isFieldInvalid('warehouseLocation')">
         <div *ngIf="isFieldInvalid('warehouseLocation')" class="error-message">
@@ -141,4 +161,102 @@
       </button>
     </div>
   </form>
+</div>
+
+  <!-- Configuration Tab Content -->
+  <div *ngIf="activeTab === 'config'">
+    <form [formGroup]="configForm" (ngSubmit)="saveConfiguration()">
+      <div class="form-section">
+        <h3>Preferencias de Apariencia</h3>
+
+        <div class="form-group">
+          <label for="theme">Tema</label>
+          <div class="theme-selector">
+            <div class="theme-option">
+              <input type="radio" id="light-theme" formControlName="theme" value="light">
+              <label for="light-theme" class="theme-label light-theme">
+                <span class="theme-preview"></span>
+                <span>Claro</span>
+              </label>
+            </div>
+            <div class="theme-option">
+              <input type="radio" id="dark-theme" formControlName="theme" value="dark">
+              <label for="dark-theme" class="theme-label dark-theme">
+                <span class="theme-preview"></span>
+                <span>Oscuro</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="language">Idioma</label>
+          <select id="language" formControlName="language" class="form-control">
+            <option *ngFor="let lang of languages" [value]="lang.code">{{ lang.name }}</option>
+          </select>
+        </div>
+
+        <h3>Notificaciones</h3>
+
+        <div class="form-group checkbox-group">
+          <div class="checkbox-container">
+            <input type="checkbox" id="emailNotifications" formControlName="emailNotifications">
+            <label for="emailNotifications">Recibir notificaciones por correo electrónico</label>
+          </div>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <div class="checkbox-container">
+            <input type="checkbox" id="pushNotifications" formControlName="pushNotifications">
+            <label for="pushNotifications">Recibir notificaciones push</label>
+          </div>
+        </div>
+
+        <h3>Diseño del Panel</h3>
+
+        <div formGroupName="dashboardLayout">
+          <div class="form-group checkbox-group">
+            <div class="checkbox-container">
+              <input type="checkbox" id="showWelcomeMessage" formControlName="showWelcomeMessage">
+              <label for="showWelcomeMessage">Mostrar mensaje de bienvenida</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="defaultView">Vista predeterminada</label>
+            <select id="defaultView" formControlName="defaultView" class="form-control">
+              <option *ngFor="let view of viewOptions" [value]="view.value">{{ view.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <h3>Privacidad</h3>
+
+        <div formGroupName="privacySettings">
+          <div class="form-group">
+            <label for="profileVisibility">Visibilidad del perfil</label>
+            <select id="profileVisibility" formControlName="profileVisibility" class="form-control">
+              <option *ngFor="let option of visibilityOptions" [value]="option.value">{{ option.label }}</option>
+            </select>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <div class="checkbox-container">
+              <input type="checkbox" id="shareData" formControlName="shareData">
+              <label for="shareData">Compartir datos anónimos para mejorar el servicio</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary" [disabled]="configForm.invalid || isSaving">
+          {{ isSaving ? 'Guardando...' : 'Guardar Configuración' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="resetConfiguration()">
+          Restablecer Valores Predeterminados
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

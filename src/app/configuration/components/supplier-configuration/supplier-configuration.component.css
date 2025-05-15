@@ -1,76 +1,63 @@
-.configuration-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+.configuracion-wrapper {
+  padding: 2rem;
+  max-width: 600px;
+  margin: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
 }
 
-h2 {
-  color: #333;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
+.configuracion-wrapper h2 {
+  font-size: 20px;
+  margin-bottom: 1.5rem;
 }
 
-h3 {
-  color: #555;
-  margin-top: 20px;
-  margin-bottom: 15px;
+.config-form .config-section {
+  margin-bottom: 1.2rem;
 }
 
-.config-section {
-  margin-bottom: 30px;
-  padding: 15px;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.config-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-control {
+.config-form select {
   width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
+  padding: 0.5rem;
   border-radius: 4px;
+  border: 1px solid #ccc;
 }
 
 .button-group {
-  margin-top: 20px;
   display: flex;
   gap: 10px;
+  margin-top: 1rem;
 }
 
-.btn {
-  padding: 8px 16px;
+.btn-save, .btn-cancel {
+  padding: 0.5rem 1.2rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.btn-primary {
-  background-color: #007bff;
-  color: white;
+.btn-save {
+  background-color: #777;
+  color: #fff;
 }
 
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.alert {
-  padding: 10px 15px;
-  margin-bottom: 20px;
-  border-radius: 4px;
+.btn-cancel {
+  background-color: #ccc;
+  color: #333;
 }
 
 .alert-success {
-  background-color: #d4edda;
-  color: #155724;
+  margin-top: 1rem;
+  color: green;
 }
 
-.alert-danger {
-  background-color: #f8d7da;
-  color: #721c24;
+.alert-error {
+  margin-top: 1rem;
+  color: red;
 }
