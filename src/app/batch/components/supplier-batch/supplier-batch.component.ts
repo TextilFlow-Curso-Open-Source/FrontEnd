@@ -1,10 +1,11 @@
+// supplier-batch.component.ts modificado
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { BatchService } from '../../services/batch.service.service';
-import { Batch, STATUS } from '../../models/batch.entity';
+import { Batch, STATUS, BatchStatus } from '../../models/batch.entity';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
@@ -45,6 +46,14 @@ export class SupplierBatchComponent implements OnInit {
   showEditError = false;
   showEditCancel = false;
 
+  // Estados disponibles para el selector
+  statusOptions = [
+    { label: 'Aceptado', value: STATUS.ACEPTADO },
+    { label: 'Completado', value: STATUS.COMPLETADO },
+    { label: 'Por Enviar', value: STATUS.POR_ENVIAR },
+    { label: 'Enviado', value: STATUS.ENVIADO }
+  ];
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -67,7 +76,12 @@ export class SupplierBatchComponent implements OnInit {
 
   loadBatches(): void {
     this.batchService.getAll().subscribe(batches => {
-      const supplierBatches = batches.filter(b => b.supplierId === this.currentUserId);
+      // Filtrar lotes del proveedor actual y excluir los de estado PENDIENTE
+      const supplierBatches = batches.filter(b =>
+        b.supplierId === this.currentUserId &&
+        b.status !== STATUS.PENDIENTE
+      );
+
       this.dataSource = new MatTableDataSource(supplierBatches);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
@@ -82,12 +96,12 @@ export class SupplierBatchComponent implements OnInit {
   toggleStatus(batch: Batch): void {
     const updatedStatus = batch.status === STATUS.ENVIADO ? STATUS.POR_ENVIAR : STATUS.ENVIADO;
 
-    const updatedBatch: Batch = {
+    const updatedBatch: Partial<Batch> = {
       ...batch,
       status: updatedStatus
     };
 
-    this.batchService.update(updatedBatch.id!, updatedBatch).subscribe(() => {
+    this.batchService.update(batch.id!, updatedBatch).subscribe(() => {
       this.loadBatches();
     });
   }
@@ -95,16 +109,17 @@ export class SupplierBatchComponent implements OnInit {
   editBatch(batch: Batch): void {
     this.selectedBatch = { ...batch };
 
-    // Resetear el formulario reactivo con los datos del batch
+    // Crear formulario con todos los campos deshabilitados excepto observaciones y estado
     this.editForm = this.fb.group({
-      code: [batch.code, Validators.required],
-      client: [batch.client, Validators.required],
-      fabricType: [batch.fabricType, Validators.required],
-      color: [batch.color],
-      quantity: [batch.quantity, [Validators.required, Validators.min(1)]],
-      price: [batch.price, [Validators.required, Validators.min(0)]],
-      observations: [batch.observations],
-      date: [batch.date, Validators.required]
+      code: [{value: batch.code, disabled: true}, Validators.required],
+      client: [{value: batch.client, disabled: true}, Validators.required],
+      fabricType: [{value: batch.fabricType, disabled: true}, Validators.required],
+      color: [{value: batch.color, disabled: true}],
+      quantity: [{value: batch.quantity, disabled: true}, [Validators.required, Validators.min(1)]],
+      price: [{value: batch.price, disabled: true}, [Validators.required, Validators.min(0)]],
+      observations: [batch.observations], // Este campo SÍ es editable
+      date: [{value: batch.date, disabled: true}, Validators.required],
+      status: [batch.status, Validators.required] // Este campo SÍ es editable
     });
 
     //Importante: resetear notificaciones
@@ -114,7 +129,6 @@ export class SupplierBatchComponent implements OnInit {
 
     this.editMode = true;
   }
-
 
   cancelEdit(): void {
     this.showEditCancel = true;
@@ -129,14 +143,17 @@ export class SupplierBatchComponent implements OnInit {
   onEditSubmit(): void {
     if (!this.editForm.valid || !this.selectedBatch) return;
 
-    const updatedBatch = {
-      ...this.selectedBatch,
-      ...this.editForm.value
+    // Solo actualizar los campos editables pero preservar businessmanId
+    const updatedBatch: Partial<Batch> = {
+      id: this.selectedBatch.id,
+      status: this.editForm.get('status')?.value as BatchStatus,
+      observations: this.editForm.get('observations')?.value,
+      businessmanId: this.selectedBatch.businessmanId // Preservar el businessmanId
     };
 
     this.batchService.update(updatedBatch.id!, updatedBatch).subscribe({
       next: () => {
-        this.showEditSuccess=true;
+        this.showEditSuccess = true;
         this.loadBatches();
         this.editMode = false;
         this.selectedBatch = null;
@@ -146,7 +163,6 @@ export class SupplierBatchComponent implements OnInit {
       }
     });
   }
-
 
   goToDetail(batch: Batch): void {
     this.router.navigate(['/supplier-batch', batch.id]);
@@ -163,5 +179,23 @@ export class SupplierBatchComponent implements OnInit {
     link.href = URL.createObjectURL(blob);
     link.download = 'lotes.csv';
     link.click();
+  }
+
+  // Método helper para obtener colores de estado
+  getStatusClass(status: string): string {
+    switch (status) {
+      case STATUS.ENVIADO:
+        return 'status-green';
+      case STATUS.POR_ENVIAR:
+        return 'status-yellow';
+      case STATUS.ACEPTADO:
+        return 'status-blue';
+      case STATUS.COMPLETADO:
+        return 'status-purple';
+      case STATUS.RECHAZADO:
+        return 'status-red';
+      default:
+        return '';
+    }
   }
 }

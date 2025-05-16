@@ -2,6 +2,9 @@
 import { Injectable } from '@angular/core';
 import { BaseService} from '../../core/services/base.service.service';
 import { SupplierReview} from '../models/supplier-review.entity';
+import {environment} from '../../../environments/environment';
+
+const supplierReviewEndpointPath = environment.supplierReviewEndpointPath;
 
 /**
  * Service responsible for managing supplier review operations.
@@ -12,7 +15,7 @@ import { SupplierReview} from '../models/supplier-review.entity';
 export class SupplierReviewService extends BaseService<SupplierReview> {
   constructor() {
     super();
-    this.resourceEndpoint = '/supplierReviews';
+    this.resourceEndpoint = supplierReviewEndpointPath;
   }
 
   /**
@@ -90,5 +93,28 @@ export class SupplierReviewService extends BaseService<SupplierReview> {
         callback(false);
       }
     });
+  }
+
+  updateReview(reviewId: number, rating: number, comment: string): any {
+    // Alternativa más simple sin usar switchMap
+    return {
+      subscribe: (observer: any) => {
+        this.http.get<SupplierReview>(`${this.serverBaseUrl}${this.resourceEndpoint}/${reviewId}`)
+          .subscribe({
+            next: (existingReview: SupplierReview) => {
+              const updatedReview: SupplierReview = {
+                ...existingReview,
+                rating,
+                comment
+              };
+
+              this.update(reviewId, updatedReview).subscribe(observer);
+            },
+            error: (error) => {
+              if (observer.error) observer.error(error);
+            }
+          });
+      }
+    };
   }
 }

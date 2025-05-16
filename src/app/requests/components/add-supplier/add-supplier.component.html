@@ -96,19 +96,27 @@
 
           <div *ngIf="reviews.length > 0" class="reviews-list">
             <div *ngFor="let review of reviews" class="review-item">
-              <div class="review-header">
-                <img [src]="'assets/default-avatar.png'" alt="reviewer" class="reviewer-avatar">
-                <div class="review-info">
-                  <div class="review-email">{{ review.businessmanName || 'Usuario' }}</div>
-                  <div class="review-rating">
-                    <span *ngFor="let star of getFilledStars(review.rating)" class="star filled">★</span>
-                    <span *ngFor="let star of getEmptyStars(review.rating)" class="star">☆</span>
-                  </div>
-                  <div class="review-date">{{ review.createdAt | date:'dd/MM/yy' }}</div>
+            <div class="review-header">
+              <img [src]="'assets/default-avatar.png'" alt="reviewer" class="reviewer-avatar">
+              <div class="review-info">
+                <div class="review-email">{{ review.businessmanName || 'Usuario' }}</div>
+                <div class="review-rating">
+                  <span *ngFor="let star of getFilledStars(review.rating)" class="star filled">★</span>
+                  <span *ngFor="let star of getEmptyStars(review.rating)" class="star">☆</span>
                 </div>
+                <div class="review-date">{{ review.createdAt | date:'dd/MM/yy' }}</div>
               </div>
-              <p class="review-text">{{ review.comment || 'Sin comentarios' }}</p>
+              <!-- Añadir botón de edición si la reseña es del usuario actual -->
+              <app-button
+                *ngIf="review.canEdit"
+                label="Editar"
+                variant="secondary"
+                size="small"
+                (click)="editReview(review)">
+              </app-button>
             </div>
+            <p class="review-text">{{ review.comment || 'Sin comentarios' }}</p>
+          </div>
           </div>
 
           <div *ngIf="reviews.length === 0" class="no-reviews">

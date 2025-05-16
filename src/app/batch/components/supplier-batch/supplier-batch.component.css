@@ -55,6 +55,24 @@ form.form-container h2 {
   margin-right: 5px;
 }
 
+.status-blue {
+  color: #2196F3; /* azul */
+  font-size: 1.2rem;
+  margin-right: 5px;
+}
+
+.status-purple {
+  color: #9C27B0; /* morado */
+  font-size: 1.2rem;
+  margin-right: 5px;
+}
+
+.status-red {
+  color: #F44336; /* rojo */
+  font-size: 1.2rem;
+  margin-right: 5px;
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   form.form-container {
