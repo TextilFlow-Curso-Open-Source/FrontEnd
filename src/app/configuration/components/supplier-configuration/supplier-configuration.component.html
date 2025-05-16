@@ -1,1 +1,46 @@
-<p>supplier-configuration works!</p>
+<div class="configuracion-wrapper">
+  <h2>Configuración</h2>
+
+  <form [formGroup]="configForm" (ngSubmit)="saveConfiguration()" class="config-form">
+    <!-- Apariencia -->
+    <div class="config-section">
+      <label for="language">Idioma</label>
+      <select id="language" formControlName="language">
+        <option value="es">Español</option>
+        <option value="en">Inglés</option>
+      </select>
+    </div>
+
+    <!-- Código de lote -->
+    <div class="config-section">
+      <label for="codigoLote">Código de Lote</label>
+      <select id="codigoLote" formControlName="codigoLote">
+        <option value="automatico">Automática</option>
+        <option value="manual">Manual</option>
+      </select>
+    </div>
+
+    <!-- Modo de vista -->
+    <div class="config-section">
+      <label for="theme">Modo de vista</label>
+      <select id="theme" formControlName="theme">
+        <option value="light">Modo claro</option>
+        <option value="dark">Modo oscuro</option>
+      </select>
+    </div>
+
+    <!-- Botones -->
+    <div class="button-group">
+      <button type="submit" class="btn-save" [disabled]="configForm.invalid || isSaving">
+        {{ isSaving ? 'Guardando...' : 'Guardar' }}
+      </button>
+      <button type="button" class="btn-cancel" (click)="resetConfiguration()">
+        Cancelar
+      </button>
+    </div>
+
+    <!-- Mensajes de éxito o error -->
+    <div *ngIf="saveSuccess" class="alert-success">Configuración guardada correctamente</div>
+    <div *ngIf="saveError" class="alert-error">Error al guardar la configuración. Inténtalo de nuevo.</div>
+  </form>
+</div>

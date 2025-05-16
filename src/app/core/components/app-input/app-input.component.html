@@ -174,16 +174,18 @@
         variant="primary"
         size="normal"
         [disabled]="disabled"
-        (click)="triggerFileInput()"
+        (click)="onUploadButtonClick($event)"
       ></app-button>
 
       <input
-        id="fileInput"
+        #fileInputRef
         type="file"
         class="hidden-uploader"
         [disabled]="disabled"
         (change)="handleFileSelect($event)"
+
       />
+
 
       <div *ngIf="selectedFile" class="selected-file">
         {{ selectedFile.name }}
@@ -198,7 +200,6 @@
         class="app-photo-circle"
         [class.has-error]="error"
         [class.has-preview]="photoPreviewUrl"
-        (click)="triggerFileInput()"
       >
         <img *ngIf="photoPreviewUrl" [src]="photoPreviewUrl" alt="Vista previa" class="photo-preview" />
         <mat-icon *ngIf="!photoPreviewUrl">photo_camera</mat-icon>

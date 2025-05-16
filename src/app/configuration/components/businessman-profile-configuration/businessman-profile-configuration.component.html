@@ -1,1 +1,158 @@
-<p>businessman-profile-configuration works!</p>
+<div class="profile-container">
+  <h2>Configuración de Perfil Empresarial</h2>
+  
+  <div *ngIf="saveSuccess" class="alert alert-success">
+    Perfil guardado correctamente
+  </div>
+  
+  <div *ngIf="saveError" class="alert alert-danger">
+    Error al guardar el perfil. Por favor, inténtalo de nuevo.
+  </div>
+
+  <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+    <div class="form-section">
+      <div class="logo-section">
+        <div class="logo-preview">
+          <img *ngIf="imagePreview" [src]="imagePreview" alt="Logo de la empresa">
+          <div *ngIf="!imagePreview" class="no-logo">
+            <span>Sin logo</span>
+          </div>
+        </div>
+        <div class="logo-upload">
+          <label for="logo-input" class="btn btn-outline">Cambiar logo</label>
+          <input 
+            type="file" 
+            id="logo-input" 
+            accept="image/*" 
+            (change)="onFileChange($event)" 
+            style="display: none;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="companyName">Nombre de la Empresa *</label>
+        <input 
+          type="text" 
+          id="companyName" 
+          formControlName="companyName" 
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('companyName')">
+        <div *ngIf="isFieldInvalid('companyName')" class="error-message">
+          {{ getErrorMessage('companyName') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="ruc">RUC *</label>
+        <input 
+          type="text" 
+          id="ruc" 
+          formControlName="ruc" 
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('ruc')">
+        <div *ngIf="isFieldInvalid('ruc')" class="error-message">
+          {{ getErrorMessage('ruc') }}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="businessType">Tipo de Empresa *</label>
+          <select 
+            id="businessType" 
+            formControlName="businessType" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('businessType')">
+            <option value="" disabled>Seleccione un tipo</option>
+            <option *ngFor="let type of businessTypes" [value]="type">{{ type }}</option>
+          </select>
+          <div *ngIf="isFieldInvalid('businessType')" class="error-message">
+            {{ getErrorMessage('businessType') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="industry">Industria *</label>
+          <select 
+            id="industry" 
+            formControlName="industry" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('industry')">
+            <option value="" disabled>Seleccione una industria</option>
+            <option *ngFor="let ind of industries" [value]="ind">{{ ind }}</option>
+          </select>
+          <div *ngIf="isFieldInvalid('industry')" class="error-message">
+            {{ getErrorMessage('industry') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="employeeCount">Número de Empleados *</label>
+          <input 
+            type="number" 
+            id="employeeCount" 
+            formControlName="employeeCount" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('employeeCount')">
+          <div *ngIf="isFieldInvalid('employeeCount')" class="error-message">
+            {{ getErrorMessage('employeeCount') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="foundingYear">Año de Fundación *</label>
+          <input 
+            type="number" 
+            id="foundingYear" 
+            formControlName="foundingYear" 
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('foundingYear')">
+          <div *ngIf="isFieldInvalid('foundingYear')" class="error-message">
+            {{ getErrorMessage('foundingYear') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="website">Sitio Web</label>
+        <input 
+          type="url" 
+          id="website" 
+          formControlName="website" 
+          class="form-control"
+          placeholder="https://www.ejemplo.com"
+          [class.is-invalid]="isFieldInvalid('website')">
+        <div *ngIf="isFieldInvalid('website')" class="error-message">
+          {{ getErrorMessage('website') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Descripción de la Empresa *</label>
+        <textarea 
+          id="description" 
+          formControlName="description" 
+          class="form-control"
+          rows="4"
+          [class.is-invalid]="isFieldInvalid('description')"></textarea>
+        <div *ngIf="isFieldInvalid('description')" class="error-message">
+          {{ getErrorMessage('description') }}
+        </div>
+        <small class="form-text text-muted">
+          Breve descripción de su empresa (entre 10 y 500 caracteres)
+        </small>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || isSaving">
+        {{ isSaving ? 'Guardando...' : 'Guardar Perfil' }}
+      </button>
+      <button type="button" class="btn btn-secondary" routerLink="/businessman">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</div>

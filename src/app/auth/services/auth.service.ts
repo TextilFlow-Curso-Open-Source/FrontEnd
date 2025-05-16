@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { SessionService } from './session.service';
 import { BusinessmanService } from '../../businessman/services/businessman.service';
 import { SupplierService } from '../../supplier/services/supplier.service';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,7 @@ export class AuthService extends BaseService<User> implements OnInit {
     private supplierService: SupplierService
   ) {
     super();
-    this.resourceEndpoint = '/users';
+    this.resourceEndpoint = environment.userEndpointPath;
   }
 
   ngOnInit() {
