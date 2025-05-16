@@ -1,4 +1,4 @@
-// add-supplier.component.ts
+// add-supplier.component.ts (con las correcciones)
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -39,13 +39,14 @@ export class AddSupplierComponent implements OnInit {
   selectedSupplierId: number | null = null;
   currentUserId: number = 0;
   currentUserName: string = '';
+  isBatchSubmitting: boolean = false;
 
   // Modal de solicitud
   showRequestForm: boolean = false;
   selectedSupplier: any = null;
   batchType: string = '';
   batchColor: string = '';
-  quantity: number = 0; // Changed from number | null to number with default value
+  quantity: number = 0;
   address: string = '';
   requestMessage: string = '';
 
@@ -77,6 +78,11 @@ export class AddSupplierComponent implements OnInit {
   };
   canAddReview: boolean = false;
   selectedReviewSupplierId: number | null = null;
+
+  // Nuevo - Para la edición de reseñas
+  isEditingReview: boolean = false;
+  editingReviewId: number | null = null;
+  isSubmitting: boolean = false; // Evitar envío duplicado
 
   // Datos para mostrar en las pestañas
   connectedSuppliers: any[] = []; // Proveedores con solicitudes aceptadas
@@ -224,7 +230,7 @@ export class AddSupplierComponent implements OnInit {
     this.loadReviews(supplierId);
   }
 
-  // Nuevo método para expandir un proveedor en la pestaña "Distribuidores Actuales"
+  // Método para expandir un proveedor en la pestaña "Distribuidores Actuales"
   toggleSupplierExpansion(supplierId: number) {
     if (this.expandedSupplierId === supplierId) {
       this.expandedSupplierId = null;
@@ -241,6 +247,10 @@ export class AddSupplierComponent implements OnInit {
   loadReviews(supplierId: number) {
     this.reviewService.getReviewsForSupplier(supplierId, (reviews: any[]) => {
       this.reviews = reviews;
+      // Marcar las reseñas que pertenecen al usuario actual
+      this.reviews.forEach(review => {
+        review.canEdit = review.businessmanId === this.currentUserId;
+      });
     });
   }
 
@@ -253,19 +263,35 @@ export class AddSupplierComponent implements OnInit {
   openReviewForm(supplierId: number) {
     this.selectedReviewSupplierId = supplierId;
     this.showReviewForm = true;
+    this.isEditingReview = false;
+    this.editingReviewId = null;
     this.newReview = {
       rating: 5,
       comment: ''
     };
   }
 
+  // Nuevo método para editar una reseña existente
+  editReview(review: any) {
+    this.selectedReviewSupplierId = review.supplierId;
+    this.editingReviewId = review.id;
+    this.isEditingReview = true;
+    this.showReviewForm = true;
+    this.newReview = {
+      rating: review.rating,
+      comment: review.comment
+    };
+  }
+
   closeReviewForm() {
     this.showReviewForm = false;
     this.selectedReviewSupplierId = null;
+    this.isEditingReview = false;
+    this.editingReviewId = null;
   }
 
   submitReview() {
-    if (!this.selectedReviewSupplierId) {
+    if (!this.selectedReviewSupplierId || this.isSubmitting) {
       return;
     }
 
@@ -275,43 +301,72 @@ export class AddSupplierComponent implements OnInit {
     }
 
     this.isLoading = true;
+    this.isSubmitting = true; // Prevenir envíos duplicados
 
-    this.reviewService.addReview(
-      this.selectedReviewSupplierId,
-      this.currentUserId,
-      this.newReview.rating,
-      this.newReview.comment,
-      this.currentUserName
-    ).subscribe({
-      next: () => {
-        this.showNotification('Reseña agregada correctamente', 'success');
-        this.closeReviewForm();
-
-        // Recargar reseñas y actualizar promedio
-        this.loadReviews(this.selectedReviewSupplierId as number); // Type assertion to handle possible null
-
-        if (this.selectedReviewSupplierId) { // Additional null check
-          this.reviewService.calculateAverageRating(
-            this.selectedReviewSupplierId,
-            (avgRating: number, totalReviews: number) => {
-              const supplier = this.filteredSuppliers.find(s => s.id === this.selectedReviewSupplierId);
-              if (supplier) {
-                supplier.averageRating = avgRating;
-                supplier.totalReviews = totalReviews;
-              }
-            }
-          );
+    if (this.isEditingReview && this.editingReviewId) {
+      // Actualizar reseña existente
+      this.reviewService.updateReview(
+        this.editingReviewId,
+        this.newReview.rating,
+        this.newReview.comment
+      ).subscribe({
+        next: () => {
+          this.showNotification('Reseña actualizada correctamente', 'success');
+          this.closeReviewForm();
+          this.loadReviews(this.selectedReviewSupplierId as number);
+          this.updateSupplierRating();
+          this.isLoading = false;
+          this.isSubmitting = false;
+        },
+        error: (error: any) => {
+          console.error('Error al actualizar reseña:', error);
+          this.showNotification('Error al actualizar la reseña', 'error');
+          this.isLoading = false;
+          this.isSubmitting = false;
         }
+      });
+    } else {
+      // Crear nueva reseña
+      this.reviewService.addReview(
+        this.selectedReviewSupplierId,
+        this.currentUserId,
+        this.newReview.rating,
+        this.newReview.comment,
+        this.currentUserName
+      ).subscribe({
+        next: () => {
+          this.showNotification('Reseña agregada correctamente', 'success');
+          this.closeReviewForm();
+          this.loadReviews(this.selectedReviewSupplierId as number);
+          this.updateSupplierRating();
+          this.canAddReview = false;
+          this.isLoading = false;
+          this.isSubmitting = false;
+        },
+        error: (error: any) => {
+          console.error('Error al agregar reseña:', error);
+          this.showNotification('Error al agregar la reseña', 'error');
+          this.isLoading = false;
+          this.isSubmitting = false;
+        }
+      });
+    }
+  }
 
-        this.canAddReview = false;
-        this.isLoading = false;
-      },
-      error: (error: any) => {
-        console.error('Error al agregar reseña:', error);
-        this.showNotification('Error al agregar la reseña', 'error');
-        this.isLoading = false;
-      }
-    });
+  // Método auxiliar para actualizar la calificación del proveedor
+  updateSupplierRating() {
+    if (this.selectedReviewSupplierId) {
+      this.reviewService.calculateAverageRating(
+        this.selectedReviewSupplierId,
+        (avgRating: number, totalReviews: number) => {
+          const supplier = this.filteredSuppliers.find(s => s.id === this.selectedReviewSupplierId);
+          if (supplier) {
+            supplier.averageRating = avgRating;
+            supplier.totalReviews = totalReviews;
+          }
+        }
+      );
+    }
   }
 
   // Métodos para la solicitud de proveedor
@@ -332,7 +387,7 @@ export class AddSupplierComponent implements OnInit {
     this.showRequestForm = false;
     this.batchType = '';
     this.batchColor = '';
-    this.quantity = 0; // Changed from null to 0
+    this.quantity = 0;
     this.address = '';
     this.requestMessage = '';
   }
@@ -357,7 +412,7 @@ export class AddSupplierComponent implements OnInit {
       observations: '',
       address: '',
       date: today,
-      status: STATUS.POR_ENVIAR,
+      status: STATUS.PENDIENTE,
       imageUrl: ''
     };
   }
@@ -368,6 +423,11 @@ export class AddSupplierComponent implements OnInit {
   }
 
   createBatch() {
+    // Agregar esta validación al inicio
+    if (this.isBatchSubmitting) {
+      return; // Evitar múltiples envíos
+    }
+
     // Validaciones
     if (!this.newBatch.fabricType) {
       this.showNotification('Por favor, ingresa el tipo de tela', 'warning');
@@ -395,6 +455,7 @@ export class AddSupplierComponent implements OnInit {
     }
 
     this.isLoading = true;
+    this.isBatchSubmitting = true; // Activar el bloqueo
 
     // Crear el nuevo batch
     this.batchService.create(this.newBatch).subscribe({
@@ -402,11 +463,13 @@ export class AddSupplierComponent implements OnInit {
         this.showNotification('Lote creado correctamente', 'success');
         this.showBatchForm = false;
         this.isLoading = false;
+        this.isBatchSubmitting = false; // Desactivar el bloqueo
       },
       error: (error: any) => {
         console.error('Error al crear lote:', error);
         this.showNotification('Error al crear el lote', 'error');
         this.isLoading = false;
+        this.isBatchSubmitting = false; // Desactivar el bloqueo
       }
     });
   }
@@ -469,7 +532,7 @@ export class AddSupplierComponent implements OnInit {
           this.requestMessage,
           this.batchType,
           this.batchColor,
-          this.quantity, // Now this is always a number, not null
+          this.quantity,
           this.address
         ).subscribe({
           next: () => {
@@ -477,7 +540,7 @@ export class AddSupplierComponent implements OnInit {
             this.showRequestForm = false;
             this.batchType = '';
             this.batchColor = '';
-            this.quantity = 0; // Reset to 0 instead of null
+            this.quantity = 0;
             this.address = '';
             this.requestMessage = '';
             this.isLoading = false;
@@ -514,10 +577,12 @@ export class AddSupplierComponent implements OnInit {
 
   // Funciones auxiliares para mostrar estrellas
   getFilledStars(rating: number): number[] {
-    return Array(Math.floor(rating)).fill(0);
+    const validRating = Math.min(Math.max(0, rating || 0), 5); // Asegurar que esté entre 0 y 5
+    return Array(Math.floor(validRating)).fill(0);
   }
 
   getEmptyStars(rating: number): number[] {
-    return Array(5 - Math.floor(rating)).fill(0);
+    const validRating = Math.min(Math.max(0, rating || 0), 5); // Asegurar que esté entre 0 y 5
+    return Array(5 - Math.floor(validRating)).fill(0);
   }
 }

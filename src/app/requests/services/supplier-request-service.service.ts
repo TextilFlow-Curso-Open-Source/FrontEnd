@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { BaseService } from '../../core/services/base.service.service';
 import { BusinessSupplierRequest} from '../model/business-supplier-request.entity';
-
+import {environment} from '../../../environments/environment';
 /**
  * Service responsible for managing business-supplier connection requests.
  */
@@ -12,7 +12,7 @@ import { BusinessSupplierRequest} from '../model/business-supplier-request.entit
 export class SupplierRequestService extends BaseService<BusinessSupplierRequest> {
   constructor() {
     super();
-    this.resourceEndpoint = '/businessSupplierRequests';
+    this.resourceEndpoint = environment.businessSupplierRequests;
   }
 
   /**
