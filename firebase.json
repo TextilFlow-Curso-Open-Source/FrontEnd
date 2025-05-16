@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": "dist/textil-flow-front-end/browser",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

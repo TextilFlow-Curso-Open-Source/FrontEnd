@@ -1,0 +1,103 @@
+<!-- business-request.component.html -->
+<div class="container">
+  <!-- Pestañas superiores -->
+  <div class="tab-navigation">
+    <div
+      class="tab-button"
+      [class.active]="activeTab === 'current'"
+      (click)="setActiveTab('current')">
+      Empresas Actuales
+    </div>
+    <div
+      class="tab-button"
+      [class.active]="activeTab === 'new'"
+      (click)="setActiveTab('new')">
+      Empresas nuevas
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-indicator">
+    <p>Cargando solicitudes...</p>
+  </div>
+
+  <div *ngIf="requestsWithDetails.length === 0 && !isLoading" class="no-requests">
+    <p>No tienes solicitudes de empresarios en este momento.</p>
+  </div>
+
+  <div class="requests-list">
+    <div *ngFor="let request of requestsWithDetails" class="business-item">
+      <div class="business-header" (click)="toggleDetails(request.businessmanId)">
+        <h3 class="business-name">{{ request.businessmanProfile?.companyName || 'Empresa sin nombre' }}</h3>
+        <div class="dropdown-arrow" [class.expanded]="selectedBusinessId === request.businessmanId">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <div class="business-basic-info">
+        <div class="business-contact">
+          <img [src]="request.businessmanProfile?.logo || 'assets/default-avatar.png'" alt="Logo" class="business-avatar">
+          <span class="business-email">{{ request.businessmanId }}&#64;gmail.com</span>
+        </div>
+
+        <app-button
+          *ngIf="activeTab === 'new'"
+          label="Aceptar Solicitud"
+          variant="primary"
+          [loading]="isLoading"
+          (click)="updateRequestStatus(request.id, 'accepted')">
+        </app-button>
+      </div>
+
+      <!-- Detalles expandibles del empresario -->
+      <div *ngIf="selectedBusinessId === request.businessmanId" class="business-details">
+        <div class="request-details">
+          <p><strong>RUC:</strong> {{ request.businessmanProfile?.ruc || 'No especificado' }}</p>
+          <p><strong>Tipo de negocio:</strong> {{ request.businessmanProfile?.businessType || 'No especificado' }}</p>
+          <p><strong>Industria:</strong> {{ request.businessmanProfile?.industry || 'No especificada' }}</p>
+          <p><strong>Sitio web:</strong>
+            <a *ngIf="request.businessmanProfile?.website"
+               href="{{ request.businessmanProfile.website }}"
+               target="_blank">
+              {{ request.businessmanProfile.website }}
+            </a>
+            <span *ngIf="!request.businessmanProfile?.website">No especificado</span>
+          </p>
+        </div>
+
+        <div *ngIf="request.message" class="request-message">
+          <h4>Mensaje:</h4>
+          <p>{{ request.message }}</p>
+        </div>
+
+        <!-- Información específica de lotes solicitados -->
+        <div *ngIf="request.batchType || request.color || request.quantity || request.address" class="batch-details">
+          <h4>Detalles del Lote:</h4>
+          <p *ngIf="request.batchType"><strong>Tipo de tela:</strong> {{ request.batchType }}</p>
+          <p *ngIf="request.color"><strong>Color:</strong> {{ request.color }}</p>
+          <p *ngIf="request.quantity"><strong>Cantidad:</strong> {{ request.quantity }}</p>
+          <p *ngIf="request.address"><strong>Dirección de entrega:</strong> {{ request.address }}</p>
+        </div>
+
+        <!-- Acciones adicionales para solicitudes pendientes -->
+        <div *ngIf="activeTab === 'new'" class="request-actions">
+          <app-button
+            label="Rechazar"
+            variant="secondary"
+            [loading]="isLoading"
+            (click)="updateRequestStatus(request.id, 'rejected')">
+          </app-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-notification
+    [show]="notification.show"
+    [message]="notification.message"
+    [type]="notification.type"
+    [autoClose]="true"
+    (close)="closeNotification()">
+  </app-notification>
+</div>

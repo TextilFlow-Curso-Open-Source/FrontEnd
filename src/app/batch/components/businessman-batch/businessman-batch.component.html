@@ -1,1 +1,201 @@
-<p>businessman-batch works!</p>
+<!-- businessman-batch.component.html -->
+<div class="batch-container">
+  <!-- Vista de tabla -->
+  <div *ngIf="view === 'table'">
+    <div class="table-header">
+      <h2>Mis Lotes</h2>
+
+      <div class="search-container">
+        <app-input
+          type="search"
+          placeholder="Buscar"
+          [(ngModel)]="searchTerm"
+          (keyup)="filterBatches()"
+          [fullWidth]="true">
+        </app-input>
+
+        <app-button
+          label="Filtro"
+          variant="primary"
+          icon="filter_list"
+          (click)="filterBatches()">
+        </app-button>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="loading">
+      Cargando...
+    </div>
+
+    <div *ngIf="!isLoading && filteredBatches.length === 0" class="no-results">
+      <p>No se encontraron lotes que coincidan con tu búsqueda.</p>
+    </div>
+
+    <table *ngIf="!isLoading && filteredBatches.length > 0" class="batch-table">
+      <thead>
+      <tr>
+        <th>Código</th>
+        <th>Distribuidor</th>
+        <th>Tipo de Tela</th>
+        <th>Fecha</th>
+        <th>Estado</th>
+        <th>Precio</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let batch of filteredBatches" (click)="viewBatchDetails(batch)" class="clickable-row">
+        <td>{{ batch.code || 'N/A' }}</td>
+        <td>{{ batch.client || 'N/A' }}</td>
+        <td>{{ batch.fabricType || 'N/A' }}</td>
+        <td>{{ batch.date | date:'dd/MM/yy' }}</td>
+        <td>
+          <span [ngClass]="getStatusClass(batch.status)" class="status-dot">●</span>
+          {{ batch.status || 'N/A' }}
+        </td>
+        <td>s/{{ batch.price || 'N/A' }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Vista de detalle -->
+  <div *ngIf="view === 'detail' && selectedBatch" class="detail-view">
+    <div class="detail-header">
+      <app-button
+        label=""
+        icon="arrow_back"
+        variant="back"
+        (click)="backToTable()">
+      </app-button>
+      <h2>Detalle del lote {{ selectedBatch.code }} – {{ selectedBatch.client }}</h2>
+    </div>
+
+    <div class="detail-content">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>Código:</label>
+          <div class="detail-value">{{ selectedBatch.code }}</div>
+        </div>
+
+        <div class="detail-item">
+          <label>Cantidad:</label>
+          <div class="detail-value">{{ selectedBatch.quantity }}m</div>
+        </div>
+
+        <div class="detail-item">
+          <label>Cliente:</label>
+          <div class="detail-value">{{ selectedBatch.client }}</div>
+        </div>
+
+        <div class="detail-item">
+          <label>Precio:</label>
+          <div class="detail-value">s/{{ selectedBatch.price }}</div>
+        </div>
+
+        <div class="detail-item">
+          <label>Tipo de tela:</label>
+          <div class="detail-value">{{ selectedBatch.fabricType }}</div>
+        </div>
+
+        <div class="detail-item">
+          <label>Observaciones:</label>
+          <div class="detail-value">{{ selectedBatch.observations || 'Sin observaciones' }}</div>
+        </div>
+
+        <div class="detail-item">
+          <label>Color del lote:</label>
+          <div class="detail-value">{{ selectedBatch.color }}</div>
+        </div>
+
+        <div class="detail-item">
+          <label>Fecha de registro:</label>
+          <div class="detail-value">{{ selectedBatch.date | date:'dd/MM/yyyy' }}</div>
+        </div>
+      </div>
+
+      <!-- Mostrar imagen si existe -->
+      <div *ngIf="selectedBatch.imageUrl" class="batch-image-container">
+        <img [src]="selectedBatch.imageUrl" alt="Imagen del lote" class="batch-image">
+      </div>
+
+      <!-- Botones de acción solo si el lote está en estado enviado -->
+      <div *ngIf="canApproveOrReject(selectedBatch)" class="action-buttons">
+        <app-button
+          label="Aprobado"
+          variant="primary"
+          (click)="approveBatch()">
+        </app-button>
+
+        <app-button
+          label="Rechazado"
+          variant="secondary"
+          (click)="showRejectForm()">
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista de formulario de rechazo -->
+  <div *ngIf="view === 'reject' && selectedBatch" class="reject-form">
+    <div class="detail-header">
+      <app-button
+        label=""
+        icon="arrow_back"
+        variant="back"
+        (click)="view = 'detail'">
+      </app-button>
+      <h2>Motivo del rechazo</h2>
+    </div>
+
+    <div class="reject-content">
+      <div class="form-group">
+        <label>Observaciones:</label>
+        <app-input
+          type="textarea"
+          [(ngModel)]="rejectReason"
+          placeholder="Ingrese el motivo del rechazo"
+          [fullWidth]="true">
+        </app-input>
+      </div>
+
+      <div class="form-group">
+        <label>Evidencia:</label>
+        <div class="upload-container">
+          <input
+            type="file"
+            id="rejectImage"
+            accept="image/*"
+            (change)="onFileChange($event)"
+            style="display: none">
+
+          <div class="image-preview" *ngIf="rejectImage">
+            <img [src]="rejectImage" alt="Vista previa" class="preview-image">
+          </div>
+
+          <div *ngIf="!rejectImage" class="upload-placeholder" (click)="triggerFileInput()">
+            <span class="camera-icon">📷</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <app-button
+          label="Enviar"
+          variant="primary"
+          [loading]="isLoading"
+          [disabled]="!rejectReason.trim()"
+          (click)="submitReject()">
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificación -->
+  <app-notification
+    [show]="notification.show"
+    [message]="notification.message"
+    [type]="notification.type"
+    [autoClose]="true"
+    (close)="notification.show = false">
+  </app-notification>
+</div>

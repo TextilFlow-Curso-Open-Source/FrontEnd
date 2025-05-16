@@ -24,7 +24,20 @@
     </div>
   </div>
 
-  <div class="notifications-container">
+  <!-- Botón para volver a mostrar las notificaciones -->
+  <button
+    *ngIf="!showNotifications"
+    class="btn-show-notifications"
+    (click)="openNotifications()"
+  >
+    Mostrar notificaciones
+  </button>
+
+  <!-- Sección de notificaciones -->
+  <div
+    class="notifications-container"
+    *ngIf="showNotifications"
+  >
     <div class="notifications-header">
       <div class="notifications-title">
         <span class="notification-icon">ⓘ</span>
@@ -34,9 +47,19 @@
     </div>
 
     <ul class="notifications-list">
-      <li *ngFor="let notification of notifications">{{ notification.message }}</li>
+      <li *ngFor="let notification of notificationsGrouped">
+        <div class="notification-item">
+          <strong>Lote {{ notification.code }}:</strong>
+          <ul>
+            <li *ngFor="let message of notification.messages">{{ message }}</li>
+          </ul>
+        </div>
+      </li>
     </ul>
 
-    <button class="btn-more-details" (click)="viewMoreNotifications()">Ver más detalles</button>
+    <button class="btn-more-details" (click)="viewMoreNotifications()">
+      Ver más detalles
+    </button>
   </div>
 </div>
+
