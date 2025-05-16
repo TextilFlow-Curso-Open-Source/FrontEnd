@@ -20,7 +20,7 @@ export class BusinessmanLayoutComponent implements OnInit {
     { id: 'inicio', label: 'Inicio', icon: 'home', route: '/businessman/inicio' },
     { id: 'lotes', label: 'Lotes Recibidos', icon: 'description', route: '/businessman/lotes' },
     { id: 'observaciones', label: 'Observaciones enviadas', icon: 'comment', route: '/businessman/observaciones' },
-    { id: 'agregar-distribuidor', label: 'Agregar Distribuidor', icon: 'person_add', route: '/businessman/agregar-distribuidor' },
+    { id: 'Distribuidores', label: 'Agregar Distribuidor', icon: 'person_add', route: '/businessman/buscar-distribuidor' },
     { id: 'planes', label: 'Planes y suscripción', icon: 'payments', route: '/businessman/planes' },
   ];
 

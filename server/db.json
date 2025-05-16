@@ -194,7 +194,7 @@
       "observations": "",
       "date": "2025-05-13T05:00:00.000Z",
       "imageUrl": "",
-      "status": "Enviado",
+      "status": "Por enviar",
       "supplierId": 1747125838395,
       "id": 5
     },
@@ -253,6 +253,66 @@
       "status": "Enviado",
       "supplierId": 1747125838395,
       "id": 9
+    },
+    {
+      "code": "L-9848",
+      "client": "Maylhy",
+      "businessmanId": 1747127476096,
+      "supplierId": 1747125838395,
+      "fabricType": "Rugosa",
+      "color": "Blanco",
+      "quantity": "48",
+      "price": "46",
+      "observations": "ninguna",
+      "address": "jr.Lima",
+      "date": "2025-05-16",
+      "status": "Por enviar",
+      "imageUrl": "",
+      "id": 10
+    },
+    {
+      "code": "L-9848",
+      "client": "Maylhy",
+      "businessmanId": 1747127476096,
+      "supplierId": 1747125838395,
+      "fabricType": "Rugosa",
+      "color": "Blanco",
+      "quantity": "48",
+      "price": "46",
+      "observations": "ninguna",
+      "address": "jr.Lima",
+      "date": "2025-05-16",
+      "status": "Por enviar",
+      "imageUrl": "",
+      "id": 11
+    }
+  ],
+  "businessSupplierRequests": [
+    {
+      "businessmanId": 1747127476096,
+      "supplierId": 1747125838395,
+      "status": "accepted",
+      "message": "Acepto negociacion",
+      "batchType": "Rugosa",
+      "color": "Amarillo",
+      "quantity": 54,
+      "address": "Av Peru 321",
+      "createdAt": "2025-05-16T08:53:50.035Z",
+      "id": 1,
+      "updatedAt": "2025-05-16T08:54:39.768Z"
+    },
+    {
+      "businessmanId": 1747127476096,
+      "supplierId": 1747126728765,
+      "status": "accepted",
+      "message": "aaaa",
+      "batchType": "Seda",
+      "color": "Blanco",
+      "quantity": "5",
+      "address": "av g",
+      "createdAt": "2025-05-16T09:43:53.596Z",
+      "id": 2,
+      "updatedAt": "2025-05-16T09:44:23.513Z"
     }
   ]
 }

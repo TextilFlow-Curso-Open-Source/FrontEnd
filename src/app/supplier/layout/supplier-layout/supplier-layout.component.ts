@@ -21,7 +21,7 @@ export class SupplierLayoutComponent implements OnInit {
     { id: 'mis-lotes', label: 'Mis lotes', icon: 'description', route: '/supplier/mis-lotes' },
     { id: 'registrar-lotes', label: 'Registrar Lotes', icon: 'add_box', route: '/supplier/registrar-lotes' },
     { id: 'observaciones', label: 'Observaciones', icon: 'comment', route: '/supplier/observaciones' },
-    { id: 'solicitudes-empresarios', label: 'Solicitudes de empresarios', icon: 'notifications', route: '/supplier/solicitudes-empresarios' },
+    { id: 'solicitudes-recibidas', label: 'Solicitudes de empresarios', icon: 'notifications', route: '/supplier/solicitudes-recibidas' },
     { id: 'planes', label: 'Planes y suscripción', icon: 'payments', route: '/supplier/planes' },
   ];
 
