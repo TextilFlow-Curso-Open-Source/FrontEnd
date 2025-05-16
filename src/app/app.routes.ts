@@ -15,16 +15,18 @@ const BusinessmanHomeComponent = () => import('./businessman/components/business
 const BusinessmanBatchComponent = () => import('./batch/components/businessman-batch/businessman-batch.component').then(m => m.BusinessmanBatchComponent);
 const BusinessmanObservationComponent = () => import('./observation/components/businessman-observation/businessman-observation.component').then(m => m.BusinessmanObservationComponent);
 const BusinessmanPlansComponent = () => import('./businessman/components/businessman-plans/businessman-plans.component').then(m => m.BusinessmanPlansComponent);
-const BusinessmanRequestComponent = () => import('./businessman/components/businessman-request/businessman-request.component').then(m => m.BusinessmanRequestComponent);
 const ConfiguracionComponent = () => import('./configuration/components/businessman-configuration/businessman-configuration.component').then(m => m.BusinessmanConfigurationComponent);
 const PerfilComponent = () => import('./configuration/components/businessman-profile-configuration/businessman-profile-configuration.component').then(m => m.BusinessmanProfileConfigurationComponent);
+
+// Componentes en el módulo requests
+const AddSupplierComponent = () => import('./requests/components/add-supplier/add-supplier.component').then(m => m.AddSupplierComponent);
+const BusinessRequestsComponent = () => import('./requests/components/business-request/business-request.component').then(m => m.BusinessRequestsComponent);
 
 // Componentes de Supplier (lazy loaded)
 const SupplierHomeComponent = () => import('./supplier/components/supplier-home/supplier-home.component').then(m => m.SupplierHomeComponent);
 const SupplierBatchComponent = () => import('./batch/components/supplier-batch/supplier-batch.component').then(m => m.SupplierBatchComponent);
 const SupplierRegisterBatchComponent = () => import('./batch/components/supplier-register-batch/supplier-register-batch.component').then(m => m.SupplierRegisterBatchComponent);
 const SupplierObservationComponent = () => import('./observation/components/supplier-observation/supplier-observation.component').then(m => m.SupplierObservationComponent);
-const SupplierRequestComponent = () => import('./supplier/components/supplier-request/supplier-request.component').then(m => m.SupplierRequestComponent);
 const SupplierPlansComponent = () => import('./supplier/components/supplier-plans/supplier-plans.component').then(m => m.SupplierPlansComponent);
 const SupplierConfigComponent = () => import('./configuration/components/supplier-configuration/supplier-configuration.component').then(m => m.SupplierConfigurationComponent);
 const SupplierPerfilComponent = () => import('./configuration/components/supplier-profile-configuration/supplier-profile-configuration.component').then(m => m.SupplierProfileConfigurationComponent);
@@ -83,8 +85,8 @@ export const routes: Routes = [
         loadComponent: BusinessmanPlansComponent
       },
       {
-        path: 'agregar-distribuidor',
-        loadComponent: BusinessmanRequestComponent
+        path: 'buscar-distribuidor',
+        loadComponent: AddSupplierComponent
       },
       {
         path: 'configuracion',
@@ -124,8 +126,8 @@ export const routes: Routes = [
         loadComponent: SupplierObservationComponent
       },
       {
-        path: 'solicitudes-empresarios',
-        loadComponent: SupplierRequestComponent
+        path: 'solicitudes-recibidas',
+        loadComponent: BusinessRequestsComponent
       },
       {
         path: 'planes',

@@ -4,4 +4,5 @@ export const environment = {
   authEndpointPath: '',
   businessmanEndpointPath: '/businessman',
   supplierEndpointPath: '/suppliers',
+  businessSupplierRequests: '/businessSupplierRequests',
 };

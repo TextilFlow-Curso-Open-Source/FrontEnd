@@ -10,6 +10,9 @@ export class Supplier extends User {
   warehouseLocation: string;
   minimumOrderQuantity: number;
   logo: string;
+  // Nuevos campos para ratings
+  averageRating?: number;
+  totalReviews?: number;
 
   constructor(supplier: {
     // Propiedades base de User
@@ -30,7 +33,10 @@ export class Supplier extends User {
     yearsFounded?: number,
     warehouseLocation?: string,
     minimumOrderQuantity?: number,
-    logo?: string
+    logo?: string,
+    // Nuevos campos opcionales
+    averageRating?: number,
+    totalReviews?: number
   }) {
     // Llamamos al constructor de la clase padre (User)
     super(supplier);
@@ -44,5 +50,8 @@ export class Supplier extends User {
     this.warehouseLocation = supplier.warehouseLocation || '';
     this.minimumOrderQuantity = supplier.minimumOrderQuantity || 0;
     this.logo = supplier.logo || '';
+    // Inicializar nuevos campos
+    this.averageRating = supplier.averageRating || 0;
+    this.totalReviews = supplier.totalReviews || 0;
   }
 }

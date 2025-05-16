@@ -1,0 +1,394 @@
+<!-- add-supplier.component.html -->
+<div class="container">
+  <!-- Pestañas superiores -->
+  <div class="tab-navigation">
+    <div
+      class="tab-button"
+      [class.active]="activeTab === 'current'"
+      (click)="setActiveTab('current')">
+      Distribuidores Actuales
+    </div>
+    <div
+      class="tab-button"
+      [class.active]="activeTab === 'add'"
+      (click)="setActiveTab('add')">
+      Añadir Distribuidor
+    </div>
+  </div>
+
+  <!-- Barra de búsqueda -->
+  <div class="search-container">
+    <app-input
+      type="search"
+      placeholder="Buscar"
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="searchSuppliers()"
+      [fullWidth]="true">
+    </app-input>
+
+    <app-button
+      label="Filtro"
+      variant="primary"
+      icon="filter_list"
+      (click)="searchSuppliers()">
+    </app-button>
+  </div>
+
+  <h2>Distribuidores</h2>
+
+  <div *ngIf="isLoading" class="loading">
+    Cargando...
+  </div>
+
+  <div *ngIf="!isLoading && filteredSuppliers.length === 0" class="no-results">
+    <p *ngIf="activeTab === 'current'">No tienes distribuidores conectados. Puedes añadir nuevos distribuidores en la pestaña "Añadir Distribuidor".</p>
+    <p *ngIf="activeTab === 'add'">No se encontraron distribuidores disponibles.</p>
+  </div>
+
+  <!-- Contenido de la pestaña Distribuidores Actuales -->
+  <div *ngIf="activeTab === 'current'" class="suppliers-grid">
+    <div *ngFor="let supplier of filteredSuppliers" class="supplier-card">
+      <div class="supplier-header" (click)="toggleSupplierExpansion(supplier.id)">
+        <h3 class="supplier-title">{{ supplier.profile?.companyName || 'Sin nombre' }}</h3>
+        <div class="dropdown-arrow" [class.expanded]="expandedSupplierId === supplier.id">▼</div>
+      </div>
+
+      <div class="supplier-info">
+        <div class="supplier-email">
+          <img [src]="supplier.profile?.logo || 'assets/default-avatar.png'" alt="avatar" class="supplier-avatar">
+          <span>{{ supplier.email }}</span>
+        </div>
+        <div class="supplier-rating">
+          <span *ngFor="let star of getFilledStars(supplier.averageRating || 0)" class="star filled">★</span>
+          <span *ngFor="let star of getEmptyStars(supplier.averageRating || 0)" class="star">☆</span>
+        </div>
+        <app-button
+          label="Pedir Lote"
+          variant="primary"
+          [fullWidth]="false"
+          (click)="showBatchFormFor(supplier)">
+        </app-button>
+      </div>
+
+      <!-- Sección expandible para detalles y reseñas -->
+      <div *ngIf="expandedSupplierId === supplier.id" class="supplier-expanded">
+        <!-- Información del proveedor -->
+        <div class="supplier-details">
+          <h4>Información del Proveedor</h4>
+          <p><strong>Especialización:</strong> {{ supplier.profile?.specialization || 'No especificado' }}</p>
+          <p><strong>Categorías:</strong> {{ supplier.profile?.productCategories?.join(', ') || 'No especificado' }}</p>
+          <p><strong>Ubicación:</strong> {{ supplier.profile?.warehouseLocation || 'No especificado' }}</p>
+          <p><strong>Pedido mínimo:</strong> {{ supplier.profile?.minimumOrderQuantity || 'No especificado' }}</p>
+        </div>
+
+        <!-- Reseñas -->
+        <div class="reviews-section">
+          <div class="reviews-header">
+            <h4>Reseñas ({{ supplier.totalReviews || 0 }})</h4>
+            <app-button
+              *ngIf="canAddReview"
+              label="Añadir Reseña"
+              variant="primary"
+              size="small"
+              (click)="openReviewForm(supplier.id)">
+            </app-button>
+          </div>
+
+          <div *ngIf="reviews.length > 0" class="reviews-list">
+            <div *ngFor="let review of reviews" class="review-item">
+              <div class="review-header">
+                <img [src]="'assets/default-avatar.png'" alt="reviewer" class="reviewer-avatar">
+                <div class="review-info">
+                  <div class="review-email">{{ review.businessmanName || 'Usuario' }}</div>
+                  <div class="review-rating">
+                    <span *ngFor="let star of getFilledStars(review.rating)" class="star filled">★</span>
+                    <span *ngFor="let star of getEmptyStars(review.rating)" class="star">☆</span>
+                  </div>
+                  <div class="review-date">{{ review.createdAt | date:'dd/MM/yy' }}</div>
+                </div>
+              </div>
+              <p class="review-text">{{ review.comment || 'Sin comentarios' }}</p>
+            </div>
+          </div>
+
+          <div *ngIf="reviews.length === 0" class="no-reviews">
+            Este proveedor aún no tiene reseñas.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido de la pestaña Añadir Distribuidor -->
+  <div *ngIf="activeTab === 'add'" class="suppliers-list">
+    <div *ngFor="let supplier of filteredSuppliers" class="supplier-item">
+      <div class="supplier-header" (click)="selectSupplier(supplier.id)">
+        <h3 class="supplier-name">{{ supplier.profile?.companyName || 'Sin nombre' }}</h3>
+        <div class="dropdown-arrow" [class.expanded]="selectedSupplierId === supplier.id">▼</div>
+      </div>
+
+      <div class="supplier-info">
+        <div class="supplier-email">
+          <img [src]="supplier.profile?.logo || 'assets/default-avatar.png'" alt="avatar" class="supplier-avatar">
+          <span>{{ supplier.email }}</span>
+        </div>
+        <div class="supplier-rating">
+          <span *ngFor="let star of getFilledStars(supplier.averageRating || 0)" class="star filled">★</span>
+          <span *ngFor="let star of getEmptyStars(supplier.averageRating || 0)" class="star">☆</span>
+        </div>
+        <app-button
+          label="Mandar Solicitud"
+          variant="primary"
+          (click)="showRequestFormFor(supplier)">
+        </app-button>
+      </div>
+
+      <!-- Mostrar reseñas cuando está desplegado -->
+      <div *ngIf="selectedSupplierId === supplier.id" class="reviews-section">
+        <div *ngIf="reviews.length > 0" class="reviews-list">
+          <div *ngFor="let review of reviews" class="review-item">
+            <div class="review-header">
+              <img [src]="'assets/default-avatar.png'" alt="reviewer" class="reviewer-avatar">
+              <div class="review-info">
+                <div class="review-email">{{ review.businessmanName || 'Usuario' }}</div>
+                <div class="review-rating">
+                  <span *ngFor="let star of getFilledStars(review.rating)" class="star filled">★</span>
+                  <span *ngFor="let star of getEmptyStars(review.rating)" class="star">☆</span>
+                </div>
+                <div class="review-date">{{ review.createdAt | date:'dd/MM/yy' }}</div>
+              </div>
+            </div>
+            <p class="review-text">{{ review.comment || 'Sin comentarios' }}</p>
+          </div>
+        </div>
+        <div *ngIf="reviews.length === 0" class="no-reviews">
+          Este proveedor aún no tiene reseñas.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para el formulario de solicitud -->
+  <div *ngIf="showRequestForm" class="modal">
+    <div class="modal-backdrop" (click)="cancelRequest()"></div>
+    <div class="modal-content">
+      <button class="close-modal" (click)="cancelRequest()">×</button>
+
+      <div class="request-form">
+        <h3>Tipo de tela</h3>
+        <app-input
+          type="textarea"
+          [(ngModel)]="batchType"
+          placeholder="Ingrese el tipo de Tela"
+          [fullWidth]="true">
+        </app-input>
+
+        <h3>Color del lote</h3>
+        <app-input
+          type="text"
+          [(ngModel)]="batchColor"
+          placeholder="Escoja el color"
+          [fullWidth]="true">
+        </app-input>
+
+        <h3>Cantidad</h3>
+        <app-input
+          type="number"
+          [(ngModel)]="quantity"
+          placeholder="Ingrese la cantidad"
+          [fullWidth]="true">
+        </app-input>
+
+        <h3>Dirección</h3>
+        <app-input
+          type="text"
+          [(ngModel)]="address"
+          placeholder="Ingrese la dirección"
+          [fullWidth]="true">
+        </app-input>
+
+        <h3>Comentario:</h3>
+        <app-input
+          type="textarea"
+          [(ngModel)]="requestMessage"
+          placeholder="Escriba un comentario adicional (opcional)"
+          [fullWidth]="true">
+        </app-input>
+
+        <app-button
+          label="Confirmar"
+          variant="primary"
+          [loading]="isLoading"
+          [fullWidth]="true"
+          (click)="sendRequest()">
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para crear un nuevo batch -->
+  <div *ngIf="showBatchForm" class="modal">
+    <div class="modal-backdrop" (click)="cancelBatch()"></div>
+    <div class="modal-content">
+      <button class="close-modal" (click)="cancelBatch()">×</button>
+
+      <div class="batch-form">
+        <h2>Crear Nuevo Lote</h2>
+
+        <div class="form-group">
+          <label>Código</label>
+          <app-input
+            type="text"
+            [(ngModel)]="newBatch.code"
+            placeholder="Código del lote"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <div class="form-group">
+          <label>Cliente</label>
+          <app-input
+            type="text"
+            [(ngModel)]="newBatch.client"
+            placeholder="Nombre del cliente"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de Tela</label>
+          <app-input
+            type="text"
+            [(ngModel)]="newBatch.fabricType"
+            placeholder="Tipo de tela"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <div class="form-group">
+          <label>Color</label>
+          <app-input
+            type="text"
+            [(ngModel)]="newBatch.color"
+            placeholder="Color de la tela"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half">
+            <label>Cantidad</label>
+            <app-input
+              type="number"
+              [(ngModel)]="newBatch.quantity"
+              placeholder="Cantidad"
+              [fullWidth]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group half">
+            <label>Precio</label>
+            <app-input
+              type="number"
+              [(ngModel)]="newBatch.price"
+              placeholder="Precio"
+              [fullWidth]="true">
+            </app-input>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Dirección</label>
+          <app-input
+            type="text"
+            [(ngModel)]="newBatch.address"
+            placeholder="Dirección de entrega"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <div class="form-group">
+          <label>Fecha</label>
+          <app-input
+            type="date"
+            [(ngModel)]="newBatch.date"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <div class="form-group">
+          <label>Observaciones</label>
+          <app-input
+            type="textarea"
+            [(ngModel)]="newBatch.observations"
+            placeholder="Observaciones adicionales"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <app-button
+          label="Crear Lote"
+          variant="primary"
+          [loading]="isLoading"
+          [fullWidth]="true"
+          (click)="createBatch()">
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para añadir reseña -->
+  <div *ngIf="showReviewForm" class="modal">
+    <div class="modal-backdrop" (click)="closeReviewForm()"></div>
+    <div class="modal-content review-modal">
+      <button class="close-modal" (click)="closeReviewForm()">×</button>
+
+      <div class="review-form">
+        <h2>Añadir Reseña</h2>
+
+        <div class="form-group">
+          <label>Calificación (1-5 estrellas)</label>
+          <div class="rating-input">
+            <app-input
+              type="number"
+              [(ngModel)]="newReview.rating"
+              [fullWidth]="false"
+              [required]="true">
+            </app-input>
+            <div class="rating-preview">
+              <span *ngFor="let star of getFilledStars(newReview.rating)" class="star filled">★</span>
+              <span *ngFor="let star of getEmptyStars(newReview.rating)" class="star">☆</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Comentario</label>
+          <app-input
+            type="textarea"
+            [(ngModel)]="newReview.comment"
+            placeholder="Escribe tu opinión sobre este proveedor"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <app-button
+          label="Publicar Reseña"
+          variant="primary"
+          [loading]="isLoading"
+          [fullWidth]="true"
+          (click)="submitReview()">
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificación -->
+  <app-notification
+    [show]="notification.show"
+    [message]="notification.message"
+    [type]="notification.type"
+    [autoClose]="true"
+    (close)="closeNotification()">
+  </app-notification>
+</div>
