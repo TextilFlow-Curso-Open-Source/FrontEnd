@@ -84,13 +84,33 @@ export class SupplierRequestService extends BaseService<BusinessSupplierRequest>
    * @param status Nuevo estado ('accepted' o 'rejected')
    */
   updateRequestStatus(requestId: number, status: 'accepted' | 'rejected'): any {
-    return this.http.patch<BusinessSupplierRequest>(
-      `${this.serverBaseUrl}${this.resourceEndpoint}/${requestId}`,
-      {
-        status,
-        updatedAt: new Date().toISOString()
+    // Primero obtenemos el objeto completo
+    return {
+      subscribe: (observer: any) => {
+        // Obtenemos primero la solicitud existente
+        this.http.get<BusinessSupplierRequest>(
+          `${this.serverBaseUrl}${this.resourceEndpoint}/${requestId}`
+        ).subscribe({
+          next: (existingRequest) => {
+            // Actualizamos con todos los campos existentes + los nuevos
+            const updatedRequest = {
+              ...existingRequest,
+              status: status,
+              updatedAt: new Date().toISOString()
+            };
+
+            // Usamos PUT en lugar de PATCH
+            this.http.put<BusinessSupplierRequest>(
+              `${this.serverBaseUrl}${this.resourceEndpoint}/${requestId}`,
+              updatedRequest
+            ).subscribe(observer);
+          },
+          error: (error) => {
+            if (observer.error) observer.error(error);
+          }
+        });
       }
-    );
+    };
   }
 
   /**

@@ -54,6 +54,17 @@
       "phone": "124578954",
       "id": 1747127476096,
       "role": "businessman"
+    },
+    {
+      "name": "Juan",
+      "email": "juana@gmail.com",
+      "password": "654321",
+      "country": "Albania",
+      "city": "Shkoder",
+      "address": "asdasd",
+      "phone": "asdasd",
+      "id": 1747461746854,
+      "role": "businessman"
     }
   ],
   "businessman": [
@@ -95,6 +106,22 @@
       "description": "",
       "logo": "",
       "id": 3
+    },
+    {
+      "userId": 1747461746854,
+      "companyName": "",
+      "ruc": "",
+      "businessType": "",
+      "industry": "",
+      "employeeCount": 0,
+      "foundingYear": 2025,
+      "website": "",
+      "description": "",
+      "productCategories": [],
+      "logo": "",
+      "contactEmail": "",
+      "contactPhone": "",
+      "id": 4
     }
   ],
   "suppliers": [
@@ -362,6 +389,18 @@
       "createdAt": "2025-05-16T09:43:53.596Z",
       "id": 2,
       "updatedAt": "2025-05-16T09:44:23.513Z"
+    },
+    {
+      "businessmanId": 1747461746854,
+      "supplierId": 1747125838395,
+      "status": "pending",
+      "message": "hello",
+      "batchType": "Rugosa",
+      "color": "amarillo",
+      "quantity": "79",
+      "address": "aqui",
+      "createdAt": "2025-05-17T06:24:27.146Z",
+      "id": 3
     }
   ],
   "supplierReviews": [
