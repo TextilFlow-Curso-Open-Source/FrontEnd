@@ -144,7 +144,8 @@ export class SupplierService extends BaseService<Supplier> {
         totalReviews
       };
 
-      this.http.patch(`${this.serverBaseUrl}${this.resourceEndpoint}/${profile.id}`, updatedProfile)
+      // Reemplazar PATCH por PUT
+      this.http.put(`${this.serverBaseUrl}${this.resourceEndpoint}/${profile.id}`, updatedProfile)
         .subscribe({
           next: (response) => console.log('Rating actualizado:', response),
           error: (error) => console.error('Error al actualizar rating:', error)

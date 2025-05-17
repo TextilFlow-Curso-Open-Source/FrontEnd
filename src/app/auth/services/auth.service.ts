@@ -125,17 +125,22 @@ export class AuthService extends BaseService<User> implements OnInit {
     }
   }
 
-  // Asignar rol de usuario y crear perfil correspondiente
+  // MÉTODO CORREGIDO: Asignar rol de usuario usando PUT en lugar de PATCH
   setUserRole(role: 'businessman' | 'supplier'): void {
     const currentUser = this.getCurrentUser();
     if (currentUser) {
-      // Actualizar el rol en el servidor
       const userId = currentUser.id;
 
-      // URL correcta para actualizar el usuario
-      this.http.patch<User>(`${this.serverBaseUrl}/users/${userId}`, { role })
+      // Crear objeto completo del usuario
+      const updatedUser = {
+        ...currentUser,
+        role: role
+      };
+
+      // Usar PUT en lugar de PATCH
+      this.http.put<User>(`${this.serverBaseUrl}/users/${userId}`, updatedUser)
         .subscribe({
-          next: (updatedUser) => {
+          next: (response) => {
             // Actualizar usuario en localStorage
             localStorage.setItem('current_user', JSON.stringify(updatedUser));
 
@@ -153,10 +158,6 @@ export class AuthService extends BaseService<User> implements OnInit {
             console.error('Error al actualizar el rol:', error);
 
             // Si falla, actualizar localmente de todos modos
-            const updatedUser = {
-              ...currentUser,
-              role: role
-            };
             localStorage.setItem('current_user', JSON.stringify(updatedUser));
 
             // Intentar crear perfil de todos modos
