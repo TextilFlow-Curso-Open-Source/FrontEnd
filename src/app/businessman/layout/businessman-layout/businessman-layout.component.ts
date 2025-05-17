@@ -5,11 +5,13 @@ import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../auth/services/auth.service';
 import { filter } from 'rxjs/operators';
+import {TranslateModule} from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-businessman-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule],
+  imports: [CommonModule, RouterModule, MatIconModule,TranslateModule],
   templateUrl: './businessman-layout.component.html',
   styleUrls: ['./businessman-layout.component.css']
 })
@@ -30,20 +32,45 @@ export class BusinessmanLayoutComponent implements OnInit {
     { id: 'salir', label: 'Cerrar sesión', icon: 'exit_to_app', route: '/login' }
   ];
 
+  private translateMenuItems(): void {
+    this.menuItems = [
+      { id: 'inicio', label: 'MENU.HOME', icon: 'home', route: '/businessman/inicio' },
+      { id: 'lotes', label: 'MENU.BATCHES', icon: 'description', route: '/businessman/lotes' },
+      { id: 'observaciones', label: 'MENU.OBSERVATIONS', icon: 'comment', route: '/businessman/observaciones' },
+      { id: 'Distribuidores', label: 'MENU.ADD_SUPPLIER', icon: 'person_add', route: '/businessman/buscar-distribuidor' },
+      { id: 'planes', label: 'MENU.SUBSCRIPTION', icon: 'payments', route: '/businessman/planes' }
+    ];
+
+    this.profileItems = [
+      { id: 'configuracion', label: 'MENU.SETTINGS', icon: 'settings', route: '/businessman/configuracion' },
+      { id: 'perfil', label: 'MENU.PROFILE', icon: 'person', route: '/businessman/perfil' },
+      { id: 'salir', label: 'MENU.LOGOUT', icon: 'exit_to_app', route: '/login' }
+    ];
+  }
+
   constructor(
     private router: Router,
-    private authService: AuthService
-  ) { }
+    private authService: AuthService,
+    private translate: TranslateService
+  ){}
 
   ngOnInit(): void {
-    // Actualizar el título de la página cuando cambia la ruta
+    // Traducir menús al iniciar
+    this.translateMenuItems();
+
+    // Escuchar cambios de idioma
+    this.translate.onLangChange.subscribe(() => {
+      this.translateMenuItems();
+      this.updatePageTitle(); // actualizar título si cambia idioma
+    });
+
+    // Ya tienes esto (lo dejamos igual)
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       this.updatePageTitle();
     });
 
-    // Establecer el título inicial
     this.updatePageTitle();
   }
 

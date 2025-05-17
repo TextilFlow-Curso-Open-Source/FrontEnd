@@ -11,6 +11,7 @@ import { AppButtonComponent } from '../../../core/components/app-button/app-butt
 import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
 import { BatchService } from '../../../batch/services/batch.service.service';
 import { Batch, BatchStatus, STATUS } from '../../../batch/models/batch.entity';
+import {TranslateModule} from "@ngx-translate/core";
 
 @Component({
   selector: 'app-add-supplier',
@@ -20,7 +21,8 @@ import { Batch, BatchStatus, STATUS } from '../../../batch/models/batch.entity';
     FormsModule,
     AppInputComponent,
     AppButtonComponent,
-    AppNotificationComponent
+    AppNotificationComponent,
+    TranslateModule
   ],
   templateUrl: './add-supplier.component.html',
   styleUrls: ['./add-supplier.component.css']

@@ -10,6 +10,7 @@ import { AppButtonComponent} from '../../../core/components/app-button/app-butto
 import { AppNotificationComponent} from '../../../core/components/app-notification/app-notification.component';
 import { Observation, OBSERVATION_STATUS  } from '../../../observation/models/observation.entity';
 import { ObservationService} from '../../../observation/services/observation.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-businessman-batch',
@@ -19,7 +20,8 @@ import { ObservationService} from '../../../observation/services/observation.ser
     FormsModule,
     AppInputComponent,
     AppButtonComponent,
-    AppNotificationComponent
+    AppNotificationComponent,
+    TranslateModule
   ],
   templateUrl: './businessman-batch.component.html',
   styleUrls: ['./businessman-batch.component.css']
@@ -314,7 +316,7 @@ export class BusinessmanBatchComponent implements OnInit {
 
   // Comprobar si un lote se puede aprobar/rechazar
   canApproveOrReject(batch: Batch): boolean {
-    return batch.status === STATUS.ENVIADO;
+    return batch.status === STATUS.ACEPTADO;
   }
 
   triggerFileInput(): void {

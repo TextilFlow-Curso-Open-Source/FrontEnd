@@ -12,6 +12,7 @@ import { AppInputComponent } from '../../../core/components/app-input/app-input.
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
 import { MatIconModule } from '@angular/material/icon';
+import {TranslateModule} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-supplier-register-batch',
@@ -24,7 +25,8 @@ import { MatIconModule } from '@angular/material/icon';
     AppInputComponent,
     AppButtonComponent,
     AppNotificationComponent,
-    MatIconModule
+    MatIconModule,
+    TranslateModule
   ]
 })
 export class SupplierRegisterBatchComponent implements OnInit {

@@ -1,46 +1,68 @@
-<div class="configuracion-wrapper">
-  <h2>Configuración</h2>
+<!-- src/app/configuration/components/supplier-configuration/supplier-configuration.component.html -->
 
-  <form [formGroup]="configForm" (ngSubmit)="saveConfiguration()" class="config-form">
-    <!-- Apariencia -->
-    <div class="config-section">
-      <label for="language">Idioma</label>
-      <select id="language" formControlName="language">
-        <option value="es">Español</option>
-        <option value="en">Inglés</option>
-      </select>
+<div class="configuration-container">
+  <div *ngIf="isLoading" class="loading-indicator">
+    {{ 'COMMON.LOADING' | translate }}
+  </div>
+
+  <div *ngIf="!isLoading && configuration">
+    <h2>{{ 'CONFIGURATION.TITLE' | translate }}</h2>
+
+    <div class="form-group">
+      <label>{{ 'CONFIGURATION.LANGUAGE' | translate }}</label>
+      <div class="language-options">
+        <div class="language-option" *ngFor="let lang of languageOptions">
+          <button
+            [class.active]="configuration.language === lang.value"
+            (click)="changeLanguage(lang.value)"
+            class="language-button">
+            {{ lang.label }}
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- Código de lote -->
-    <div class="config-section">
-      <label for="codigoLote">Código de Lote</label>
-      <select id="codigoLote" formControlName="codigoLote">
-        <option value="automatico">Automática</option>
-        <option value="manual">Manual</option>
-      </select>
+    <div class="form-group">
+      <app-input
+        [label]="'CONFIGURATION.BATCH_CODE' | translate"
+        type="select"
+        [options]="batchCodeOptions"
+        [(ngModel)]="configuration.batchCodeFormat"
+        [fullWidth]="true">
+      </app-input>
     </div>
 
-    <!-- Modo de vista -->
-    <div class="config-section">
-      <label for="theme">Modo de vista</label>
-      <select id="theme" formControlName="theme">
-        <option value="light">Modo claro</option>
-        <option value="dark">Modo oscuro</option>
-      </select>
+    <div class="form-group">
+      <app-input
+        [label]="'CONFIGURATION.VIEW_MODE' | translate"
+        type="select"
+        [options]="viewModeOptions"
+        [(ngModel)]="configuration.viewMode"
+        [fullWidth]="true">
+      </app-input>
     </div>
 
-    <!-- Botones -->
-    <div class="button-group">
-      <button type="submit" class="btn-save" [disabled]="configForm.invalid || isSaving">
-        {{ isSaving ? 'Guardando...' : 'Guardar' }}
-      </button>
-      <button type="button" class="btn-cancel" (click)="resetConfiguration()">
-        Cancelar
-      </button>
-    </div>
+    <div class="button-container">
+      <app-button
+        [label]="'COMMON.SAVE' | translate"
+        variant="primary"
+        [loading]="isLoading"
+        (click)="saveConfiguration()">
+      </app-button>
 
-    <!-- Mensajes de éxito o error -->
-    <div *ngIf="saveSuccess" class="alert-success">Configuración guardada correctamente</div>
-    <div *ngIf="saveError" class="alert-error">Error al guardar la configuración. Inténtalo de nuevo.</div>
-  </form>
+      <app-button
+        [label]="'COMMON.CANCEL' | translate"
+        variant="secondary"
+        [disabled]="isLoading"
+        (click)="cancel()">
+      </app-button>
+    </div>
+  </div>
+
+  <app-notification
+    *ngIf="notification.show"
+    [message]="notification.message"
+    [type]="notification.type"
+    (close)="notification.show = false">
+  </app-notification>
 </div>

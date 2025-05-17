@@ -1,149 +1,240 @@
+// src/app/configuration/components/businessman-configuration/businessman-configuration.component.ts
+
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ConfigurationServiceService } from '../../services/configuration.service.service';
+import { FormsModule } from '@angular/forms';
+import { ConfigurationService } from '../../services/configuration.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Configuration } from '../../models/configuration.entity';
-import { Router } from '@angular/router';
+import { AppInputComponent } from '../../../core/components/app-input/app-input.component';
+import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
+import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-businessman-configuration',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    AppInputComponent,
+    AppButtonComponent,
+    AppNotificationComponent,
+    TranslateModule
+  ],
   templateUrl: './businessman-configuration.component.html',
-  styleUrl: './businessman-configuration.component.css'
+  styleUrls: ['./businessman-configuration.component.css']
 })
 export class BusinessmanConfigurationComponent implements OnInit {
-  configForm!: FormGroup;
-  userId!: number;
-  userRole: 'businessman' | 'supplier' = 'businessman';
-  configuration!: Configuration;
-  isSaving = false;
-  saveSuccess = false;
-  saveError = false;
+  // Usuario actual
+  currentUserId: number = 0;
+
+  // Configuración
+  configuration: Configuration | null = null;
+
+  // Opciones para los selectores según el formato requerido por app-input
+  languageOptions = [
+    { label: 'Español', value: 'es' },
+    { label: 'English', value: 'en' }
+  ];
+
+  batchCodeOptions = [
+    { label: 'Automático', value: 'automatic' },
+    { label: 'Manual', value: 'manual' }
+  ];
+
+  viewModeOptions = [
+    { label: 'Modo claro', value: 'light' },
+    { label: 'Modo oscuro', value: 'dark' }
+  ];
+
+  // Estado de carga
+  isLoading: boolean = false;
+
+  // Notificaciones
+  notification = {
+    show: false,
+    message: '',
+    type: 'success' as 'success' | 'error' | 'warning' | 'info'
+  };
 
   constructor(
-    private fb: FormBuilder,
-    private configService: ConfigurationServiceService,
+    private configurationService: ConfigurationService,
     private authService: AuthService,
-    private router: Router
-  ) {}
+    private translateService: TranslateService
+  ) {
+    // Definir idiomas disponibles
+    this.translateService.addLangs(['es', 'en']);
+    // Idioma por defecto
+    this.translateService.setDefaultLang('es');
 
+    // AÑADIR: cargar activamente el idioma por defecto
+    this.translateService.use('es');
+
+    // AÑADIR: suscribirse a cambios de traducción para depuración
+    this.translateService.get(['CONFIGURATION.AUTOMATIC', 'CONFIGURATION.MANUAL']).subscribe(
+      (translations) => {
+        console.log('Traducciones cargadas:', translations);
+      },
+      (error) => {
+        console.error('Error al cargar traducciones:', error);
+      }
+    );
+  }
   ngOnInit(): void {
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) {
-      this.router.navigate(['/login']);
-      return;
+    const user = this.authService.getCurrentUser();
+    if (user && user.id) {
+      this.currentUserId = user.id;
+      this.loadConfiguration();
     }
 
-    this.userId = currentUser.id;
-    this.userRole = currentUser.role as 'businessman' | 'supplier';
+    // Cargar idioma guardado en localStorage
+    const savedLanguage = localStorage.getItem('userLanguage');
+    if (savedLanguage && this.translateService.getLangs().includes(savedLanguage)) {
+      this.translateService.use(savedLanguage);
+      // Actualizar opciones con traducciones
+      this.updateTranslatedOptions();
+    }
+  }
 
-    // Initialize form
-    this.configForm = this.fb.group({
-      theme: ['light', Validators.required],
-      language: ['es', Validators.required],
-      emailNotifications: [true],
-      pushNotifications: [true],
-      dashboardLayout: this.fb.group({
-        showWelcomeMessage: [true],
-        defaultView: ['list'],
-        widgetsOrder: [['summary', 'recent', 'notifications']]
-      }),
-      privacySettings: this.fb.group({
-        profileVisibility: ['public'],
-        shareData: [true]
-      })
-    });
+  // Método para cambiar el idioma
+  changeLanguage(langCode: string): void {
+    this.translateService.use(langCode);
+    localStorage.setItem('userLanguage', langCode);
 
-    // Load user configuration
-    this.loadConfiguration();
+    // Si tenemos configuración, actualizar
+    if (this.configuration) {
+      this.configuration.language = langCode;
+    }
+
+    // Actualizar opciones con traducciones
+    this.updateTranslatedOptions();
+  }
+
+  // Actualizar opciones con traducciones
+  updateTranslatedOptions(): void {
+    console.log('Actualizando opciones traducidas...');
+
+    // MODIFICAR: agregar comprobaciones de fallos
+    const automatic = this.translateService.instant('CONFIGURATION.AUTOMATIC');
+    const manual = this.translateService.instant('CONFIGURATION.MANUAL');
+    const lightMode = this.translateService.instant('CONFIGURATION.LIGHT_MODE');
+    const darkMode = this.translateService.instant('CONFIGURATION.DARK_MODE');
+
+    console.log('Traducciones obtenidas:', { automatic, manual, lightMode, darkMode });
+
+    // Comprobar si las traducciones funcionaron o devolvieron las claves sin traducir
+    this.batchCodeOptions = [
+      { label: automatic !== 'CONFIGURATION.AUTOMATIC' ? automatic : 'Automático', value: 'automatic' },
+      { label: manual !== 'CONFIGURATION.MANUAL' ? manual : 'Manual', value: 'manual' }
+    ];
+
+    this.viewModeOptions = [
+      { label: lightMode !== 'CONFIGURATION.LIGHT_MODE' ? lightMode : 'Modo claro', value: 'light' },
+      { label: darkMode !== 'CONFIGURATION.DARK_MODE' ? darkMode : 'Modo oscuro', value: 'dark' }
+    ];
   }
 
   loadConfiguration(): void {
-    this.configService.getUserConfiguration(this.userId, this.userRole)
-      .subscribe({
-        next: (config) => {
-          this.configuration = config;
-          this.updateFormWithConfig(config);
-        },
-        error: (error) => {
-          console.error('Error loading configuration:', error);
-          // Create a default configuration if none exists
-          this.configuration = new Configuration(this.userId, this.userRole);
-        }
-      });
-  }
+    this.isLoading = true;
 
-  updateFormWithConfig(config: Configuration): void {
-    this.configForm.patchValue({
-      theme: config.theme,
-      language: config.language,
-      emailNotifications: config.emailNotifications,
-      pushNotifications: config.pushNotifications,
-      dashboardLayout: {
-        showWelcomeMessage: config.dashboardLayout.showWelcomeMessage,
-        defaultView: config.dashboardLayout.defaultView,
-        widgetsOrder: config.dashboardLayout.widgetsOrder
+    this.configurationService.getByUserId(this.currentUserId).subscribe({
+      next: (configs) => {
+        if (Array.isArray(configs) && configs.length > 0) {
+          this.configuration = configs[0];
+          // Aplicar idioma de la configuración
+          if (this.configuration && this.configuration.language) {
+            this.changeLanguage(this.configuration.language);
+          }
+        } else if (!Array.isArray(configs)) {
+          this.configuration = configs;
+          // Aplicar idioma de la configuración
+          if (this.configuration && this.configuration.language) {
+            this.changeLanguage(this.configuration.language);
+          }
+        } else {
+          // Crear configuración por defecto si no existe
+          this.configuration = new Configuration({
+            userId: this.currentUserId,
+            userType: 'businessman',
+            language: 'es', // Cambiado a código de idioma
+            batchCodeFormat: 'automatic',
+            viewMode: 'light',
+            createdAt: new Date().toISOString()
+          });
+
+          this.saveConfiguration();
+        }
+
+        this.isLoading = false;
       },
-      privacySettings: {
-        profileVisibility: config.privacySettings.profileVisibility,
-        shareData: config.privacySettings.shareData
+      error: (error) => {
+        console.error('Error al cargar configuración:', error);
+        this.showNotification(this.translateService.instant('CONFIGURATION.ERROR_LOAD'), 'error');
+        this.isLoading = false;
+
+        // Crear configuración por defecto en caso de error
+        this.configuration = new Configuration({
+          userId: this.currentUserId,
+          userType: 'businessman',
+          language: 'es', // Cambiado a código de idioma
+          batchCodeFormat: 'automatic',
+          viewMode: 'light',
+          createdAt: new Date().toISOString()
+        });
       }
     });
   }
 
   saveConfiguration(): void {
-    if (this.configForm.invalid) {
-      return;
-    }
+    if (!this.configuration) return;
 
-    this.isSaving = true;
-    this.saveSuccess = false;
-    this.saveError = false;
+    this.isLoading = true;
 
-    // Update configuration with form values
-    const updatedConfig = new Configuration(this.userId, this.userRole, {
-      ...this.configuration,
-      ...this.configForm.value,
-      lastUpdated: new Date()
-    });
+    // Actualizar fecha
+    this.configuration.updatedAt = new Date().toISOString();
 
-    // Save configuration
-    this.configService.saveConfiguration(updatedConfig)
-      .subscribe({
-        next: (savedConfig) => {
-          this.configuration = savedConfig;
-          this.isSaving = false;
-          this.saveSuccess = true;
-          setTimeout(() => this.saveSuccess = false, 3000);
+    if (this.configuration.id) {
+      // Actualizar configuración existente
+      this.configurationService.update(this.configuration.id, this.configuration).subscribe({
+        next: () => {
+          this.showNotification(this.translateService.instant('CONFIGURATION.SUCCESS_SAVE'), 'success');
+          this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error saving configuration:', error);
-          this.isSaving = false;
-          this.saveError = true;
-          setTimeout(() => this.saveError = false, 3000);
+          console.error('Error al guardar configuración:', error);
+          this.showNotification(this.translateService.instant('CONFIGURATION.ERROR_SAVE'), 'error');
+          this.isLoading = false;
         }
       });
+    } else {
+      // Crear nueva configuración
+      this.configurationService.create(this.configuration).subscribe({
+        next: (config) => {
+          this.configuration = config;
+          this.showNotification(this.translateService.instant('CONFIGURATION.SUCCESS_SAVE'), 'success');
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error al crear configuración:', error);
+          this.showNotification(this.translateService.instant('CONFIGURATION.ERROR_SAVE'), 'error');
+          this.isLoading = false;
+        }
+      });
+    }
   }
 
-  resetConfiguration(): void {
-    if (confirm('¿Estás seguro de que deseas restablecer la configuración a los valores predeterminados?')) {
-      this.configService.resetConfiguration(this.userId, this.userRole)
-        .subscribe({
-          next: (resetConfig) => {
-            this.configuration = resetConfig;
-            this.updateFormWithConfig(resetConfig);
-            this.saveSuccess = true;
-            setTimeout(() => this.saveSuccess = false, 3000);
-          },
-          error: (error) => {
-            console.error('Error resetting configuration:', error);
-            this.saveError = true;
-            setTimeout(() => this.saveError = false, 3000);
-          }
-        });
-    }
+  cancel(): void {
+    // Recargar la configuración original
+    this.loadConfiguration();
+  }
+
+  // Método auxiliar para mostrar notificaciones
+  showNotification(message: string, type: 'success' | 'error' | 'warning' | 'info'): void {
+    this.notification = {
+      show: true,
+      message,
+      type
+    };
   }
 }

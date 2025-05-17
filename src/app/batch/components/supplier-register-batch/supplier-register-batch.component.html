@@ -1,4 +1,3 @@
-<!-- supplier-register-batch.component.html -->
 <div class="container">
   <!-- Pestañas superiores -->
   <div class="tab-navigation">
@@ -6,43 +5,43 @@
       class="tab-button"
       [class.active]="activeTab === 'pending'"
       (click)="setActiveTab('pending')">
-      Lotes Pendientes
+      {{ 'BATCH_TABS.PENDING_BATCHES' | translate }}
     </div>
     <div
       class="tab-button"
       [class.active]="activeTab === 'register'"
       (click)="setActiveTab('register')">
-      Registrar Envío
+      {{ 'BATCH_TABS.REGISTER_SHIPPING' | translate }}
     </div>
   </div>
 
   <!-- Contenido de Lotes Pendientes -->
   <div *ngIf="activeTab === 'pending'" class="tab-content">
-    <h2>Lotes Pendientes de Envío</h2>
+    <h2>{{ 'BATCH_TABS.PENDING_BATCHES' | translate }}</h2>
 
     <div *ngIf="isLoading" class="loading">
-      Cargando lotes pendientes...
+      {{ 'COMMON.LOADING' | translate }}
     </div>
 
     <div *ngIf="!isLoading && pendingBatches.length === 0" class="empty-state">
-      <p>No tienes lotes pendientes de envío.</p>
+      <p>{{ 'COMMON.NO_DATA' | translate }}</p>
     </div>
 
     <div *ngIf="!isLoading && pendingBatches.length > 0" class="batches-grid">
       <div *ngFor="let batch of pendingBatches" class="batch-card" (click)="selectBatch(batch)">
         <div class="batch-header">
-          <h3>Código: {{ batch.code }}</h3>
+          <h3>{{ 'BATCH.BATCH_CODE' | translate }}: {{ batch.code }}</h3>
           <span class="batch-status" [ngClass]="batch.status.toLowerCase().replace(' ', '-')">{{ batch.status }}</span>
         </div>
         <div class="batch-details">
-          <p><strong>Cliente:</strong> {{ batch.client }}</p>
-          <p><strong>Tipo de tela:</strong> {{ batch.fabricType }}</p>
-          <p><strong>Color:</strong> {{ batch.color }}</p>
-          <p><strong>Cantidad:</strong> {{ batch.quantity }}</p>
-          <p><strong>Fecha solicitada:</strong> {{ batch.date | date:'dd/MM/yyyy' }}</p>
+          <p><strong>{{ 'BATCH.CLIENT' | translate }}:</strong> {{ batch.client }}</p>
+          <p><strong>{{ 'BATCH.FABRIC_TYPE' | translate }}:</strong> {{ batch.fabricType }}</p>
+          <p><strong>{{ 'BATCH.COLOR' | translate }}:</strong> {{ batch.color }}</p>
+          <p><strong>{{ 'BATCH.QUANTITY' | translate }}:</strong> {{ batch.quantity }}</p>
+          <p><strong>{{ 'BATCH.DATE' | translate }}:</strong> {{ batch.date | date:'dd/MM/yyyy' }}</p>
         </div>
         <app-button
-          label="Procesar Lote"
+          label="{{ 'COMMON.PROCESS' | translate }}"
           icon="send"
           variant="primary"
           (click)="selectBatch(batch)">
@@ -53,12 +52,12 @@
 
   <!-- Contenido de Registrar Envío -->
   <div *ngIf="activeTab === 'register'" class="tab-content">
-    <h2>Procesar Lote</h2>
+    <h2>{{ 'BATCH_TABS.PROCESS_BATCH' | translate }}</h2>
 
     <div *ngIf="!selectedBatch" class="empty-state">
-      <p>Selecciona un lote pendiente para procesarlo.</p>
+      <p>{{ 'BATCH_TABS.SELECT_PENDING' | translate }}</p>
       <app-button
-        label="Ver Lotes Pendientes"
+        label="{{ 'BATCH_TABS.VIEW_PENDING' | translate }}"
         icon="list"
         variant="primary"
         (click)="setActiveTab('pending')">
@@ -68,7 +67,7 @@
     <form *ngIf="selectedBatch" [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container">
       <div class="form-group">
         <app-input
-          label="Código del Lote"
+          label="{{ 'BATCH.BATCH_CODE' | translate }}"
           type="text"
           [disabled]="true"
           [fullWidth]="true"
@@ -78,7 +77,7 @@
 
       <div class="form-group">
         <app-input
-          label="Cliente"
+          label="{{ 'BATCH.CLIENT' | translate }}"
           type="text"
           [disabled]="true"
           [fullWidth]="true"
@@ -88,7 +87,7 @@
 
       <div class="form-group">
         <app-input
-          label="Tipo de tela"
+          label="{{ 'BATCH.FABRIC_TYPE' | translate }}"
           type="text"
           [disabled]="true"
           [fullWidth]="true"
@@ -98,7 +97,7 @@
 
       <div class="form-group">
         <app-input
-          label="Color"
+          label="{{ 'BATCH.COLOR' | translate }}"
           type="text"
           [disabled]="true"
           [fullWidth]="true"
@@ -108,7 +107,7 @@
 
       <div class="form-group">
         <app-input
-          label="Cantidad"
+          label="{{ 'BATCH.QUANTITY' | translate }}"
           type="number"
           [disabled]="true"
           [fullWidth]="true"
@@ -118,7 +117,7 @@
 
       <div class="form-group">
         <app-input
-          label="Precio"
+          label="{{ 'BATCH.PRICE' | translate }}"
           type="number"
           [disabled]="true"
           [fullWidth]="true"
@@ -128,7 +127,7 @@
 
       <div class="form-group full-width">
         <app-input
-          label="Dirección de entrega"
+          label="{{ 'BATCH.ADDRESS' | translate }}"
           type="text"
           [disabled]="true"
           [fullWidth]="true"
@@ -138,7 +137,7 @@
 
       <div class="form-group">
         <app-input
-          label="Fecha de solicitud"
+          label="{{ 'BATCH.REGISTER_DATE' | translate }}"
           type="date"
           [disabled]="true"
           [fullWidth]="true"
@@ -147,7 +146,7 @@
       </div>
 
       <div class="form-group full-width">
-        <label>Estado del Lote</label>
+        <label>{{ 'BATCH.STATUS' | translate }}</label>
         <app-input
           type="select"
           [options]="availableStatuses"
@@ -155,12 +154,12 @@
           formControlName="status"
           placeholder="Selecciona un estado para el lote">
         </app-input>
-        <small>Selecciona el nuevo estado para este lote</small>
+        <small>{{ 'BATCH.SELECT_STATUS' | translate }}</small>
       </div>
 
       <div class="form-group full-width">
         <app-input
-          label="Observaciones del cliente"
+          label="{{ 'BATCH.CLIENT_OBSERVATIONS' | translate }}"
           type="textarea"
           [disabled]="true"
           [fullWidth]="true"
@@ -170,7 +169,7 @@
 
       <div class="form-group full-width">
         <app-input
-          label="Observaciones adicionales"
+          label="{{ 'BATCH.ADDITIONAL_COMMENTS' | translate }}"
           type="textarea"
           [fullWidth]="true"
           formControlName="additionalComments"
@@ -179,9 +178,9 @@
       </div>
 
       <div class="form-group full-width">
-        <label>Evidencia del envío</label>
+        <label>{{ 'BATCH.SENDING_EVIDENCE' | translate }}</label>
         <app-input
-          label="Subir imagen"
+          label="{{ 'BATCH.UPLOAD_IMAGE' | translate }}"
           type="file"
           [fullWidth]="true"
           formControlName="imageUrl"
@@ -191,16 +190,16 @@
 
         <!-- Vista previa de la imagen -->
         <div *ngIf="imagePreview" class="image-preview">
-          <h4>Vista previa:</h4>
-          <img [src]="imagePreview" alt="Vista previa" class="preview-image">
+          <h4>{{ 'BATCH.PREVIEW' | translate }}:</h4>
+          <img [src]="imagePreview" alt="{{ 'BATCH.PREVIEW' | translate }}" class="preview-image">
         </div>
 
-        <small>Sube una imagen como evidencia del envío</small>
+        <small>{{ 'BATCH.UPLOAD_EVIDENCE_HELP' | translate }}</small>
       </div>
 
       <div class="button-group">
         <app-button
-          label="Cancelar"
+          label="{{ 'COMMON.CANCEL' | translate }}"
           icon="close"
           variant="secondary"
           size="normal"
@@ -208,7 +207,7 @@
         </app-button>
 
         <app-button
-          label="Procesar Lote"
+          label="{{ 'COMMON.PROCESS' | translate }}"
           icon="send"
           variant="primary"
           size="normal"
