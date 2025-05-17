@@ -9,5 +9,6 @@ export const environment = {
   businessSupplierRequests: '/businessSupplierRequests',
   supplierReviewEndpointPath:'/supplierReviews',
   observationEndpointPath: '/observation',
+  configurationEndpointPath: '/configuration',
 };
 

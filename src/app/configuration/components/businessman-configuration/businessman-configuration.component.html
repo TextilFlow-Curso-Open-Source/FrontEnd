@@ -1,88 +1,68 @@
+<!-- src/app/configuration/components/businessman-configuration/businessman-configuration.component.html -->
+
 <div class="configuration-container">
-  <h2>Configuración General</h2>
-  
-  <div *ngIf="saveSuccess" class="alert alert-success">
-    Configuración guardada correctamente
-  </div>
-  
-  <div *ngIf="saveError" class="alert alert-danger">
-    Error al guardar la configuración. Por favor, inténtalo de nuevo.
+  <div *ngIf="isLoading" class="loading-indicator">
+    {{ 'COMMON.LOADING' | translate }}
   </div>
 
-  <form [formGroup]="configForm" (ngSubmit)="saveConfiguration()">
-    <div class="config-section">
-      <h3>Apariencia</h3>
-      <div class="form-group">
-        <label for="theme">Tema:</label>
-        <select id="theme" formControlName="theme" class="form-control">
-          <option value="light">Claro</option>
-          <option value="dark">Oscuro</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label for="language">Idioma:</label>
-        <select id="language" formControlName="language" class="form-control">
-          <option value="es">Español</option>
-          <option value="en">Inglés</option>
-        </select>
+  <div *ngIf="!isLoading && configuration">
+    <h2>{{ 'CONFIGURATION.TITLE' | translate }}</h2>
+
+    <div class="form-group">
+      <label>{{ 'CONFIGURATION.LANGUAGE' | translate }}</label>
+      <div class="language-options">
+        <div class="language-option" *ngFor="let lang of languageOptions">
+          <button
+            [class.active]="configuration.language === lang.value"
+            (click)="changeLanguage(lang.value)"
+            class="language-button">
+            {{ lang.label }}
+          </button>
+        </div>
       </div>
     </div>
 
-    <div class="config-section">
-      <h3>Notificaciones</h3>
-      <div class="form-check">
-        <input type="checkbox" id="emailNotifications" formControlName="emailNotifications" class="form-check-input">
-        <label for="emailNotifications" class="form-check-label">Recibir notificaciones por correo electrónico</label>
-      </div>
-      
-      <div class="form-check">
-        <input type="checkbox" id="pushNotifications" formControlName="pushNotifications" class="form-check-input">
-        <label for="pushNotifications" class="form-check-label">Recibir notificaciones push</label>
-      </div>
+    <div class="form-group">
+      <app-input
+        [label]="'CONFIGURATION.BATCH_CODE' | translate"
+        type="select"
+        [options]="batchCodeOptions"
+        [(ngModel)]="configuration.batchCodeFormat"
+        [fullWidth]="true">
+      </app-input>
     </div>
 
-    <div class="config-section" formGroupName="dashboardLayout">
-      <h3>Diseño del Panel</h3>
-      <div class="form-check">
-        <input type="checkbox" id="showWelcomeMessage" formControlName="showWelcomeMessage" class="form-check-input">
-        <label for="showWelcomeMessage" class="form-check-label">Mostrar mensaje de bienvenida</label>
-      </div>
-      
-      <div class="form-group">
-        <label for="defaultView">Vista predeterminada:</label>
-        <select id="defaultView" formControlName="defaultView" class="form-control">
-          <option value="list">Lista</option>
-          <option value="grid">Cuadrícula</option>
-          <option value="calendar">Calendario</option>
-        </select>
-      </div>
+    <div class="form-group">
+      <app-input
+        [label]="'CONFIGURATION.VIEW_MODE' | translate"
+        type="select"
+        [options]="viewModeOptions"
+        [(ngModel)]="configuration.viewMode"
+        [fullWidth]="true">
+      </app-input>
     </div>
 
-    <div class="config-section" formGroupName="privacySettings">
-      <h3>Privacidad</h3>
-      <div class="form-group">
-        <label for="profileVisibility">Visibilidad del perfil:</label>
-        <select id="profileVisibility" formControlName="profileVisibility" class="form-control">
-          <option value="public">Público</option>
-          <option value="private">Privado</option>
-          <option value="contacts">Solo contactos</option>
-        </select>
-      </div>
-      
-      <div class="form-check">
-        <input type="checkbox" id="shareData" formControlName="shareData" class="form-check-input">
-        <label for="shareData" class="form-check-label">Compartir datos de uso anónimos para mejorar el servicio</label>
-      </div>
-    </div>
+    <div class="button-container">
+      <app-button
+        [label]="'COMMON.SAVE' | translate"
+        variant="primary"
+        [loading]="isLoading"
+        (click)="saveConfiguration()">
+      </app-button>
 
-    <div class="button-group">
-      <button type="submit" class="btn btn-primary" [disabled]="configForm.invalid || isSaving">
-        {{ isSaving ? 'Guardando...' : 'Guardar Configuración' }}
-      </button>
-      <button type="button" class="btn btn-secondary" (click)="resetConfiguration()">
-        Restablecer Valores Predeterminados
-      </button>
+      <app-button
+        [label]="'COMMON.CANCEL' | translate"
+        variant="secondary"
+        [disabled]="isLoading"
+        (click)="cancel()">
+      </app-button>
     </div>
-  </form>
+  </div>
+
+  <app-notification
+    *ngIf="notification.show"
+    [message]="notification.message"
+    [type]="notification.type"
+    (close)="notification.show = false">
+  </app-notification>
 </div>

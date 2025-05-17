@@ -7,6 +7,7 @@ import { BusinessmanService } from '../../../businessman/services/businessman.se
 import { AuthService } from '../../../auth/services/auth.service';
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
+import {TranslateModule} from "@ngx-translate/core";
 
 @Component({
   selector: 'app-business-request',
@@ -14,7 +15,8 @@ import { AppNotificationComponent } from '../../../core/components/app-notificat
   imports: [
     CommonModule,
     AppButtonComponent,
-    AppNotificationComponent
+    AppNotificationComponent,
+    TranslateModule
   ],
   templateUrl: './business-request.component.html',
   styleUrls: ['./business-request.component.css']

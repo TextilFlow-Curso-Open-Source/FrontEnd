@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {TranslateModule} from '@ngx-translate/core';
 
 interface LotSummary {
   pending: number;
@@ -15,7 +16,7 @@ interface Notification {
 @Component({
   selector: 'app-businessman-home',
   standalone:true,
-  imports: [CommonModule],
+  imports: [CommonModule,TranslateModule],
   templateUrl: './businessman-home.component.html',
   styleUrl: './businessman-home.component.css'
 })

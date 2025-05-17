@@ -1,32 +1,32 @@
 <div class="dashboard-container">
   <div class="welcome-section">
-    <h1>Bienvenido, {{ supplierName }}</h1>
-    <p>Aquí tienes un resumen de tu actividad actual en TextilFlow.</p>
+    <h1>{{ 'SUPPLIER.WELCOME' | translate }}, {{ supplierName }}</h1>
+    <p>{{ 'SUPPLIER.ACTIVITY_SUMMARY' | translate }}</p>
   </div>
 
   <div class="stats-container">
     <div class="stat-card">
-      <h2>Lotes recibidos hoy</h2>
-      <p class="stat-number">{{ lotSummary.pending }} lotes</p>
-      <button class="btn-details" (click)="viewDetails('recibidos')">Ver detalles</button>
+      <h2>{{ 'BATCH.RECEIVED_TODAY' | translate }}</h2>
+      <p class="stat-number">{{ lotSummary.pending }} {{ 'BATCH.BATCHES' | translate }}</p>
+      <button class="btn-details" (click)="viewDetails('recibidos')">{{ 'COMMON.VIEW_DETAILS' | translate }}</button>
     </div>
 
     <div class="stat-card">
-      <h2>Pendientes por revisar</h2>
-      <p class="stat-number">{{ lotSummary.sent }} lotes</p>
-      <button class="btn-details" (click)="viewDetails('Pendientes')">Ver detalles</button>
+      <h2>{{ 'BATCH.PENDING_REVIEW' | translate }}</h2>
+      <p class="stat-number">{{ lotSummary.sent }} {{ 'BATCH.BATCHES' | translate }}</p>
+      <button class="btn-details" (click)="viewDetails('Pendientes')">{{ 'COMMON.VIEW_DETAILS' | translate }}</button>
     </div>
 
     <div class="stat-card">
-      <h2>Aprovados</h2>
-      <p class="stat-number">{{ lotSummary.confirmed }} lotes</p>
-      <button class="btn-details" (click)="viewDetails('Aprovados')">Ver detalles</button>
+      <h2>{{ 'BATCH_STATUS.APPROVED' | translate }}</h2>
+      <p class="stat-number">{{ lotSummary.confirmed }} {{ 'BATCH.BATCHES' | translate }}</p>
+      <button class="btn-details" (click)="viewDetails('Aprovados')">{{ 'COMMON.VIEW_DETAILS' | translate }}</button>
     </div>
 
     <div class="stat-card">
-      <h2>Rechazados</h2>
-      <p class="stat-number">{{ lotSummary.confirmed }} lotes</p>
-      <button class="btn-details" (click)="viewDetails('Rechazados')">Ver detalles</button>
+      <h2>{{ 'BATCH_STATUS.REJECTED' | translate }}</h2>
+      <p class="stat-number">{{ lotSummary.confirmed }} {{ 'BATCH.BATCHES' | translate }}</p>
+      <button class="btn-details" (click)="viewDetails('Rechazados')">{{ 'COMMON.VIEW_DETAILS' | translate }}</button>
     </div>
   </div>
 
@@ -34,7 +34,7 @@
     <div class="notifications-header">
       <div class="notifications-title">
         <span class="notification-icon">ⓘ</span>
-        <h3>Notificaciones recientes</h3>
+        <h3>{{ 'SUPPLIER.RECENT_NOTIFICATIONS' | translate }}</h3>
       </div>
       <button class="close-btn" (click)="closeNotifications()">✕</button>
     </div>
@@ -43,6 +43,6 @@
       <li *ngFor="let notification of notifications">{{ notification.message }}</li>
     </ul>
 
-    <button class="btn-more-details" (click)="viewMoreNotifications()">Evaluar ahora</button>
+    <button class="btn-more-details" (click)="viewMoreNotifications()">{{ 'BATCH.EVALUATE_NOW' | translate }}</button>
   </div>
 </div>
