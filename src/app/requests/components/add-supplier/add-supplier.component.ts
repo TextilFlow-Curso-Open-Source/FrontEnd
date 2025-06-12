@@ -1,4 +1,4 @@
-// add-supplier.component.ts (con las correcciones)
+// /src/app/requests/components/add-supplier/add-supplier.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +11,7 @@ import { AppButtonComponent } from '../../../core/components/app-button/app-butt
 import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
 import { BatchService } from '../../../batch/services/batch.service.service';
 import { Batch, BatchStatus, STATUS } from '../../../batch/models/batch.entity';
-import {TranslateModule} from "@ngx-translate/core";
+import { TranslateModule } from "@ngx-translate/core";
 
 @Component({
   selector: 'app-add-supplier',
@@ -38,8 +38,8 @@ export class AddSupplierComponent implements OnInit {
   isLoading: boolean = false;
 
   // Selección y detalles de proveedor
-  selectedSupplierId: number | null = null;
-  currentUserId: number = 0;
+  selectedSupplierId: string | null = null;
+  currentUserId: string = '';
   currentUserName: string = '';
   isBatchSubmitting: boolean = false;
 
@@ -57,8 +57,8 @@ export class AddSupplierComponent implements OnInit {
   newBatch: Batch = new Batch({
     code: '',
     client: '',
-    businessmanId: 0,
-    supplierId: 0,
+    businessmanId: '',
+    supplierId: '',
     fabricType: '',
     color: '',
     quantity: 0,
@@ -73,17 +73,17 @@ export class AddSupplierComponent implements OnInit {
   // Reseñas
   reviews: any[] = [];
   showReviewForm: boolean = false;
-  expandedSupplierId: number | null = null;
+  expandedSupplierId: string | null = null;
   newReview = {
     rating: 5,
     comment: ''
   };
   canAddReview: boolean = false;
-  selectedReviewSupplierId: number | null = null;
+  selectedReviewSupplierId: string | null = null;
 
   // Nuevo - Para la edición de reseñas
   isEditingReview: boolean = false;
-  editingReviewId: number | null = null;
+  editingReviewId: string | null = null;
   isSubmitting: boolean = false; // Evitar envío duplicado
 
   // Datos para mostrar en las pestañas
@@ -112,6 +112,9 @@ export class AddSupplierComponent implements OnInit {
       this.currentUserId = user.id;
       this.currentUserName = user.name || 'Usuario';
       this.newBatch.businessmanId = this.currentUserId;
+    } else {
+      console.error('No hay usuario autenticado o falta ID');
+      this.authService.logout();
     }
   }
 
@@ -132,44 +135,57 @@ export class AddSupplierComponent implements OnInit {
       // Filtrar solo las solicitudes aceptadas
       const acceptedRequests = requests.filter(req => req.status === 'accepted');
 
-      // Luego cargar todos los proveedores
-      this.supplierService.getAllSuppliers((suppliers: any[]) => {
-        this.suppliers = suppliers;
+      // Luego cargar todos los proveedores - CORREGIDO: sin callback
+      this.supplierService.getAllSuppliers().subscribe({
+        next: (suppliers: any[]) => {
+          this.suppliers = suppliers;
 
-        // Para cada proveedor, cargar sus detalles
-        this.suppliers.forEach(supplier => {
-          this.supplierService.getProfileByUserId(supplier.id, (profile: any) => {
-            supplier.profile = profile;
+          // Para cada proveedor, cargar sus detalles - CORREGIDO: sin callback
+          this.suppliers.forEach(supplier => {
+            this.supplierService.getProfileByUserId(supplier.id).subscribe({
+              next: (profile: any) => {
+                // Asignar el perfil directamente (no es un array)
+                supplier.profile = profile || null;
 
-            // Cargar calificaciones
-            this.reviewService.calculateAverageRating(supplier.id, (avgRating: number, totalReviews: number) => {
-              supplier.averageRating = avgRating;
-              supplier.totalReviews = totalReviews;
+                // Cargar calificaciones - mantener callback porque reviewService aún lo usa
+                this.reviewService.calculateAverageRating(supplier.id, (avgRating: number, totalReviews: number) => {
+                  supplier.averageRating = avgRating;
+                  supplier.totalReviews = totalReviews;
+                });
+              },
+              error: (error) => {
+                console.error('Error al cargar perfil:', error);
+                supplier.profile = null;
+              }
             });
           });
-        });
 
-        // Separar los proveedores conectados de los disponibles
-        this.connectedSuppliers = [];
-        this.availableSuppliers = [];
+          // Separar los proveedores conectados de los disponibles
+          this.connectedSuppliers = [];
+          this.availableSuppliers = [];
 
-        // Para cada solicitud aceptada, buscar el proveedor correspondiente
-        acceptedRequests.forEach(request => {
-          const connectedSupplier = this.suppliers.find(s => s.id === request.supplierId);
-          if (connectedSupplier) {
-            // Añadir el request a los detalles del proveedor para referencia
-            connectedSupplier.request = request;
-            this.connectedSuppliers.push(connectedSupplier);
-          }
-        });
+          // Para cada solicitud aceptada, buscar el proveedor correspondiente
+          acceptedRequests.forEach(request => {
+            const connectedSupplier = this.suppliers.find(s => s.id === request.supplierId);
+            if (connectedSupplier) {
+              // Añadir el request a los detalles del proveedor para referencia
+              connectedSupplier.request = request;
+              this.connectedSuppliers.push(connectedSupplier);
+            }
+          });
 
-        // Los proveedores disponibles son aquellos que no están conectados
-        this.availableSuppliers = this.suppliers.filter(supplier =>
-          !this.connectedSuppliers.some(connectedSupplier => connectedSupplier.id === supplier.id)
-        );
+          // Los proveedores disponibles son aquellos que no están conectados
+          this.availableSuppliers = this.suppliers.filter(supplier =>
+            !this.connectedSuppliers.some(connectedSupplier => connectedSupplier.id === supplier.id)
+          );
 
-        this.updateDisplayedSuppliers();
-        this.isLoading = false;
+          this.updateDisplayedSuppliers();
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar proveedores:', error);
+          this.isLoading = false;
+        }
       });
     });
   }
@@ -218,7 +234,7 @@ export class AddSupplierComponent implements OnInit {
     this.updateDisplayedSuppliers();
   }
 
-  selectSupplier(supplierId: number) {
+  selectSupplier(supplierId: string) {
     // Si ya está seleccionado, lo deseleccionamos
     if (this.selectedSupplierId === supplierId) {
       this.selectedSupplierId = null;
@@ -233,7 +249,7 @@ export class AddSupplierComponent implements OnInit {
   }
 
   // Método para expandir un proveedor en la pestaña "Distribuidores Actuales"
-  toggleSupplierExpansion(supplierId: number) {
+  toggleSupplierExpansion(supplierId: string) {
     if (this.expandedSupplierId === supplierId) {
       this.expandedSupplierId = null;
     } else {
@@ -246,7 +262,7 @@ export class AddSupplierComponent implements OnInit {
     }
   }
 
-  loadReviews(supplierId: number) {
+  loadReviews(supplierId: string) {
     this.reviewService.getReviewsForSupplier(supplierId, (reviews: any[]) => {
       this.reviews = reviews;
       // Marcar las reseñas que pertenecen al usuario actual
@@ -256,13 +272,13 @@ export class AddSupplierComponent implements OnInit {
     });
   }
 
-  checkIfCanAddReview(supplierId: number) {
+  checkIfCanAddReview(supplierId: string) {
     this.reviewService.hasBusinessmanReviewed(supplierId, this.currentUserId, (hasReviewed: boolean) => {
       this.canAddReview = !hasReviewed;
     });
   }
 
-  openReviewForm(supplierId: number) {
+  openReviewForm(supplierId: string) {
     this.selectedReviewSupplierId = supplierId;
     this.showReviewForm = true;
     this.isEditingReview = false;
@@ -315,7 +331,7 @@ export class AddSupplierComponent implements OnInit {
         next: () => {
           this.showNotification('Reseña actualizada correctamente', 'success');
           this.closeReviewForm();
-          this.loadReviews(this.selectedReviewSupplierId as number);
+          this.loadReviews(this.selectedReviewSupplierId as string);
           this.updateSupplierRating();
           this.isLoading = false;
           this.isSubmitting = false;
@@ -339,7 +355,7 @@ export class AddSupplierComponent implements OnInit {
         next: () => {
           this.showNotification('Reseña agregada correctamente', 'success');
           this.closeReviewForm();
-          this.loadReviews(this.selectedReviewSupplierId as number);
+          this.loadReviews(this.selectedReviewSupplierId as string);
           this.updateSupplierRating();
           this.canAddReview = false;
           this.isLoading = false;

@@ -111,17 +111,11 @@ export class UserRegisterComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.authService.register(this.registerForm.value, (user: any) => {
-      if (user) {
-        // Al registrarse exitosamente, iniciar sesión
-        this.authService.login({
-          email: this.registerForm.value.email,
-          password: this.registerForm.value.password
-        });
-      } else {
-        this.isLoading = false;
-        this.errorMessage = 'Error al registrar usuario. Por favor, intente nuevamente.';
-      }
-    });
+    // AuthService ahora maneja todo automáticamente
+    // Registra el usuario, inicia sesión y redirige
+    this.authService.register(this.registerForm.value);
+
+    // El loading se mantendrá hasta que el usuario sea redirigido
+    // AuthService maneja todo internamente
   }
 }

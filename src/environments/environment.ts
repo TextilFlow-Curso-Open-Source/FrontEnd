@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  serverBaseUrl: 'http://localhost:3000', // Usar la URL local con el prefijo de la API
+  serverBaseUrl: 'https://6827756e6b7628c529106db9.mockapi.io',
   authEndpointPath: '',
   userEndpointPath: '/users',
   batchesEndpointPath: '/batches',

@@ -58,7 +58,7 @@ export class SupplierBatchComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  currentUserId!: number;
+  currentUserId!: string;
 
   constructor(
     private batchService: BatchService,
@@ -67,11 +67,16 @@ export class SupplierBatchComponent implements OnInit {
     private fb: FormBuilder
   ) {}
 
+
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
+    if (currentUser && currentUser.id) {
       this.currentUserId = currentUser.id;
       this.loadBatches();
+    } else {
+      console.error('No hay usuario autenticado o falta ID');
+      // Redirigir al login si no hay usuario
+      this.authService.logout();
     }
   }
 

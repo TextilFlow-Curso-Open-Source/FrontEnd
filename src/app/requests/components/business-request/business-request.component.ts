@@ -29,10 +29,10 @@ export class BusinessRequestsComponent implements OnInit { // Cambiado a plural
   requests: any[] = [];
   requestsWithDetails: any[] = [];
   isLoading = false;
-  currentUserId = 0;
+  currentUserId = '';
 
   // ID del proveedor seleccionado para expandir
-  selectedBusinessId: number | null = null;
+  selectedBusinessId: string | null = null;
 
   // Notificación
   notification = {
@@ -94,17 +94,29 @@ export class BusinessRequestsComponent implements OnInit { // Cambiado a plural
         // Para cada solicitud, obtener información del empresario
         let loadedCount = 0;
         this.requests.forEach(request => {
-          this.businessmanService.getProfileByUserId(request.businessmanId, (profile: any) => {
-            if (profile) {
-              this.requestsWithDetails.push({
-                ...request,
-                businessmanProfile: profile
-              });
-            }
+          // CORREGIDO: Cambiar callback por Observable
+          this.businessmanService.getProfileByUserId(request.businessmanId).subscribe({
+            next: (profile: any) => {
+              // Asignar el perfil directamente (no es un array)
+              if (profile) {
+                this.requestsWithDetails.push({
+                  ...request,
+                  businessmanProfile: profile
+                });
+              }
 
-            loadedCount++;
-            if (loadedCount === this.requests.length) {
-              this.isLoading = false;
+              loadedCount++;
+              if (loadedCount === this.requests.length) {
+                this.isLoading = false;
+              }
+            },
+            error: (error) => {
+              console.error('Error al cargar perfil del empresario:', error);
+
+              loadedCount++;
+              if (loadedCount === this.requests.length) {
+                this.isLoading = false;
+              }
             }
           });
         });
@@ -117,7 +129,7 @@ export class BusinessRequestsComponent implements OnInit { // Cambiado a plural
     });
   }
 
-  updateRequestStatus(requestId: number, status: 'accepted' | 'rejected') {
+  updateRequestStatus(requestId: string, status: 'accepted' | 'rejected') {
     if (this.isLoading) {
       return;
     }
@@ -144,7 +156,7 @@ export class BusinessRequestsComponent implements OnInit { // Cambiado a plural
     });
   }
 
-  toggleDetails(businessId: number) {
+  toggleDetails(businessId: string) {
     if (this.selectedBusinessId === businessId) {
       this.selectedBusinessId = null;
     } else {

@@ -1,8 +1,8 @@
 // src/app/configuration/models/configuration.entity.ts
 
 export class Configuration {
-  id?: number;
-  userId: number;
+  id?: string;
+  userId: string;
   userType: 'businessman' | 'supplier';
   language: string;
   batchCodeFormat: 'automatic' | 'manual';
@@ -11,8 +11,8 @@ export class Configuration {
   updatedAt?: string;
 
   constructor(data: {
-    id?: number;
-    userId: number;
+    id?: string;
+    userId: string;
     userType: 'businessman' | 'supplier';
     language: string;
     batchCodeFormat: 'automatic' | 'manual';
