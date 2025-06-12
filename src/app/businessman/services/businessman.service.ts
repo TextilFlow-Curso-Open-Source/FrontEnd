@@ -1,34 +1,53 @@
 // /src/app/businessman/services/businessman.service.ts
 import { Injectable } from '@angular/core';
 import { BaseService } from '../../core/services/base.service.service';
-import { Businessman } from '../models/businessman.entity'; // Cambié entity por model para coincidir con tus archivos
+import { Businessman } from '../models/businessman.entity';
+import { AuthService } from '../../auth/services/auth.service';
 import { environment } from '../../../environments/environment';
-import { Observable, map } from 'rxjs';
+import { map } from 'rxjs';
 
-/**
- * API endpoint path for businessmen obtained from environment configuration.
- */
-const businessmanResourceEndpointPath = environment.businessmanEndpointPath;
-
-/**
- * Service responsible for managing businessman-related operations.
- */
 @Injectable({
   providedIn: 'root'
 })
 export class BusinessmanService extends BaseService<Businessman> {
-  constructor() {
+  constructor(private authService: AuthService) {
     super();
-    this.resourceEndpoint = businessmanResourceEndpointPath;
+    this.resourceEndpoint = environment.businessmanEndpointPath;
   }
 
   /**
-   * Crea un nuevo perfil de empresario asociado a un usuario existente
-   * @param userId ID del usuario al que se asociará el perfil
+   * Crea un nuevo perfil de empresario usando el mismo ID del usuario
+   * @param userId ID del usuario (será el mismo ID para el businessman)
    */
-  createProfile(userId: number): void {
-    const newBusinessman = {
-      userId: userId,
+  createProfile(userId: string) {
+    const currentUser = this.authService.getCurrentUser();
+
+    console.log('Usuario actual obtenido en BusinessmanService:', currentUser);
+    console.log('UserID esperado:', userId);
+
+    if (!currentUser) {
+      console.error('No hay usuario autenticado en el sistema');
+      throw new Error('No hay usuario autenticado en el sistema');
+    }
+
+    if (currentUser.id !== userId) {
+      console.warn(`ID de usuario no coincide. Actual: ${currentUser.id}, Esperado: ${userId}`);
+      if (!currentUser.id) {
+        throw new Error('El usuario actual no tiene ID asignado');
+      }
+    }
+
+    // Crear Businessman con herencia completa usando el MISMO ID
+    const newBusinessman = new Businessman({
+      id: currentUser.id,
+      name: currentUser.name,
+      email: currentUser.email,
+      password: currentUser.password,
+      role: 'businessman',
+      country: currentUser.country,
+      city: currentUser.city,
+      address: currentUser.address,
+      phone: currentUser.phone,
       companyName: "",
       ruc: "",
       businessType: "",
@@ -38,56 +57,46 @@ export class BusinessmanService extends BaseService<Businessman> {
       website: "",
       description: "",
       logo: ""
-    };
+    });
 
-    this.http.post(`${this.serverBaseUrl}${this.resourceEndpoint}`, newBusinessman)
-      .subscribe({
-        next: (response) => console.log('Perfil de empresario creado:', response),
-        error: (error) => console.error('Error al crear perfil de empresario:', error)
-      });
+    console.log('Businessman a crear:', newBusinessman);
+    return this.create(newBusinessman);
   }
 
   /**
-   * Obtiene el perfil de empresario asociado a un ID de usuario
-   * @param userId ID del usuario cuyo perfil se quiere obtener
+   * Obtiene todos los empresarios
    */
-  getProfileByUserId(userId: number, callback?: Function): void {
-    this.http.get<Businessman[]>(`${this.serverBaseUrl}${this.resourceEndpoint}?userId=${userId}`)
-      .subscribe({
-        next: (profiles) => {
-          const profile = profiles && profiles.length > 0 ? profiles[0] : null;
-          if (callback) {
-            callback(profile);
-          }
-        },
-        error: (error) => {
-          console.error('Error al obtener perfil de empresario:', error);
-          if (callback) {
-            callback(null);
-          }
-        }
-      });
+  getAllBusinessmen() {
+    return this.getAll();
   }
 
   /**
-   * Obtiene el perfil de empresario asociado a un ID de usuario como Observable
-   * @param userId ID del usuario cuyo perfil se quiere obtener
-   * @returns Observable con el perfil de empresario
+   * Obtiene el perfil de empresario por email
    */
-  getProfileByUserIdObservable(userId: number): Observable<Businessman | null> {
-    return this.http.get<Businessman[]>(`${this.serverBaseUrl}${this.resourceEndpoint}?userId=${userId}`)
-      .pipe(
-        map(profiles => profiles && profiles.length > 0 ? profiles[0] : null)
-      );
+  getProfileByEmail(email: string) {
+    return this.getAll().pipe(
+      map(businessmen => businessmen.find(b => b.email === email))
+    );
+  }
+
+  /**
+   * Obtiene el perfil de empresario por ID
+   */
+  getProfileById(id: string) {
+    return this.getById(id);
+  }
+
+  /**
+   * Obtiene el perfil de empresario por ID de usuario (alias para compatibilidad)
+   */
+  getProfileByUserId(userId: string) {
+    return this.getProfileById(userId);
   }
 
   /**
    * Actualiza el perfil de un empresario
-   * @param id ID del perfil a actualizar
-   * @param profile Datos actualizados del perfil
-   * @returns Observable con el perfil actualizado
    */
-  updateProfile(id: number, profile: Businessman): Observable<Businessman> {
+  updateProfile(id: string, profile: Businessman) {
     return this.update(id, profile);
   }
 }

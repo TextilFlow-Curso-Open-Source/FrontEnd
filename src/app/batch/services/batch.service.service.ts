@@ -13,15 +13,15 @@ export class BatchService extends BaseService<Batch> {
   constructor() {
     super();
     // Aquí defines el endpoint específico para los lotes
-    this.resourceEndpoint = environment.batchesEndpointPath; // 👈 esto coincide con tu backend o json-server
+    this.resourceEndpoint = environment.batchesEndpointPath;
   }
 
   /**
    * Obtiene los lotes creados por un proveedor específico
-   * @param supplierId ID del proveedor
+   * @param supplierId ID del proveedor (ahora string)
    * @returns Observable con los lotes filtrados
    */
-  getBySupplierId(supplierId: number) {
+  getBySupplierId(supplierId: string) { // CAMBIO: number → string
     return this.http.get<Batch[]>(
       `${this.serverBaseUrl}${this.resourceEndpoint}?supplierId=${supplierId}`,
       this.httpOptions
@@ -33,11 +33,28 @@ export class BatchService extends BaseService<Batch> {
 
   /**
    * Sobrescribe el método update para aceptar actualizaciones parciales
+   * @param id ID del lote (ahora string)
+   * @param resource Datos parciales del lote a actualizar
    */
-  override update(id: any, resource: Partial<Batch>) {
+  override update(id: string, resource: Partial<Batch>) { // CAMBIO: any → string
     return this.http.put<Batch>(
       `${this.resourcePath()}/${id}`,
       JSON.stringify(resource),
+      this.httpOptions
+    ).pipe(
+      retry(2),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Obtiene los lotes asignados a un empresario específico
+   * @param businessmanId ID del empresario
+   * @returns Observable con los lotes filtrados
+   */
+  getByBusinessmanId(businessmanId: string) {
+    return this.http.get<Batch[]>(
+      `${this.serverBaseUrl}${this.resourceEndpoint}?businessmanId=${businessmanId}`,
       this.httpOptions
     ).pipe(
       retry(2),

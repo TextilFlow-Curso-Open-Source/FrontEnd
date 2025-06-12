@@ -1,6 +1,6 @@
-// /src/app/auth/models/user.model.ts
+// /src/app/auth/models/user.entity.ts
 export class User {
-  id: number;
+  id?: string; // ID como string para compatibilidad con MockAPI
   name: string;
   email: string;
   password?: string;
@@ -11,7 +11,7 @@ export class User {
   phone: string;
 
   constructor(user: {
-    id?: number,
+    id?: string,
     name?: string,
     email?: string,
     password?: string,
@@ -21,7 +21,10 @@ export class User {
     address?: string,
     phone?: string
   }) {
-    this.id = user.id || 0;
+    // Solo asignar ID si viene en el constructor (para usuarios existentes)
+    if (user.id) {
+      this.id = user.id;
+    }
     this.name = user.name || '';
     this.email = user.email || '';
     this.password = user.password;

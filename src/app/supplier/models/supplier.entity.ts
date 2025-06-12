@@ -1,7 +1,8 @@
-// /src/app/supplier/models/supplier.model.ts
+// /src/app/supplier/models/supplier.entity.ts
 import { User } from '../../auth/models/user.entity';
 
 export class Supplier extends User {
+  // Solo datos específicos de Supplier
   companyName: string;
   ruc: string;
   specialization: string;
@@ -10,13 +11,12 @@ export class Supplier extends User {
   warehouseLocation: string;
   minimumOrderQuantity: number;
   logo: string;
-  // Nuevos campos para ratings
-  averageRating?: number;
-  totalReviews?: number;
+  averageRating: number;
+  totalReviews: number;
 
   constructor(supplier: {
     // Propiedades base de User
-    id?: number,
+    id?: string, // ID único heredado de User
     name?: string,
     email?: string,
     password?: string,
@@ -34,7 +34,6 @@ export class Supplier extends User {
     warehouseLocation?: string,
     minimumOrderQuantity?: number,
     logo?: string,
-    // Nuevos campos opcionales
     averageRating?: number,
     totalReviews?: number
   }) {
@@ -50,7 +49,6 @@ export class Supplier extends User {
     this.warehouseLocation = supplier.warehouseLocation || '';
     this.minimumOrderQuantity = supplier.minimumOrderQuantity || 0;
     this.logo = supplier.logo || '';
-    // Inicializar nuevos campos
     this.averageRating = supplier.averageRating || 0;
     this.totalReviews = supplier.totalReviews || 0;
   }

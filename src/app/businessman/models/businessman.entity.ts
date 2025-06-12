@@ -1,7 +1,8 @@
-// /src/app/businessman/models/businessman.model.ts
+// /src/app/businessman/models/businessman.entity.ts
 import { User } from '../../auth/models/user.entity';
 
 export class Businessman extends User {
+  // Solo datos específicos de Businessman
   companyName: string;
   ruc: string;
   businessType: string;
@@ -14,7 +15,7 @@ export class Businessman extends User {
 
   constructor(businessman: {
     // Propiedades base de User
-    id?: number,
+    id?: string, // ID único heredado de User
     name?: string,
     email?: string,
     password?: string,

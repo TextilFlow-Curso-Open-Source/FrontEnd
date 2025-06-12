@@ -36,8 +36,8 @@ export class BusinessmanBatchComponent implements OnInit {
   selectedBatch: Batch | null = null;
   isCreatingObservation: boolean = false;
 
-  // Usuario actual
-  currentUserId: number = 0;
+  // Usuario actual - CAMBIO: de number a string
+  currentUserId: string = '';
 
   // Búsqueda
   searchTerm: string = '';
@@ -87,7 +87,7 @@ export class BusinessmanBatchComponent implements OnInit {
         console.log('Registro de observación creado correctamente');
         this.isCreatingObservation = false;
       },
-      error: (error) => {
+      error: (error: any) => { // CAMBIO: Agregar tipo any
         console.error('Error al crear registro de observación:', error);
         this.isCreatingObservation = false;
       }
@@ -97,7 +97,7 @@ export class BusinessmanBatchComponent implements OnInit {
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
     if (user && user.id) {
-      this.currentUserId = user.id;
+      this.currentUserId = user.id; // CAMBIO: Ahora user.id es string
       this.loadBatches();
     }
   }
@@ -130,7 +130,7 @@ export class BusinessmanBatchComponent implements OnInit {
         this.filteredBatches = [...this.batches];
         this.isLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => { // CAMBIO: Agregar tipo any
         console.error('Error al cargar lotes:', error);
         this.showNotification('Error al cargar los lotes', 'error');
         this.isLoading = false;
@@ -184,13 +184,14 @@ export class BusinessmanBatchComponent implements OnInit {
         this.loadBatches();
         this.backToTable();
       },
-      error: (error) => {
+      error: (error: any) => { // CAMBIO: Agregar tipo any
         console.error('Error al aprobar lote:', error);
         this.showNotification('Error al aprobar el lote', 'error');
         this.isLoading = false;
       }
     });
   }
+
   // Mostrar formulario de rechazo
   showRejectForm(): void {
     this.rejectReason = '';
@@ -279,7 +280,7 @@ export class BusinessmanBatchComponent implements OnInit {
         this.loadBatches();
         this.backToTable();
       },
-      error: (error) => {
+      error: (error: any) => { // CAMBIO: Agregar tipo any
         console.error('Error al rechazar lote:', error);
         this.showNotification('Error al rechazar el lote', 'error');
         this.isLoading = false;
@@ -322,5 +323,4 @@ export class BusinessmanBatchComponent implements OnInit {
   triggerFileInput(): void {
     document.getElementById('rejectImage')?.click();
   }
-
 }

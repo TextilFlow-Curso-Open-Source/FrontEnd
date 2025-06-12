@@ -60,7 +60,7 @@ export class SupplierRegisterBatchComponent implements OnInit {
   imagePreview: string = '';
 
   // Usuario actual
-  currentUserId: number = 0;
+  currentUserId: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -242,7 +242,7 @@ export class SupplierRegisterBatchComponent implements OnInit {
     if (!this.selectedBatch) return;
 
     // Obtener el lote completo antes de actualizarlo
-    this.batchService.getById(this.selectedBatch.id as number).subscribe({
+    this.batchService.getById(this.selectedBatch.id as string).subscribe({
       next: (originalBatch: Batch) => {
         // Combinar el lote original con los campos a actualizar
         const updatedBatch: Batch = {
@@ -257,7 +257,7 @@ export class SupplierRegisterBatchComponent implements OnInit {
         }
 
         // Actualizar el lote completo
-        this.batchService.update(this.selectedBatch?.id as number, updatedBatch).subscribe({
+        this.batchService.update(this.selectedBatch?.id as string, updatedBatch).subscribe({
           next: () => {
             this.showNotification(`Lote actualizado y marcado como ${newStatus} correctamente`, 'success');
             this.loadPendingBatches();

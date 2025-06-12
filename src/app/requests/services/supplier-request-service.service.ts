@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { BaseService } from '../../core/services/base.service.service';
 import { BusinessSupplierRequest} from '../model/business-supplier-request.entity';
 import {environment} from '../../../environments/environment';
+
 /**
  * Service responsible for managing business-supplier connection requests.
  */
@@ -26,8 +27,8 @@ export class SupplierRequestService extends BaseService<BusinessSupplierRequest>
    * @param address Dirección de entrega (opcional)
    */
   createRequest(
-    businessmanId: number,
-    supplierId: number,
+    businessmanId: string,
+    supplierId: string,
     message?: string,
     batchType?: string,
     color?: string,
@@ -54,7 +55,7 @@ export class SupplierRequestService extends BaseService<BusinessSupplierRequest>
    * @param businessmanId ID del empresario
    * @param callback Función de retorno con la lista de solicitudes
    */
-  getRequestsByBusinessman(businessmanId: number, callback: Function): void {
+  getRequestsByBusinessman(businessmanId: string, callback: Function): void {
     this.http.get<BusinessSupplierRequest[]>(
       `${this.serverBaseUrl}${this.resourceEndpoint}?businessmanId=${businessmanId}`
     ).subscribe({
@@ -72,7 +73,7 @@ export class SupplierRequestService extends BaseService<BusinessSupplierRequest>
    * Obtiene solicitudes recibidas por un proveedor
    * @param supplierId ID del proveedor
    */
-  getRequestsForSupplier(supplierId: number): any {
+  getRequestsForSupplier(supplierId: string): any {
     return this.http.get<BusinessSupplierRequest[]>(
       `${this.serverBaseUrl}${this.resourceEndpoint}?supplierId=${supplierId}`
     );
@@ -83,7 +84,7 @@ export class SupplierRequestService extends BaseService<BusinessSupplierRequest>
    * @param requestId ID de la solicitud
    * @param status Nuevo estado ('accepted' o 'rejected')
    */
-  updateRequestStatus(requestId: number, status: 'accepted' | 'rejected'): any {
+  updateRequestStatus(requestId: string, status: 'accepted' | 'rejected'): any {
     // Primero obtenemos el objeto completo
     return {
       subscribe: (observer: any) => {
@@ -118,7 +119,7 @@ export class SupplierRequestService extends BaseService<BusinessSupplierRequest>
    * @param businessmanId ID del empresario
    * @param supplierId ID del proveedor
    */
-  checkExistingRequest(businessmanId: number, supplierId: number): any {
+  checkExistingRequest(businessmanId: string, supplierId: string): any {
     return this.http.get<BusinessSupplierRequest[]>(
       `${this.serverBaseUrl}${this.resourceEndpoint}?businessmanId=${businessmanId}&supplierId=${supplierId}&status_ne=rejected`
     );

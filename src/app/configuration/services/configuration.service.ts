@@ -15,7 +15,7 @@ export class ConfigurationService extends BaseService<Configuration> {
   }
 
   // Método para obtener la configuración por usuario
-  getByUserId(userId: number) {
+  getByUserId(userId: string) {
     return this.http.get<Configuration>(
       `${this.resourcePath()}?userId=${userId}`,
       this.httpOptions

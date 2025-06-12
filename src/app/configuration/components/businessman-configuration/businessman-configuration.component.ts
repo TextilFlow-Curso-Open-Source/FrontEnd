@@ -27,7 +27,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 })
 export class BusinessmanConfigurationComponent implements OnInit {
   // Usuario actual
-  currentUserId: number = 0;
+  currentUserId: string = '';
 
   // Configuración
   configuration: Configuration | null = null;
