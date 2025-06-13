@@ -1,0 +1,60 @@
+<!-- /src/app/core/components/theme-switcher/theme-switcher.component.html -->
+
+<div
+  class="theme-switcher"
+  [ngClass]="'theme-switcher--' + variant + ' theme-switcher--' + size"
+  [class.theme-switcher--full-width]="fullWidth">
+
+  <!-- Variant: Radio Buttons -->
+  <div *ngIf="variant === 'radio'" class="theme-switcher__radio-group">
+    <div
+      *ngFor="let option of themeOptions"
+      class="theme-switcher__radio-item">
+      <input
+        type="radio"
+        [id]="'theme-' + option.value"
+        [value]="option.value"
+        [checked]="isSelected(option.value)"
+        (change)="onThemeChange(option.value)"
+        class="theme-switcher__radio-input">
+      <label
+        [for]="'theme-' + option.value"
+        class="theme-switcher__radio-label">
+        <span class="theme-switcher__icon material-icons">{{option.icon}}</span>
+        <span *ngIf="showLabels" class="theme-switcher__text">
+          {{option.translationKey | translate}}
+        </span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Variant: Buttons -->
+  <div *ngIf="variant === 'buttons'" class="theme-switcher__button-group">
+    <button
+      *ngFor="let option of themeOptions"
+      type="button"
+      [class.active]="isSelected(option.value)"
+      (click)="onThemeChange(option.value)"
+      class="theme-switcher__button">
+      <span class="theme-switcher__icon material-icons">{{option.icon}}</span>
+      <span *ngIf="showLabels" class="theme-switcher__text">
+        {{option.translationKey | translate}}
+      </span>
+    </button>
+  </div>
+
+  <!-- Variant: Dropdown -->
+  <div *ngIf="variant === 'dropdown'" class="theme-switcher__dropdown">
+    <select
+      [value]="currentTheme"
+      (change)="onSelectChange($event)"
+      class="theme-switcher__select">
+      <option
+        *ngFor="let option of themeOptions"
+        [value]="option.value">
+        {{option.translationKey | translate}}
+      </option>
+    </select>
+  </div>
+
+</div>

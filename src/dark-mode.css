@@ -1,0 +1,40 @@
+/* /src/styles/dark-mode.css */
+
+/* ===== VARIABLES GLOBALES PARA TEMA OSCURO ===== */
+[data-theme="dark"] {
+  /* Colores principales */
+  --primary-color: #a68b6b;
+  --primary-dark: #8a7556;
+  --primary-light: rgba(166, 139, 107, 0.15);
+
+  /* Colores de texto */
+  --text-dark: #e0e0e0;
+  --text-light: #b0b0b0;
+  --text-muted: #888888;
+
+  /* Colores de fondo */
+  --background-color: #121212;
+  --surface-color: #1e1e1e;
+  --card-background: #2a2a2a;
+  --input-background: #333333;
+
+  /* Bordes */
+  --border-color: #404040;
+  --border-light: #555555;
+
+  /* Estados */
+  --error-color: #ff6b6b;
+  --success-color: #51cf66;
+  --warning-color: #ffd43b;
+  --info-color: #74c0fc;
+
+  /* Sombras */
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== ESTILOS BÁSICOS GLOBALES ===== */
+[data-theme="dark"] body {
+  background-color: var(--background-color);
+  color: var(--text-dark);
+}
