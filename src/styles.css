@@ -3,9 +3,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
-
+@import './dark-mode.css';
 /* Variables de colores personalizados */
 :root {
+  --background-color: #ffffff;
   --primary-color: #866C52;
   --primary-dark: #6e573f;
   --primary-light: rgba(134, 108, 82, 0.1);
@@ -22,6 +23,11 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+
+body {
+  background-color: var(--background-color);
 }
 
 /* Estilos generales */

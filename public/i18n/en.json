@@ -179,5 +179,14 @@
     "MY_BATCHES": "My batches",
     "REGISTER_BATCHES": "Register Batches",
     "BUSINESS_REQUESTS": "Business Requests"
+  },
+  "THEME_SWITCHER": {
+    "LIGHT": "Light",
+    "DARK": "Dark",
+    "AUTO": "Auto",
+    "DESCRIPTION": "Select application theme",
+    "LIGHT_DESCRIPTION": "Light theme for better visibility during the day",
+    "DARK_DESCRIPTION": "Dark theme to reduce eye strain",
+    "AUTO_DESCRIPTION": "Automatically adapts based on system settings"
   }
 }

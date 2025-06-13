@@ -179,5 +179,14 @@
     "MY_BATCHES": "Mis lotes",
     "REGISTER_BATCHES": "Registrar Lotes",
     "BUSINESS_REQUESTS": "Solicitudes de empresarios"
+  },
+  "THEME_SWITCHER": {
+    "LIGHT": "Claro",
+    "DARK": "Oscuro",
+    "AUTO": "Automático",
+    "DESCRIPTION": "Seleccionar tema de la aplicación",
+    "LIGHT_DESCRIPTION": "Tema claro para mejor visibilidad durante el día",
+    "DARK_DESCRIPTION": "Tema oscuro para reducir fatiga visual",
+    "AUTO_DESCRIPTION": "Se adapta automáticamente según la configuración del sistema"
   }
 }

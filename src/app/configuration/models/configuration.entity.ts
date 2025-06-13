@@ -6,7 +6,7 @@ export class Configuration {
   userType: 'businessman' | 'supplier';
   language: string;
   batchCodeFormat: 'automatic' | 'manual';
-  viewMode: 'light' | 'dark';
+  viewMode: 'light' | 'dark' | 'auto';
   createdAt?: string;
   updatedAt?: string;
 
@@ -16,7 +16,7 @@ export class Configuration {
     userType: 'businessman' | 'supplier';
     language: string;
     batchCodeFormat: 'automatic' | 'manual';
-    viewMode: 'light' | 'dark';
+    viewMode: 'light' | 'dark' | 'auto';
     createdAt?: string;
     updatedAt?: string;
   }) {
