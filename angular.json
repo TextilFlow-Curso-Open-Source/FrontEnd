@@ -27,8 +27,18 @@
               }
             ],
             "styles": [
-              "src/styles.css"
-
+              "src/styles.css",
+              {
+                "input": "node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+                "bundleName": "light-theme",
+                "inject": false
+              },
+              {
+                "input": "node_modules/@angular/material/prebuilt-themes/purple-green.css",
+                "bundleName": "dark-theme",
+                "inject": false
+              },
+              "src/dark-mode.css"
             ],
             "scripts": []
           },

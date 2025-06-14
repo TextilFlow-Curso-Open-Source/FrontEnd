@@ -94,19 +94,28 @@ export class ThemeService {
   }
 
   /**
-   * Aplica el tema al DOM
+   * Aplica el tema al DOM cargando dinámicamente solo el tema base de Material
    */
   private applyThemeToDOM(theme: ActiveTheme): void {
-    const body = document.body;
+    const head = document.head;
 
-    // Remover clases de tema anteriores
-    body.classList.remove('light-theme', 'dark-theme');
+    // Remover temas anteriores
+    const lightLink = head.querySelector('link[href*="light-theme"]');
+    const darkLink = head.querySelector('link[href*="dark-theme"]');
 
-    // Agregar clase del tema actual
-    body.classList.add(`${theme}-theme`);
+    if (lightLink) lightLink.remove();
+    if (darkLink) darkLink.remove();
 
-    // También agregar data attribute para CSS
-    body.setAttribute('data-theme', theme);
+    // Cargar tema correspondiente
+    const themeLink = document.createElement('link');
+    themeLink.rel = 'stylesheet';
+    themeLink.href = theme === 'dark' ? 'dark-theme.css' : 'light-theme.css';
+    head.appendChild(themeLink);
+
+    // Aplicar clases
+    document.body.setAttribute('data-theme', theme);
+    document.body.classList.remove('light-theme', 'dark-theme');
+    document.body.classList.add(`${theme}-theme`);
   }
 
   /**
