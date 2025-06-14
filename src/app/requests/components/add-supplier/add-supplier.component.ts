@@ -11,7 +11,7 @@ import { AppButtonComponent } from '../../../core/components/app-button/app-butt
 import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
 import { BatchService } from '../../../batch/services/batch.service.service';
 import { Batch, BatchStatus, STATUS } from '../../../batch/models/batch.entity';
-import { TranslateModule } from "@ngx-translate/core";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
 @Component({
   selector: 'app-add-supplier',
@@ -85,6 +85,7 @@ export class AddSupplierComponent implements OnInit {
   isEditingReview: boolean = false;
   editingReviewId: string | null = null;
   isSubmitting: boolean = false; // Evitar envío duplicado
+  hoverRatingValue: number = 0; // Para el hover de las estrellas
 
   // Datos para mostrar en las pestañas
   connectedSuppliers: any[] = []; // Proveedores con solicitudes aceptadas
@@ -105,7 +106,8 @@ export class AddSupplierComponent implements OnInit {
     private requestService: SupplierRequestService,
     private reviewService: SupplierReviewService,
     private batchService: BatchService,
-    private authService: AuthService
+    private authService: AuthService,
+    private translate: TranslateService
   ) {
     const user = this.authService.getCurrentUser();
     if (user && user.id) {
@@ -225,14 +227,13 @@ export class AddSupplierComponent implements OnInit {
     this.isLoading = false;
 
     if (this.filteredSuppliers.length === 0) {
-      this.showNotification('No se encontraron proveedores con ese criterio de búsqueda', 'info');
+      this.showNotification(
+        this.translate.instant('ADD_SUPPLIER.NO_SEARCH_RESULTS'),
+        'info'
+      );
     }
   }
 
-  clearSearch() {
-    this.searchTerm = '';
-    this.updateDisplayedSuppliers();
-  }
 
   selectSupplier(supplierId: string) {
     // Si ya está seleccionado, lo deseleccionamos
@@ -278,29 +279,6 @@ export class AddSupplierComponent implements OnInit {
     });
   }
 
-  openReviewForm(supplierId: string) {
-    this.selectedReviewSupplierId = supplierId;
-    this.showReviewForm = true;
-    this.isEditingReview = false;
-    this.editingReviewId = null;
-    this.newReview = {
-      rating: 5,
-      comment: ''
-    };
-  }
-
-  // Nuevo método para editar una reseña existente
-  editReview(review: any) {
-    this.selectedReviewSupplierId = review.supplierId;
-    this.editingReviewId = review.id;
-    this.isEditingReview = true;
-    this.showReviewForm = true;
-    this.newReview = {
-      rating: review.rating,
-      comment: review.comment
-    };
-  }
-
   closeReviewForm() {
     this.showReviewForm = false;
     this.selectedReviewSupplierId = null;
@@ -314,7 +292,10 @@ export class AddSupplierComponent implements OnInit {
     }
 
     if (this.newReview.rating < 1 || this.newReview.rating > 5) {
-      this.showNotification('La calificación debe estar entre 1 y 5 estrellas', 'warning');
+      this.showNotification(
+        this.translate.instant('ADD_SUPPLIER.RATING_RANGE_ERROR'),
+        'warning'
+      );
       return;
     }
 
@@ -329,7 +310,10 @@ export class AddSupplierComponent implements OnInit {
         this.newReview.comment
       ).subscribe({
         next: () => {
-          this.showNotification('Reseña actualizada correctamente', 'success');
+          this.showNotification(
+            this.translate.instant('ADD_SUPPLIER.REVIEW_UPDATED_SUCCESS'),
+            'success'
+          );
           this.closeReviewForm();
           this.loadReviews(this.selectedReviewSupplierId as string);
           this.updateSupplierRating();
@@ -338,7 +322,10 @@ export class AddSupplierComponent implements OnInit {
         },
         error: (error: any) => {
           console.error('Error al actualizar reseña:', error);
-          this.showNotification('Error al actualizar la reseña', 'error');
+          this.showNotification(
+            this.translate.instant('ADD_SUPPLIER.REVIEW_ERROR'),
+            'error'
+          );
           this.isLoading = false;
           this.isSubmitting = false;
         }
@@ -353,7 +340,10 @@ export class AddSupplierComponent implements OnInit {
         this.currentUserName
       ).subscribe({
         next: () => {
-          this.showNotification('Reseña agregada correctamente', 'success');
+          this.showNotification(
+            this.translate.instant('ADD_SUPPLIER.REVIEW_ADDED_SUCCESS'),
+            'success'
+          );
           this.closeReviewForm();
           this.loadReviews(this.selectedReviewSupplierId as string);
           this.updateSupplierRating();
@@ -363,7 +353,10 @@ export class AddSupplierComponent implements OnInit {
         },
         error: (error: any) => {
           console.error('Error al agregar reseña:', error);
-          this.showNotification('Error al agregar la reseña', 'error');
+          this.showNotification(
+            this.translate.instant('ADD_SUPPLIER.REVIEW_ERROR'),
+            'error'
+          );
           this.isLoading = false;
           this.isSubmitting = false;
         }
@@ -446,29 +439,44 @@ export class AddSupplierComponent implements OnInit {
       return; // Evitar múltiples envíos
     }
 
-    // Validaciones
+    // Validaciones con traducciones
     if (!this.newBatch.fabricType) {
-      this.showNotification('Por favor, ingresa el tipo de tela', 'warning');
+      this.showNotification(
+        this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.FABRIC_TYPE_REQUIRED'),
+        'warning'
+      );
       return;
     }
 
     if (!this.newBatch.color) {
-      this.showNotification('Por favor, selecciona un color', 'warning');
+      this.showNotification(
+        this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.COLOR_REQUIRED'),
+        'warning'
+      );
       return;
     }
 
     if (!this.newBatch.quantity || this.newBatch.quantity <= 0) {
-      this.showNotification('Por favor, ingresa una cantidad válida', 'warning');
+      this.showNotification(
+        this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.QUANTITY_REQUIRED'),
+        'warning'
+      );
       return;
     }
 
     if (!this.newBatch.price || this.newBatch.price <= 0) {
-      this.showNotification('Por favor, ingresa un precio válido', 'warning');
+      this.showNotification(
+        this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.PRICE_REQUIRED'),
+        'warning'
+      );
       return;
     }
 
     if (!this.newBatch.address) {
-      this.showNotification('Por favor, ingresa la dirección de entrega', 'warning');
+      this.showNotification(
+        this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.ADDRESS_REQUIRED'),
+        'warning'
+      );
       return;
     }
 
@@ -478,14 +486,20 @@ export class AddSupplierComponent implements OnInit {
     // Crear el nuevo batch
     this.batchService.create(this.newBatch).subscribe({
       next: () => {
-        this.showNotification('Lote creado correctamente', 'success');
+        this.showNotification(
+          this.translate.instant('ADD_SUPPLIER.BATCH_CREATED_SUCCESS'),
+          'success'
+        );
         this.showBatchForm = false;
         this.isLoading = false;
         this.isBatchSubmitting = false; // Desactivar el bloqueo
       },
       error: (error: any) => {
         console.error('Error al crear lote:', error);
-        this.showNotification('Error al crear el lote', 'error');
+        this.showNotification(
+          this.translate.instant('ADD_SUPPLIER.BATCH_ERROR'),
+          'error'
+        );
         this.isLoading = false;
         this.isBatchSubmitting = false; // Desactivar el bloqueo
       }
@@ -495,29 +509,44 @@ export class AddSupplierComponent implements OnInit {
   // Método para enviar solicitud a proveedor
   sendRequest() {
     if (!this.selectedSupplierId) {
-      this.showNotification('Selecciona un proveedor', 'warning');
+      this.showNotification(
+        this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.SELECT_SUPPLIER'),
+        'warning'
+      );
       return;
     }
 
-    // Validaciones del formulario
+    // Validaciones del formulario con traducciones
     if (this.showRequestForm) {
       if (!this.batchType) {
-        this.showNotification('Por favor, ingresa el tipo de tela', 'warning');
+        this.showNotification(
+          this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.FABRIC_TYPE_REQUIRED'),
+          'warning'
+        );
         return;
       }
 
       if (!this.batchColor) {
-        this.showNotification('Por favor, selecciona un color', 'warning');
+        this.showNotification(
+          this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.COLOR_REQUIRED'),
+          'warning'
+        );
         return;
       }
 
       if (this.quantity <= 0) {
-        this.showNotification('Por favor, ingresa una cantidad válida', 'warning');
+        this.showNotification(
+          this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.QUANTITY_REQUIRED'),
+          'warning'
+        );
         return;
       }
 
       if (!this.address) {
-        this.showNotification('Por favor, ingresa la dirección de entrega', 'warning');
+        this.showNotification(
+          this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.ADDRESS_REQUIRED'),
+          'warning'
+        );
         return;
       }
     }
@@ -534,11 +563,14 @@ export class AddSupplierComponent implements OnInit {
       next: (requests: any[]) => {
         if (requests && requests.length > 0) {
           const status = requests[0].status;
-          const message = status === 'pending'
-            ? 'Ya has enviado una solicitud a este proveedor que está pendiente de respuesta'
-            : 'Ya tienes una conexión activa con este proveedor';
+          const messageKey = status === 'pending'
+            ? 'ADD_SUPPLIER.REQUEST_PENDING'
+            : 'ADD_SUPPLIER.CONNECTION_EXISTS';
 
-          this.showNotification(message, 'warning');
+          this.showNotification(
+            this.translate.instant(messageKey),
+            'warning'
+          );
           this.isLoading = false;
           return;
         }
@@ -554,7 +586,10 @@ export class AddSupplierComponent implements OnInit {
           this.address
         ).subscribe({
           next: () => {
-            this.showNotification('Solicitud enviada correctamente', 'success');
+            this.showNotification(
+              this.translate.instant('ADD_SUPPLIER.REQUEST_SENT_SUCCESS'),
+              'success'
+            );
             this.showRequestForm = false;
             this.batchType = '';
             this.batchColor = '';
@@ -568,14 +603,20 @@ export class AddSupplierComponent implements OnInit {
           },
           error: (error: any) => {
             console.error('Error al enviar solicitud:', error);
-            this.showNotification('Error al enviar la solicitud', 'error');
+            this.showNotification(
+              this.translate.instant('ADD_SUPPLIER.REQUEST_ERROR'),
+              'error'
+            );
             this.isLoading = false;
           }
         });
       },
       error: (error: any) => {
         console.error('Error al verificar solicitudes existentes:', error);
-        this.showNotification('Error al verificar solicitudes existentes', 'error');
+        this.showNotification(
+          this.translate.instant('ADD_SUPPLIER.REQUEST_CHECK_ERROR'),
+          'error'
+        );
         this.isLoading = false;
       }
     });
@@ -602,5 +643,54 @@ export class AddSupplierComponent implements OnInit {
   getEmptyStars(rating: number): number[] {
     const validRating = Math.min(Math.max(0, rating || 0), 5); // Asegurar que esté entre 0 y 5
     return Array(5 - Math.floor(validRating)).fill(0);
+  }
+
+
+// Métodos actualizados para el rating clickeable
+  setRating(rating: number) {
+    this.newReview.rating = rating;
+  }
+
+  hoverRating(rating: number) {
+    this.hoverRatingValue = rating;
+  }
+
+// Actualizar el método openReviewForm para resetear el hover
+  openReviewForm(supplierId: string) {
+    this.selectedReviewSupplierId = supplierId;
+    this.showReviewForm = true;
+    this.isEditingReview = false;
+    this.editingReviewId = null;
+    this.hoverRatingValue = 0; // Resetear hover
+    this.newReview = {
+      rating: 5,
+      comment: ''
+    };
+  }
+
+// Actualizar el método editReview para resetear el hover
+  editReview(review: any) {
+    this.selectedReviewSupplierId = review.supplierId;
+    this.editingReviewId = review.id;
+    this.isEditingReview = true;
+    this.showReviewForm = true;
+    this.hoverRatingValue = 0; // Resetear hover
+    this.newReview = {
+      rating: review.rating,
+      comment: review.comment
+    };
+  }
+
+// Añadir estos métodos a tu clase del componente
+  onSearchInput(): void {
+    // Opcional: búsqueda en tiempo real
+    if (this.searchTerm.length > 2 || this.searchTerm.length === 0) {
+      this.searchSuppliers();
+    }
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.searchSuppliers();
   }
 }

@@ -1,401 +1,427 @@
 <div class="container">
-    <!-- Pestañas superiores -->
-    <div class="tab-navigation">
-        <div
-                class="tab-button"
-                [class.active]="activeTab === 'current'"
-                (click)="setActiveTab('current')">
-            {{ 'BUSINESSMAN.CURRENT_SUPPLIERS' | translate }}
-        </div>
-        <div
-                class="tab-button"
-                [class.active]="activeTab === 'add'"
-                (click)="setActiveTab('add')">
-            {{ 'BUSINESSMAN.ADD_SUPPLIER' | translate }}
-        </div>
+  <!-- Pestañas superiores -->
+  <div class="tab-navigation">
+    <div
+      class="tab-button"
+      [class.active]="activeTab === 'current'"
+      (click)="setActiveTab('current')">
+      {{ 'ADD_SUPPLIER.CURRENT_SUPPLIERS' | translate }}
+    </div>
+    <div
+      class="tab-button"
+      [class.active]="activeTab === 'add'"
+      (click)="setActiveTab('add')">
+      {{ 'ADD_SUPPLIER.ADD_SUPPLIER' | translate }}
+    </div>
+  </div>
+
+  <!-- Barra de búsqueda -->
+  <!-- Barra de búsqueda -->
+  <div class="search-container">
+    <div class="search-input-wrapper">
+      <i class="material-icons search-icon">search</i>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="{{ 'ADD_SUPPLIER.SEARCH_PLACEHOLDER' | translate }}"
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="searchSuppliers()"
+        (input)="onSearchInput()">
+      <button *ngIf="searchTerm" class="clear-button" (click)="clearSearch()">
+        <i class="material-icons">close</i>
+      </button>
     </div>
 
-    <!-- Barra de búsqueda -->
-    <div class="search-container">
-        <app-input
-                type="search"
-                placeholder="{{ 'COMMON.SEARCH' | translate }}"
-                [(ngModel)]="searchTerm"
-                (keyup.enter)="searchSuppliers()"
-                [fullWidth]="true">
-        </app-input>
+    <app-button
+      label="{{ 'COMMON.FILTER' | translate }}"
+      variant="primary"
+      icon="filter_list"
+      (click)="searchSuppliers()">
+    </app-button>
+  </div>
+
+  <h2>{{ 'ADD_SUPPLIER.SUPPLIERS' | translate }}</h2>
+
+  <div *ngIf="isLoading" class="loading">
+    {{ 'ADD_SUPPLIER.LOADING' | translate }}
+  </div>
+
+  <div *ngIf="!isLoading && filteredSuppliers.length === 0" class="no-results">
+    <p *ngIf="activeTab === 'current'">{{ 'ADD_SUPPLIER.NO_SUPPLIERS' | translate }}</p>
+    <p *ngIf="activeTab === 'add'">{{ 'ADD_SUPPLIER.NO_AVAILABLE_SUPPLIERS' | translate }}</p>
+    <p *ngIf="searchTerm.trim()">{{ 'ADD_SUPPLIER.NO_SEARCH_RESULTS' | translate }}</p>
+  </div>
+
+  <!-- Contenido de la pestaña Distribuidores Actuales -->
+  <div *ngIf="activeTab === 'current'" class="suppliers-grid">
+    <div *ngFor="let supplier of filteredSuppliers" class="supplier-card">
+      <div class="supplier-header" (click)="toggleSupplierExpansion(supplier.id)">
+        <h3 class="supplier-title">{{ supplier.profile?.companyName || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</h3>
+        <div class="dropdown-arrow" [class.expanded]="expandedSupplierId === supplier.id"></div>
+      </div>
+
+      <div class="supplier-info">
+        <div class="supplier-email">
+          <img [src]="supplier.profile?.logo || 'assets/default-avatar.png'" alt="avatar" class="supplier-avatar">
+          <span>{{ supplier.email }}</span>
+        </div>
+        <div class="supplier-rating">
+          <span *ngFor="let star of getFilledStars(supplier.averageRating || 0)" class="star filled">★</span>
+          <span *ngFor="let star of getEmptyStars(supplier.averageRating || 0)" class="star">☆</span>
+        </div>
+        <app-button
+          label="{{ 'ADD_SUPPLIER.ORDER_BATCH' | translate }}"
+          variant="primary"
+          [fullWidth]="false"
+          (click)="showBatchFormFor(supplier)">
+        </app-button>
+      </div>
+
+      <!-- Sección expandible para detalles y reseñas -->
+      <div *ngIf="expandedSupplierId === supplier.id" class="supplier-expanded">
+        <!-- Información del proveedor -->
+        <div class="supplier-details">
+          <h4>{{ 'ADD_SUPPLIER.SUPPLIER_INFO' | translate }}</h4>
+          <p><strong>{{ 'ADD_SUPPLIER.SPECIALIZATION' | translate }}:</strong> {{ supplier.profile?.specialization || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</p>
+          <p><strong>{{ 'ADD_SUPPLIER.CATEGORIES' | translate }}:</strong> {{ supplier.profile?.productCategories?.join(', ') || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</p>
+          <p><strong>{{ 'ADD_SUPPLIER.LOCATION' | translate }}:</strong> {{ supplier.profile?.warehouseLocation || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</p>
+          <p><strong>{{ 'ADD_SUPPLIER.MIN_ORDER' | translate }}:</strong> {{ supplier.profile?.minimumOrderQuantity || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</p>
+        </div>
+
+        <!-- Reseñas -->
+        <div class="reviews-section">
+          <div class="reviews-header">
+            <h4>{{ 'ADD_SUPPLIER.REVIEWS' | translate }} ({{ supplier.totalReviews || 0 }})</h4>
+            <app-button
+              *ngIf="canAddReview"
+              label="{{ 'ADD_SUPPLIER.ADD_REVIEW' | translate }}"
+              variant="primary"
+              size="small"
+              (click)="openReviewForm(supplier.id)">
+            </app-button>
+          </div>
+
+          <div *ngIf="reviews.length > 0" class="reviews-list">
+            <div *ngFor="let review of reviews" class="review-item">
+              <div class="review-header">
+                <img [src]="'assets/default-avatar.png'" alt="reviewer" class="reviewer-avatar">
+                <div class="review-info">
+                  <div class="review-email">{{ review.businessmanName || ('COMMON.USER' | translate) }}</div>
+                  <div class="review-rating">
+                    <span *ngFor="let star of getFilledStars(review.rating)" class="star filled">★</span>
+                    <span *ngFor="let star of getEmptyStars(review.rating)" class="star">☆</span>
+                  </div>
+                  <div class="review-date">{{ review.createdAt | date:'dd/MM/yy' }}</div>
+                </div>
+                <!-- Añadir botón de edición si la reseña es del usuario actual -->
+                <app-button
+                  *ngIf="review.canEdit"
+                  label="{{ 'ADD_SUPPLIER.EDIT_REVIEW' | translate }}"
+                  variant="secondary"
+                  size="small"
+                  (click)="editReview(review)">
+                </app-button>
+              </div>
+              <p class="review-text">{{ review.comment || ('ADD_SUPPLIER.NO_COMMENTS' | translate) }}</p>
+            </div>
+          </div>
+
+          <div *ngIf="reviews.length === 0" class="no-reviews">
+            {{ 'ADD_SUPPLIER.NO_REVIEWS' | translate }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido de la pestaña Añadir Distribuidor -->
+  <div *ngIf="activeTab === 'add'" class="suppliers-list">
+    <div *ngFor="let supplier of filteredSuppliers" class="supplier-item">
+      <div class="supplier-header" (click)="selectSupplier(supplier.id)">
+        <h3 class="supplier-name">{{ supplier.profile?.companyName || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</h3>
+        <div class="dropdown-arrow" [class.expanded]="selectedSupplierId === supplier.id"></div>
+      </div>
+
+      <div class="supplier-info">
+        <div class="supplier-email">
+          <img [src]="supplier.profile?.logo || 'assets/default-avatar.png'" alt="avatar" class="supplier-avatar">
+          <span>{{ supplier.email }}</span>
+        </div>
+        <div class="supplier-rating">
+          <span *ngFor="let star of getFilledStars(supplier.averageRating || 0)" class="star filled">★</span>
+          <span *ngFor="let star of getEmptyStars(supplier.averageRating || 0)" class="star">☆</span>
+        </div>
+        <app-button
+          label="{{ 'ADD_SUPPLIER.SEND_REQUEST' | translate }}"
+          variant="primary"
+          (click)="showRequestFormFor(supplier)">
+        </app-button>
+      </div>
+
+      <!-- Mostrar reseñas cuando está desplegado -->
+      <div *ngIf="selectedSupplierId === supplier.id" class="reviews-section">
+        <div *ngIf="reviews.length > 0" class="reviews-list">
+          <div *ngFor="let review of reviews" class="review-item">
+            <div class="review-header">
+              <img [src]="'assets/default-avatar.png'" alt="reviewer" class="reviewer-avatar">
+              <div class="review-info">
+                <div class="review-email">{{ review.businessmanName || ('COMMON.USER' | translate) }}</div>
+                <div class="review-rating">
+                  <span *ngFor="let star of getFilledStars(review.rating)" class="star filled">★</span>
+                  <span *ngFor="let star of getEmptyStars(review.rating)" class="star">☆</span>
+                </div>
+                <div class="review-date">{{ review.createdAt | date:'dd/MM/yy' }}</div>
+              </div>
+            </div>
+            <p class="review-text">{{ review.comment || ('ADD_SUPPLIER.NO_COMMENTS' | translate) }}</p>
+          </div>
+        </div>
+        <div *ngIf="reviews.length === 0" class="no-reviews">
+          {{ 'ADD_SUPPLIER.NO_REVIEWS' | translate }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para el formulario de solicitud -->
+  <div *ngIf="showRequestForm" class="modal">
+    <div class="modal-backdrop" (click)="cancelRequest()"></div>
+    <div class="modal-content">
+      <button class="close-modal" (click)="cancelRequest()">×</button>
+
+      <div class="request-form">
+        <h3>{{ 'ADD_SUPPLIER.REQUEST_FORM_TITLE' | translate }}</h3>
+
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.BATCH_TYPE' | translate }}</label>
+          <app-input
+            type="textarea"
+            [(ngModel)]="batchType"
+            placeholder="{{ 'ADD_SUPPLIER.ENTER_FABRIC_TYPE' | translate }}"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.BATCH_COLOR' | translate }}</label>
+          <app-input
+            type="text"
+            [(ngModel)]="batchColor"
+            placeholder="{{ 'ADD_SUPPLIER.CHOOSE_COLOR' | translate }}"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.QUANTITY' | translate }}</label>
+          <app-input
+            type="number"
+            [(ngModel)]="quantity"
+            placeholder="{{ 'ADD_SUPPLIER.ENTER_QUANTITY' | translate }}"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.ADDRESS' | translate }}</label>
+          <app-input
+            type="text"
+            [(ngModel)]="address"
+            placeholder="{{ 'ADD_SUPPLIER.ENTER_ADDRESS' | translate }}"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.COMMENT' | translate }}</label>
+          <app-input
+            type="textarea"
+            [(ngModel)]="requestMessage"
+            placeholder="{{ 'ADD_SUPPLIER.ADDITIONAL_COMMENT' | translate }}"
+            [fullWidth]="true">
+          </app-input>
+        </div>
 
         <app-button
-                label="{{ 'COMMON.FILTER' | translate }}"
-                variant="primary"
-                icon="filter_list"
-                (click)="searchSuppliers()">
+          label="{{ 'ADD_SUPPLIER.CONFIRM' | translate }}"
+          variant="primary"
+          [loading]="isLoading"
+          [fullWidth]="true"
+          (click)="sendRequest()">
         </app-button>
+      </div>
     </div>
+  </div>
 
-    <h2>{{ 'BUSINESSMAN.SUPPLIERS' | translate }}</h2>
+  <!-- Modal para crear un nuevo batch -->
+  <div *ngIf="showBatchForm" class="modal">
+    <div class="modal-backdrop" (click)="cancelBatch()"></div>
+    <div class="modal-content">
+      <button class="close-modal" (click)="cancelBatch()">×</button>
 
-    <div *ngIf="isLoading" class="loading">
-        {{ 'COMMON.LOADING' | translate }}
-    </div>
+      <div class="batch-form">
+        <h2>{{ 'ADD_SUPPLIER.CREATE_NEW_BATCH' | translate }}</h2>
 
-    <div *ngIf="!isLoading && filteredSuppliers.length === 0" class="no-results">
-        <p *ngIf="activeTab === 'current'">{{ 'BUSINESSMAN.NO_SUPPLIERS' | translate }}</p>
-        <p *ngIf="activeTab === 'add'">{{ 'BUSINESSMAN.NO_AVAILABLE_SUPPLIERS' | translate }}</p>
-    </div>
-
-    <!-- Contenido de la pestaña Distribuidores Actuales -->
-    <div *ngIf="activeTab === 'current'" class="suppliers-grid">
-        <div *ngFor="let supplier of filteredSuppliers" class="supplier-card">
-            <div class="supplier-header" (click)="toggleSupplierExpansion(supplier.id)">
-                <h3 class="supplier-title">{{ supplier.profile?.companyName || ('COMMON.NO_NAME' | translate) }}</h3>
-                <div class="dropdown-arrow" [class.expanded]="expandedSupplierId === supplier.id">▼</div>
-            </div>
-
-            <div class="supplier-info">
-                <div class="supplier-email">
-                    <img [src]="supplier.profile?.logo || 'assets/default-avatar.png'" alt="avatar" class="supplier-avatar">
-                    <span>{{ supplier.email }}</span>
-                </div>
-                <div class="supplier-rating">
-                    <span *ngFor="let star of getFilledStars(supplier.averageRating || 0)" class="star filled">★</span>
-                    <span *ngFor="let star of getEmptyStars(supplier.averageRating || 0)" class="star">☆</span>
-                </div>
-                <app-button
-                        label="{{ 'BUSINESSMAN.ORDER_BATCH' | translate }}"
-                        variant="primary"
-                        [fullWidth]="false"
-                        (click)="showBatchFormFor(supplier)">
-                </app-button>
-            </div>
-
-            <!-- Sección expandible para detalles y reseñas -->
-            <div *ngIf="expandedSupplierId === supplier.id" class="supplier-expanded">
-                <!-- Información del proveedor -->
-                <div class="supplier-details">
-                    <h4>{{ 'BUSINESSMAN.SUPPLIER_INFO' | translate }}</h4>
-                    <p><strong>{{ 'BUSINESSMAN.SPECIALIZATION' | translate }}:</strong> {{ supplier.profile?.specialization || ('SUPPLIER.NO_SPECIFIED' | translate) }}</p>
-                    <p><strong>{{ 'BUSINESSMAN.CATEGORIES' | translate }}:</strong> {{ supplier.profile?.productCategories?.join(', ') || ('SUPPLIER.NO_SPECIFIED' | translate) }}</p>
-                    <p><strong>{{ 'BUSINESSMAN.LOCATION' | translate }}:</strong> {{ supplier.profile?.warehouseLocation || ('SUPPLIER.NO_SPECIFIED' | translate) }}</p>
-                    <p><strong>{{ 'BUSINESSMAN.MIN_ORDER' | translate }}:</strong> {{ supplier.profile?.minimumOrderQuantity || ('SUPPLIER.NO_SPECIFIED' | translate) }}</p>
-                </div>
-
-                <!-- Reseñas -->
-                <div class="reviews-section">
-                    <div class="reviews-header">
-                        <h4>{{ 'BUSINESSMAN.REVIEWS' | translate }} ({{ supplier.totalReviews || 0 }})</h4>
-                        <app-button
-                                *ngIf="canAddReview"
-                                label="{{ 'BUSINESSMAN.ADD_REVIEW' | translate }}"
-                                variant="primary"
-                                size="small"
-                                (click)="openReviewForm(supplier.id)">
-                        </app-button>
-                    </div>
-
-                    <div *ngIf="reviews.length > 0" class="reviews-list">
-                        <div *ngFor="let review of reviews" class="review-item">
-                            <div class="review-header">
-                                <img [src]="'assets/default-avatar.png'" alt="reviewer" class="reviewer-avatar">
-                                <div class="review-info">
-                                    <div class="review-email">{{ review.businessmanName || ('COMMON.USER' | translate) }}</div>
-                                    <div class="review-rating">
-                                        <span *ngFor="let star of getFilledStars(review.rating)" class="star filled">★</span>
-                                        <span *ngFor="let star of getEmptyStars(review.rating)" class="star">☆</span>
-                                    </div>
-                                    <div class="review-date">{{ review.createdAt | date:'dd/MM/yy' }}</div>
-                                </div>
-                                <!-- Añadir botón de edición si la reseña es del usuario actual -->
-                                <app-button
-                                        *ngIf="review.canEdit"
-                                        label="{{ 'BUSINESSMAN.EDIT_REVIEW' | translate }}"
-                                        variant="secondary"
-                                        size="small"
-                                        (click)="editReview(review)">
-                                </app-button>
-                            </div>
-                            <p class="review-text">{{ review.comment || ('BUSINESSMAN.NO_COMMENTS' | translate) }}</p>
-                        </div>
-                    </div>
-
-                    <div *ngIf="reviews.length === 0" class="no-reviews">
-                        {{ 'BUSINESSMAN.NO_REVIEWS' | translate }}
-                    </div>
-                </div>
-            </div>
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.BATCH_CODE' | translate }}</label>
+          <app-input
+            type="text"
+            [(ngModel)]="newBatch.code"
+            placeholder="{{ 'ADD_SUPPLIER.BATCH_CODE' | translate }}"
+            [fullWidth]="true">
+          </app-input>
         </div>
-    </div>
 
-    <!-- Contenido de la pestaña Añadir Distribuidor -->
-    <div *ngIf="activeTab === 'add'" class="suppliers-list">
-        <div *ngFor="let supplier of filteredSuppliers" class="supplier-item">
-            <div class="supplier-header" (click)="selectSupplier(supplier.id)">
-                <h3 class="supplier-name">{{ supplier.profile?.companyName || ('COMMON.NO_NAME' | translate) }}</h3>
-                <div class="dropdown-arrow" [class.expanded]="selectedSupplierId === supplier.id">▼</div>
-            </div>
-
-            <div class="supplier-info">
-                <div class="supplier-email">
-                    <img [src]="supplier.profile?.logo || 'assets/default-avatar.png'" alt="avatar" class="supplier-avatar">
-                    <span>{{ supplier.email }}</span>
-                </div>
-                <div class="supplier-rating">
-                    <span *ngFor="let star of getFilledStars(supplier.averageRating || 0)" class="star filled">★</span>
-                    <span *ngFor="let star of getEmptyStars(supplier.averageRating || 0)" class="star">☆</span>
-                </div>
-                <app-button
-                        label="{{ 'BUSINESSMAN.SEND_REQUEST' | translate }}"
-                        variant="primary"
-                        (click)="showRequestFormFor(supplier)">
-                </app-button>
-            </div>
-
-            <!-- Mostrar reseñas cuando está desplegado -->
-            <div *ngIf="selectedSupplierId === supplier.id" class="reviews-section">
-                <div *ngIf="reviews.length > 0" class="reviews-list">
-                    <div *ngFor="let review of reviews" class="review-item">
-                        <div class="review-header">
-                            <img [src]="'assets/default-avatar.png'" alt="reviewer" class="reviewer-avatar">
-                            <div class="review-info">
-                                <div class="review-email">{{ review.businessmanName || ('COMMON.USER' | translate) }}</div>
-                                <div class="review-rating">
-                                    <span *ngFor="let star of getFilledStars(review.rating)" class="star filled">★</span>
-                                    <span *ngFor="let star of getEmptyStars(review.rating)" class="star">☆</span>
-                                </div>
-                                <div class="review-date">{{ review.createdAt | date:'dd/MM/yy' }}</div>
-                            </div>
-                        </div>
-                        <p class="review-text">{{ review.comment || ('BUSINESSMAN.NO_COMMENTS' | translate) }}</p>
-                    </div>
-                </div>
-                <div *ngIf="reviews.length === 0" class="no-reviews">
-                    {{ 'BUSINESSMAN.NO_REVIEWS' | translate }}
-                </div>
-            </div>
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.CLIENT' | translate }}</label>
+          <app-input
+            type="text"
+            [(ngModel)]="newBatch.client"
+            placeholder="{{ 'ADD_SUPPLIER.CLIENT' | translate }}"
+            [fullWidth]="true">
+          </app-input>
         </div>
-    </div>
 
-    <!-- Modal para el formulario de solicitud -->
-    <div *ngIf="showRequestForm" class="modal">
-        <div class="modal-backdrop" (click)="cancelRequest()"></div>
-        <div class="modal-content">
-            <button class="close-modal" (click)="cancelRequest()">×</button>
-
-            <div class="request-form">
-                <h3>{{ 'REQUEST.BATCH_TYPE' | translate }}</h3>
-                <app-input
-                        type="textarea"
-                        [(ngModel)]="batchType"
-                        placeholder="{{ 'REQUEST.ENTER_FABRIC_TYPE' | translate }}"
-                        [fullWidth]="true">
-                </app-input>
-
-                <h3>{{ 'REQUEST.BATCH_COLOR' | translate }}</h3>
-                <app-input
-                        type="text"
-                        [(ngModel)]="batchColor"
-                        placeholder="{{ 'REQUEST.CHOOSE_COLOR' | translate }}"
-                        [fullWidth]="true">
-                </app-input>
-
-                <h3>{{ 'REQUEST.QUANTITY' | translate }}</h3>
-                <app-input
-                        type="number"
-                        [(ngModel)]="quantity"
-                        placeholder="{{ 'REQUEST.ENTER_QUANTITY' | translate }}"
-                        [fullWidth]="true">
-                </app-input>
-
-                <h3>{{ 'REQUEST.ADDRESS' | translate }}</h3>
-                <app-input
-                        type="text"
-                        [(ngModel)]="address"
-                        placeholder="{{ 'REQUEST.ENTER_ADDRESS' | translate }}"
-                        [fullWidth]="true">
-                </app-input>
-
-                <h3>{{ 'REQUEST.COMMENT' | translate }}:</h3>
-                <app-input
-                        type="textarea"
-                        [(ngModel)]="requestMessage"
-                        placeholder="{{ 'REQUEST.ADDITIONAL_COMMENT' | translate }}"
-                        [fullWidth]="true">
-                </app-input>
-
-                <app-button
-                        label="{{ 'COMMON.CONFIRM' | translate }}"
-                        variant="primary"
-                        [loading]="isLoading"
-                        [fullWidth]="true"
-                        (click)="sendRequest()">
-                </app-button>
-            </div>
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.FABRIC_TYPE' | translate }}</label>
+          <app-input
+            type="text"
+            [(ngModel)]="newBatch.fabricType"
+            placeholder="{{ 'ADD_SUPPLIER.FABRIC_TYPE' | translate }}"
+            [fullWidth]="true">
+          </app-input>
         </div>
-    </div>
 
-    <!-- Modal para crear un nuevo batch -->
-    <div *ngIf="showBatchForm" class="modal">
-        <div class="modal-backdrop" (click)="cancelBatch()"></div>
-        <div class="modal-content">
-            <button class="close-modal" (click)="cancelBatch()">×</button>
-
-            <div class="batch-form">
-                <h2>{{ 'BUSINESSMAN.CREATE_NEW_BATCH' | translate }}</h2>
-
-                <div class="form-group">
-                    <label>{{ 'BATCH.BATCH_CODE' | translate }}</label>
-                    <app-input
-                            type="text"
-                            [(ngModel)]="newBatch.code"
-                            placeholder="{{ 'BATCH.BATCH_CODE' | translate }}"
-                            [fullWidth]="true">
-                    </app-input>
-                </div>
-
-                <div class="form-group">
-                    <label>{{ 'BATCH.CLIENT' | translate }}</label>
-                    <app-input
-                            type="text"
-                            [(ngModel)]="newBatch.client"
-                            placeholder="{{ 'BATCH.CLIENT' | translate }}"
-                            [fullWidth]="true">
-                    </app-input>
-                </div>
-
-                <div class="form-group">
-                    <label>{{ 'BATCH.FABRIC_TYPE' | translate }}</label>
-                    <app-input
-                            type="text"
-                            [(ngModel)]="newBatch.fabricType"
-                            placeholder="{{ 'BATCH.FABRIC_TYPE' | translate }}"
-                            [fullWidth]="true">
-                    </app-input>
-                </div>
-
-                <div class="form-group">
-                    <label>{{ 'BATCH.COLOR' | translate }}</label>
-                    <app-input
-                            type="text"
-                            [(ngModel)]="newBatch.color"
-                            placeholder="{{ 'BATCH.COLOR' | translate }}"
-                            [fullWidth]="true">
-                    </app-input>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group half">
-                        <label>{{ 'BATCH.QUANTITY' | translate }}</label>
-                        <app-input
-                                type="number"
-                                [(ngModel)]="newBatch.quantity"
-                                placeholder="{{ 'BATCH.QUANTITY' | translate }}"
-                                [fullWidth]="true">
-                        </app-input>
-                    </div>
-
-                    <div class="form-group half">
-                        <label>{{ 'BATCH.PRICE' | translate }}</label>
-                        <app-input
-                                type="number"
-                                [(ngModel)]="newBatch.price"
-                                placeholder="{{ 'BATCH.PRICE' | translate }}"
-                                [fullWidth]="true">
-                        </app-input>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>{{ 'BATCH.ADDRESS' | translate }}</label>
-                    <app-input
-                            type="text"
-                            [(ngModel)]="newBatch.address"
-                            placeholder="{{ 'BATCH.ADDRESS' | translate }}"
-                            [fullWidth]="true">
-                    </app-input>
-                </div>
-
-                <div class="form-group">
-                    <label>{{ 'BATCH.DATE' | translate }}</label>
-                    <app-input
-                            type="date"
-                            [(ngModel)]="newBatch.date"
-                            [fullWidth]="true">
-                    </app-input>
-                </div>
-
-                <div class="form-group">
-                    <label>{{ 'BATCH.OBSERVATIONS' | translate }}</label>
-                    <app-input
-                            type="textarea"
-                            [(ngModel)]="newBatch.observations"
-                            placeholder="{{ 'BATCH.OBSERVATIONS' | translate }}"
-                            [fullWidth]="true">
-                    </app-input>
-                </div>
-
-                <app-button
-                        label="{{ 'BATCH.CREATE_BATCH' | translate }}"
-                        variant="primary"
-                        [loading]="isLoading"
-                        [fullWidth]="true"
-                        (click)="createBatch()">
-                </app-button>
-            </div>
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.COLOR' | translate }}</label>
+          <app-input
+            type="text"
+            [(ngModel)]="newBatch.color"
+            placeholder="{{ 'ADD_SUPPLIER.COLOR' | translate }}"
+            [fullWidth]="true">
+          </app-input>
         </div>
-    </div>
 
-    <!-- Modal para añadir reseña -->
-    <div *ngIf="showReviewForm" class="modal">
-        <div class="modal-backdrop" (click)="closeReviewForm()"></div>
-        <div class="modal-content review-modal">
-            <button class="close-modal" (click)="closeReviewForm()">×</button>
+        <div class="form-row">
+          <div class="form-group half">
+            <label>{{ 'ADD_SUPPLIER.QUANTITY' | translate }}</label>
+            <app-input
+              type="number"
+              [(ngModel)]="newBatch.quantity"
+              placeholder="{{ 'ADD_SUPPLIER.QUANTITY' | translate }}"
+              [fullWidth]="true">
+            </app-input>
+          </div>
 
-            <div class="review-form">
-                <h2>{{ 'BUSINESSMAN.ADD_REVIEW' | translate }}</h2>
-
-                <div class="form-group">
-                    <label>{{ 'BUSINESSMAN.RATING' | translate }}</label>
-                    <div class="rating-input">
-                        <app-input
-                                type="number"
-                                [(ngModel)]="newReview.rating"
-                                [fullWidth]="false"
-                                [required]="true">
-                        </app-input>
-                        <div class="rating-preview">
-                            <span *ngFor="let star of getFilledStars(newReview.rating)" class="star filled">★</span>
-                            <span *ngFor="let star of getEmptyStars(newReview.rating)" class="star">☆</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>{{ 'BUSINESSMAN.COMMENT' | translate }}</label>
-                    <app-input
-                            type="textarea"
-                            [(ngModel)]="newReview.comment"
-                            placeholder="{{ 'BUSINESSMAN.WRITE_OPINION' | translate }}"
-                            [fullWidth]="true">
-                    </app-input>
-                </div>
-
-                <app-button
-                        label="{{ 'BUSINESSMAN.PUBLISH_REVIEW' | translate }}"
-                        variant="primary"
-                        [loading]="isLoading"
-                        [fullWidth]="true"
-                        (click)="submitReview()">
-                </app-button>
-            </div>
+          <div class="form-group half">
+            <label>{{ 'ADD_SUPPLIER.PRICE' | translate }}</label>
+            <app-input
+              type="number"
+              [(ngModel)]="newBatch.price"
+              placeholder="{{ 'ADD_SUPPLIER.PRICE' | translate }}"
+              [fullWidth]="true">
+            </app-input>
+          </div>
         </div>
-    </div>
 
-    <!-- Notificación -->
-    <app-notification
-            [show]="notification.show"
-            [message]="notification.message"
-            [type]="notification.type"
-            [autoClose]="true"
-            (close)="closeNotification()">
-    </app-notification>
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.ADDRESS' | translate }}</label>
+          <app-input
+            type="text"
+            [(ngModel)]="newBatch.address"
+            placeholder="{{ 'ADD_SUPPLIER.ADDRESS' | translate }}"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.DATE' | translate }}</label>
+          <app-input
+            type="date"
+            [(ngModel)]="newBatch.date"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.OBSERVATIONS' | translate }}</label>
+          <app-input
+            type="textarea"
+            [(ngModel)]="newBatch.observations"
+            placeholder="{{ 'ADD_SUPPLIER.OBSERVATIONS' | translate }}"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <app-button
+          label="{{ 'ADD_SUPPLIER.CREATE_BATCH' | translate }}"
+          variant="primary"
+          [loading]="isLoading"
+          [fullWidth]="true"
+          (click)="createBatch()">
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para añadir reseña - ACTUALIZADO -->
+  <div *ngIf="showReviewForm" class="modal">
+    <div class="modal-backdrop" (click)="closeReviewForm()"></div>
+    <div class="modal-content review-modal">
+      <button class="close-modal" (click)="closeReviewForm()">×</button>
+
+      <div class="review-form">
+        <h2>{{ isEditingReview ? 'ADD_SUPPLIER.EDIT_REVIEW' : 'ADD_SUPPLIER.ADD_REVIEW' | translate }}</h2>
+
+        <!-- Rating con estrellas clickeables -->
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.RATING' | translate }}</label>
+          <div class="star-rating-container">
+            <div class="clickable-stars">
+            <span
+              *ngFor="let star of [1,2,3,4,5]; let i = index"
+              class="star-click"
+              [class.active]="i < newReview.rating"
+              [class.hover]="i < hoverRatingValue"
+              (click)="setRating(i + 1)"
+              (mouseenter)="hoverRating(i + 1)"
+              (mouseleave)="hoverRating(0)">
+              ★
+            </span>
+            </div>
+            <div class="rating-display">
+              {{ newReview.rating }}/5
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'ADD_SUPPLIER.COMMENT' | translate }}</label>
+          <app-input
+            type="textarea"
+            [(ngModel)]="newReview.comment"
+            placeholder="{{ 'ADD_SUPPLIER.WRITE_OPINION' | translate }}"
+            [fullWidth]="true">
+          </app-input>
+        </div>
+
+        <app-button
+          label="{{ 'ADD_SUPPLIER.PUBLISH_REVIEW' | translate }}"
+          variant="primary"
+          [loading]="isLoading"
+          [fullWidth]="true"
+          (click)="submitReview()">
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificación -->
+  <app-notification
+    [show]="notification.show"
+    [message]="notification.message"
+    [type]="notification.type"
+    [autoClose]="true"
+    (close)="closeNotification()">
+  </app-notification>
 </div>
