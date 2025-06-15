@@ -7,11 +7,12 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { filter } from 'rxjs/operators';
 import {TranslateModule} from '@ngx-translate/core';
 import { TranslateService } from '@ngx-translate/core';
+import {SmartLogoComponent} from '../../../core/components/smart-logo/smart-logo.component';
 
 @Component({
   selector: 'app-businessman-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule,TranslateModule],
+  imports: [CommonModule, RouterModule, MatIconModule, TranslateModule, SmartLogoComponent],
   templateUrl: './businessman-layout.component.html',
   styleUrls: ['./businessman-layout.component.css']
 })

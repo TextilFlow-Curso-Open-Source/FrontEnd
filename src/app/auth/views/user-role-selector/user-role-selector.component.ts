@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
+import {SmartLogoComponent} from '../../../core/components/smart-logo/smart-logo.component';
 
 @Component({
   selector: 'app-user-role-selector',
   standalone: true,
-  imports: [CommonModule, RouterModule, AppButtonComponent],
+  imports: [CommonModule, RouterModule, AppButtonComponent, SmartLogoComponent],
   templateUrl: './user-role-selector.component.html',
   styleUrls: ['./user-role-selector.component.css']
 })

@@ -1,5 +1,4 @@
 // business-request.component.ts
-// Cambia el nombre a BusinessRequestsComponent para que coincida con app.routes.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SupplierRequestService } from '../../services/supplier-request-service.service';
@@ -7,7 +6,7 @@ import { BusinessmanService } from '../../../businessman/services/businessman.se
 import { AuthService } from '../../../auth/services/auth.service';
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
-import {TranslateModule} from "@ngx-translate/core";
+import { TranslateModule } from "@ngx-translate/core";
 
 @Component({
   selector: 'app-business-request',
@@ -21,7 +20,7 @@ import {TranslateModule} from "@ngx-translate/core";
   templateUrl: './business-request.component.html',
   styleUrls: ['./business-request.component.css']
 })
-export class BusinessRequestsComponent implements OnInit { // Cambiado a plural
+export class BusinessRequestsComponent implements OnInit {
   // Control de pestañas
   activeTab: 'current' | 'new' = 'current';
 
@@ -58,6 +57,7 @@ export class BusinessRequestsComponent implements OnInit { // Cambiado a plural
 
   setActiveTab(tab: 'current' | 'new') {
     this.activeTab = tab;
+    this.selectedBusinessId = null; // Reset expansion when changing tabs
     this.loadRequests();
   }
 
@@ -94,10 +94,8 @@ export class BusinessRequestsComponent implements OnInit { // Cambiado a plural
         // Para cada solicitud, obtener información del empresario
         let loadedCount = 0;
         this.requests.forEach(request => {
-          // CORREGIDO: Cambiar callback por Observable
           this.businessmanService.getProfileByUserId(request.businessmanId).subscribe({
             next: (profile: any) => {
-              // Asignar el perfil directamente (no es un array)
               if (profile) {
                 this.requestsWithDetails.push({
                   ...request,
@@ -108,11 +106,15 @@ export class BusinessRequestsComponent implements OnInit { // Cambiado a plural
               loadedCount++;
               if (loadedCount === this.requests.length) {
                 this.isLoading = false;
+                // Ordenar por fecha de solicitud (más recientes primero)
+                this.requestsWithDetails.sort((a, b) =>
+                  new Date(b.createdAt || b.requestDate || 0).getTime() -
+                  new Date(a.createdAt || a.requestDate || 0).getTime()
+                );
               }
             },
             error: (error) => {
               console.error('Error al cargar perfil del empresario:', error);
-
               loadedCount++;
               if (loadedCount === this.requests.length) {
                 this.isLoading = false;
@@ -138,8 +140,9 @@ export class BusinessRequestsComponent implements OnInit { // Cambiado a plural
 
     this.requestService.updateRequestStatus(requestId, status).subscribe({
       next: () => {
+        const messageKey = status === 'accepted' ? 'REQUEST_ACCEPTED' : 'REQUEST_REJECTED';
         this.showNotification(
-          `Solicitud ${status === 'accepted' ? 'aceptada' : 'rechazada'} correctamente`,
+          messageKey, // Usar claves de i18n en lugar de texto hardcoded
           'success'
         );
 
@@ -150,7 +153,7 @@ export class BusinessRequestsComponent implements OnInit { // Cambiado a plural
       },
       error: (error: any) => {
         console.error('Error al actualizar solicitud:', error);
-        this.showNotification('Error al actualizar solicitud', 'error');
+        this.showNotification('ERROR_UPDATING_REQUEST', 'error');
         this.isLoading = false;
       }
     });
@@ -161,6 +164,136 @@ export class BusinessRequestsComponent implements OnInit { // Cambiado a plural
       this.selectedBusinessId = null;
     } else {
       this.selectedBusinessId = businessId;
+    }
+  }
+
+  /**
+   * Contactar al empresario (llamar, enviar email, etc.)
+   */
+  contactBusinessman(businessmanProfile: any) {
+    if (!businessmanProfile) {
+      this.showNotification('ERROR_BUSINESSMAN_INFO', 'error');
+      return;
+    }
+
+    // Opción 1: Abrir el cliente de email del usuario
+    if (businessmanProfile.email || businessmanProfile.contactEmail) {
+      const email = businessmanProfile.email || businessmanProfile.contactEmail;
+      const subject = encodeURIComponent('Contacto desde TextilFlow');
+      const body = encodeURIComponent(`Hola ${businessmanProfile.contactName || businessmanProfile.companyName},\n\nMe pongo en contacto contigo desde TextilFlow.\n\nSaludos.`);
+      window.open(`mailto:${email}?subject=${subject}&body=${body}`);
+
+      this.showNotification('CONTACTING_BUSINESSMAN', 'info');
+      return;
+    }
+
+    // Opción 2: Llamar si hay teléfono
+    if (businessmanProfile.phone) {
+      window.open(`tel:${businessmanProfile.phone}`);
+      return;
+    }
+
+    // Si no hay información de contacto
+    this.showNotification('ERROR_NO_CONTACT_INFO', 'warning');
+  }
+
+  /**
+   * Ver historial de solicitudes con este empresario
+   */
+  viewRequestHistory(businessmanId: string) {
+    // Filtrar todas las solicitudes de este empresario
+    const businessmanRequests = this.requests.filter(req => req.businessmanId === businessmanId);
+
+    if (businessmanRequests.length === 0) {
+      this.showNotification('NO_REQUEST_HISTORY', 'info');
+      return;
+    }
+
+    // Por ahora, mostrar información básica en consola
+    // TODO: Implementar modal o navegación a página de historial
+    console.log('Historial de solicitudes:', businessmanRequests);
+
+    // Mostrar notificación temporal
+    this.showNotification(
+      `Historial encontrado: ${businessmanRequests.length} solicitudes`,
+      'info'
+    );
+
+    // Aquí podrías:
+    // 1. Abrir un modal con el historial
+    // 2. Navegar a una página dedicada
+    // 3. Expandir una sección en el mismo componente
+  }
+
+  /**
+   * Enviar mensaje directo al empresario
+   */
+  sendMessage(businessmanProfile: any) {
+    if (!businessmanProfile) {
+      this.showNotification('ERROR_BUSINESSMAN_INFO', 'error');
+      return;
+    }
+
+    // Por ahora, usar email como método de mensaje
+    // TODO: Implementar sistema de mensajería interno
+    this.contactBusinessman(businessmanProfile);
+
+    // Alternativa: Abrir WhatsApp si hay teléfono
+    /*
+    if (businessmanProfile.phone) {
+      const message = encodeURIComponent('Hola, me pongo en contacto desde TextilFlow');
+      window.open(`https://wa.me/${businessmanProfile.phone}?text=${message}`);
+      this.showNotification('MESSAGE_SENT', 'success');
+    }
+    */
+  }
+
+  /**
+   * Obtener información adicional del empresario si es necesario
+   */
+  getBusinessmanDetails(businessmanId: string) {
+    return this.requestsWithDetails.find(req => req.businessmanId === businessmanId)?.businessmanProfile;
+  }
+
+  /**
+   * Formatear fecha para mostrar
+   */
+  formatDate(date: string | Date): string {
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
+
+  /**
+   * Determinar el estado visual de la solicitud
+   */
+  getRequestStatus(request: any): string {
+    switch (request.status) {
+      case 'pending': return 'STATUS_PENDING';
+      case 'accepted': return 'STATUS_ACCEPTED';
+      case 'rejected': return 'STATUS_REJECTED';
+      case 'in_progress': return 'STATUS_IN_PROGRESS';
+      case 'completed': return 'STATUS_COMPLETED';
+      default: return 'STATUS_PENDING';
+    }
+  }
+
+  /**
+   * Determinar urgencia de la solicitud
+   */
+  getUrgencyLevel(request: any): string {
+    if (!request.urgency) return '';
+
+    switch (request.urgency.toLowerCase()) {
+      case 'low': return 'URGENCY_LOW';
+      case 'medium': return 'URGENCY_MEDIUM';
+      case 'high': return 'URGENCY_HIGH';
+      case 'urgent': return 'URGENCY_URGENT';
+      default: return request.urgency;
     }
   }
 

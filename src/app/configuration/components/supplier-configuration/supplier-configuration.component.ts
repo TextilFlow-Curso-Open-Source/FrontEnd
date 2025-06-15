@@ -1,15 +1,18 @@
 // src/app/configuration/components/supplier-configuration/supplier-configuration.component.ts
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfigurationService } from '../../services/configuration.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { Configuration } from '../../models/configuration.entity';
 import { AppInputComponent } from '../../../core/components/app-input/app-input.component';
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
+import { ThemeSwitcherComponent } from '../../../core/components/theme-switcher/theme-switcher.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-supplier-configuration',
@@ -20,19 +23,20 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     AppInputComponent,
     AppButtonComponent,
     AppNotificationComponent,
+    ThemeSwitcherComponent,
     TranslateModule
   ],
   templateUrl: './supplier-configuration.component.html',
   styleUrls: ['./supplier-configuration.component.css']
 })
-export class SupplierConfigurationComponent implements OnInit {
+export class SupplierConfigurationComponent implements OnInit, OnDestroy {
   // Usuario actual
   currentUserId: string = '';
 
   // Configuración
   configuration: Configuration | null = null;
 
-  // Opciones para los selectores según el formato requerido por app-input
+  // Opciones para los selectores
   languageOptions = [
     { label: 'Español', value: 'es' },
     { label: 'English', value: 'en' }
@@ -41,11 +45,6 @@ export class SupplierConfigurationComponent implements OnInit {
   batchCodeOptions = [
     { label: 'Automático', value: 'automatic' },
     { label: 'Manual', value: 'manual' }
-  ];
-
-  viewModeOptions = [
-    { label: 'Modo claro', value: 'light' },
-    { label: 'Modo oscuro', value: 'dark' }
   ];
 
   // Estado de carga
@@ -58,27 +57,29 @@ export class SupplierConfigurationComponent implements OnInit {
     type: 'success' as 'success' | 'error' | 'warning' | 'info'
   };
 
+  private subscriptions = new Subscription();
+
   constructor(
     private configurationService: ConfigurationService,
     private authService: AuthService,
+    private themeService: ThemeService,
     private translateService: TranslateService
   ) {
-    // Definir idiomas disponibles
+    // Configurar idiomas
     this.translateService.addLangs(['es', 'en']);
-    // Idioma por defecto
     this.translateService.setDefaultLang('es');
-
-    // AÑADIR: cargar activamente el idioma por defecto
     this.translateService.use('es');
 
-    // AÑADIR: suscribirse a cambios de traducción para depuración
-    this.translateService.get(['CONFIGURATION.AUTOMATIC', 'CONFIGURATION.MANUAL']).subscribe(
-      (translations) => {
-        console.log('Traducciones cargadas:', translations);
-      },
-      (error) => {
-        console.error('Error al cargar traducciones:', error);
-      }
+    // Suscribirse a traducciones
+    this.subscriptions.add(
+      this.translateService.get(['CONFIGURATION.AUTOMATIC', 'CONFIGURATION.MANUAL']).subscribe(
+        (translations) => {
+          console.log('Traducciones cargadas:', translations);
+        },
+        (error) => {
+          console.error('Error al cargar traducciones:', error);
+        }
+      )
     );
   }
 
@@ -89,13 +90,16 @@ export class SupplierConfigurationComponent implements OnInit {
       this.loadConfiguration();
     }
 
-    // Cargar idioma guardado en localStorage
+    // Cargar idioma guardado
     const savedLanguage = localStorage.getItem('userLanguage');
     if (savedLanguage && this.translateService.getLangs().includes(savedLanguage)) {
       this.translateService.use(savedLanguage);
-      // Actualizar opciones con traducciones
       this.updateTranslatedOptions();
     }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   // Método para cambiar el idioma
@@ -103,36 +107,21 @@ export class SupplierConfigurationComponent implements OnInit {
     this.translateService.use(langCode);
     localStorage.setItem('userLanguage', langCode);
 
-    // Si tenemos configuración, actualizar
     if (this.configuration) {
       this.configuration.language = langCode;
     }
 
-    // Actualizar opciones con traducciones
     this.updateTranslatedOptions();
   }
 
   // Actualizar opciones con traducciones
   updateTranslatedOptions(): void {
-    console.log('Actualizando opciones traducidas...');
-
-    // MODIFICAR: agregar comprobaciones de fallos
     const automatic = this.translateService.instant('CONFIGURATION.AUTOMATIC');
     const manual = this.translateService.instant('CONFIGURATION.MANUAL');
-    const lightMode = this.translateService.instant('CONFIGURATION.LIGHT_MODE');
-    const darkMode = this.translateService.instant('CONFIGURATION.DARK_MODE');
 
-    console.log('Traducciones obtenidas:', { automatic, manual, lightMode, darkMode });
-
-    // Comprobar si las traducciones funcionaron o devolvieron las claves sin traducir
     this.batchCodeOptions = [
       { label: automatic !== 'CONFIGURATION.AUTOMATIC' ? automatic : 'Automático', value: 'automatic' },
       { label: manual !== 'CONFIGURATION.MANUAL' ? manual : 'Manual', value: 'manual' }
-    ];
-
-    this.viewModeOptions = [
-      { label: lightMode !== 'CONFIGURATION.LIGHT_MODE' ? lightMode : 'Modo claro', value: 'light' },
-      { label: darkMode !== 'CONFIGURATION.DARK_MODE' ? darkMode : 'Modo oscuro', value: 'dark' }
     ];
   }
 
@@ -143,30 +132,22 @@ export class SupplierConfigurationComponent implements OnInit {
       next: (configs) => {
         if (Array.isArray(configs) && configs.length > 0) {
           this.configuration = configs[0];
-          // Aplicar idioma de la configuración
-          if (this.configuration && this.configuration.language) {
-            this.changeLanguage(this.configuration.language);
-          }
+          this.applyConfigurationSettings();
         } else if (!Array.isArray(configs)) {
           this.configuration = configs;
-          // Aplicar idioma de la configuración
-          if (this.configuration && this.configuration.language) {
-            this.changeLanguage(this.configuration.language);
-          }
+          this.applyConfigurationSettings();
         } else {
-          // Crear configuración por defecto si no existe
+          // Crear configuración por defecto
           this.configuration = new Configuration({
             userId: this.currentUserId,
             userType: 'supplier',
-            language: 'es', // Cambiado a código de idioma
+            language: 'es',
             batchCodeFormat: 'automatic',
-            viewMode: 'light',
+            viewMode: 'auto', // Cambiado a 'auto' por defecto
             createdAt: new Date().toISOString()
           });
-
           this.saveConfiguration();
         }
-
         this.isLoading = false;
       },
       error: (error) => {
@@ -174,17 +155,32 @@ export class SupplierConfigurationComponent implements OnInit {
         this.showNotification(this.translateService.instant('CONFIGURATION.ERROR_LOAD'), 'error');
         this.isLoading = false;
 
-        // Crear configuración por defecto en caso de error
+        // Configuración por defecto en caso de error
         this.configuration = new Configuration({
           userId: this.currentUserId,
           userType: 'supplier',
-          language: 'es', // Cambiado a código de idioma
+          language: 'es',
           batchCodeFormat: 'automatic',
-          viewMode: 'light',
+          viewMode: 'auto',
           createdAt: new Date().toISOString()
         });
       }
     });
+  }
+
+  // Aplicar configuraciones cargadas
+  private applyConfigurationSettings(): void {
+    if (!this.configuration) return;
+
+    // Aplicar idioma
+    if (this.configuration.language) {
+      this.changeLanguage(this.configuration.language);
+    }
+
+    // Aplicar tema
+    if (this.configuration.viewMode) {
+      this.themeService.syncFromConfiguration(this.configuration.viewMode);
+    }
   }
 
   saveConfiguration(): void {
@@ -192,7 +188,8 @@ export class SupplierConfigurationComponent implements OnInit {
 
     this.isLoading = true;
 
-    // Actualizar fecha
+    // Sincronizar el tema actual con la configuración
+    this.configuration.viewMode = this.themeService.getThemeForConfiguration();
     this.configuration.updatedAt = new Date().toISOString();
 
     if (this.configuration.id) {
@@ -226,11 +223,9 @@ export class SupplierConfigurationComponent implements OnInit {
   }
 
   cancel(): void {
-    // Recargar la configuración original
     this.loadConfiguration();
   }
 
-  // Método auxiliar para mostrar notificaciones
   showNotification(message: string, type: 'success' | 'error' | 'warning' | 'info'): void {
     this.notification = {
       show: true,

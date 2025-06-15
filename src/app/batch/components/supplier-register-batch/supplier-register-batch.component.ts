@@ -151,6 +151,24 @@ export class SupplierRegisterBatchComponent implements OnInit {
     }
   }
 
+  // Método para obtener el icono según el estado
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case STATUS.PENDIENTE:
+        return 'pending';
+      case STATUS.ACEPTADO:
+        return 'check_circle';
+      case STATUS.RECHAZADO:
+        return 'cancel';
+      case STATUS.POR_ENVIAR:
+        return 'schedule_send';
+      case STATUS.ENVIADO:
+        return 'local_shipping';
+      default:
+        return 'help_outline';
+    }
+  }
+
   onFileChange(event: any): void {
     const file = event.target.files[0];
     if (file && file.type.match(/image\/*/) && this.form) {
@@ -216,6 +234,7 @@ export class SupplierRegisterBatchComponent implements OnInit {
 
     if (this.form.invalid) {
       this.showNotification('Por favor complete todos los campos requeridos', 'warning');
+      this.markFormGroupTouched();
       return;
     }
 
@@ -283,6 +302,14 @@ export class SupplierRegisterBatchComponent implements OnInit {
     this.setActiveTab('pending');
     this.form.reset();
     this.initForm();
+  }
+
+  // Método auxiliar para marcar todos los campos como tocados (para mostrar errores)
+  private markFormGroupTouched(): void {
+    Object.keys(this.form.controls).forEach(key => {
+      const control = this.form.get(key);
+      control?.markAsTouched();
+    });
   }
 
   showNotification(message: string, type: 'success' | 'error' | 'warning' | 'info'): void {

@@ -8,6 +8,7 @@
   <div *ngIf="!isLoading && configuration">
     <h2>{{ 'CONFIGURATION.TITLE' | translate }}</h2>
 
+    <!-- Configuración de idioma -->
     <div class="form-group">
       <label>{{ 'CONFIGURATION.LANGUAGE' | translate }}</label>
       <div class="language-options">
@@ -22,6 +23,7 @@
       </div>
     </div>
 
+    <!-- Configuración de formato de código de lote -->
     <div class="form-group">
       <app-input
         [label]="'CONFIGURATION.BATCH_CODE' | translate"
@@ -32,16 +34,18 @@
       </app-input>
     </div>
 
+    <!-- Theme Switcher - Reemplaza el select anterior -->
     <div class="form-group">
-      <app-input
-        [label]="'CONFIGURATION.VIEW_MODE' | translate"
-        type="select"
-        [options]="viewModeOptions"
-        [(ngModel)]="configuration.viewMode"
+      <label>{{ 'CONFIGURATION.VIEW_MODE' | translate }}</label>
+      <app-theme-switcher
+        variant="buttons"
+        size="medium"
+        [showLabels]="true"
         [fullWidth]="true">
-      </app-input>
+      </app-theme-switcher>
     </div>
 
+    <!-- Botones de acción -->
     <div class="button-container">
       <app-button
         [label]="'COMMON.SAVE' | translate"

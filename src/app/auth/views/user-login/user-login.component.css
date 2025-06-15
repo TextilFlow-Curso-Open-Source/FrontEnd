@@ -14,18 +14,6 @@
   overflow-y: auto;
 }
 
-/* Logo */
-.logo {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-}
-
-.logo img {
-  width: 170px;
-  height: auto;
-}
-
 /* Contenedor del formulario */
 .form-container {
   max-width: 400px;
@@ -108,15 +96,6 @@ app-button {
 @media (max-width: 576px) {
   .content-col {
     padding: 1.5rem;
-  }
-
-  .logo {
-    top: 1.5rem;
-    left: 1.5rem;
-  }
-
-  .logo img {
-    width: 60px;
   }
 
   .form-container {
