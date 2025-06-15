@@ -7,11 +7,12 @@ import { AuthService } from '../../services/auth.service';
 import { AppInputComponent } from '../../../core/components/app-input/app-input.component';
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { HttpClient } from '@angular/common/http';
+import {SmartLogoComponent} from '../../../core/components/smart-logo/smart-logo.component';
 
 @Component({
   selector: 'app-user-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, AppInputComponent, AppButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, AppInputComponent, AppButtonComponent, SmartLogoComponent],
   templateUrl: './user-register.component.html',
   styleUrls: ['./user-register.component.css']
 })

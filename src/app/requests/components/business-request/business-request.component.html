@@ -5,28 +5,31 @@
       class="tab-button"
       [class.active]="activeTab === 'current'"
       (click)="setActiveTab('current')">
-      {{ 'SUPPLIER.CURRENT_BUSINESSES' | translate }}
+      {{ 'BUSINESS_REQUEST.CURRENT_BUSINESSES' | translate }}
     </div>
     <div
       class="tab-button"
       [class.active]="activeTab === 'new'"
       (click)="setActiveTab('new')">
-      {{ 'SUPPLIER.NEW_BUSINESSES' | translate }}
+      {{ 'BUSINESS_REQUEST.NEW_REQUESTS' | translate }}
     </div>
   </div>
 
   <div *ngIf="isLoading" class="loading-indicator">
-    <p>{{ 'COMMON.LOADING' | translate }}</p>
+    <p>{{ 'BUSINESS_REQUEST.LOADING' | translate }}</p>
   </div>
 
   <div *ngIf="requestsWithDetails.length === 0 && !isLoading" class="no-requests">
-    <p>{{ 'SUPPLIER.NO_REQUESTS' | translate }}</p>
+    <p *ngIf="activeTab === 'current'">{{ 'BUSINESS_REQUEST.NO_CURRENT_BUSINESSES' | translate }}</p>
+    <p *ngIf="activeTab === 'new'">{{ 'BUSINESS_REQUEST.NO_NEW_REQUESTS' | translate }}</p>
   </div>
 
   <div class="requests-list">
     <div *ngFor="let request of requestsWithDetails" class="business-item">
       <div class="business-header" (click)="toggleDetails(request.businessmanId)">
-        <h3 class="business-name">{{ request.businessmanProfile?.companyName || ('COMMON.NO_NAME_COMPANY' | translate) }}</h3>
+        <h3 class="business-name">
+          {{ request.businessmanProfile?.companyName || ('BUSINESS_REQUEST.COMPANY_WITHOUT_NAME' | translate) }}
+        </h3>
         <div class="dropdown-arrow" [class.expanded]="selectedBusinessId === request.businessmanId">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="6 9 12 15 18 9"></polyline>
@@ -36,13 +39,20 @@
 
       <div class="business-basic-info">
         <div class="business-contact">
-          <img [src]="request.businessmanProfile?.logo || 'assets/default-avatar.png'" alt="Logo" class="business-avatar">
-          <span class="business-email">{{ request.businessmanId }}&#64;gmail.com</span>
+          <img [src]="request.businessmanProfile?.logo || 'assets/default-avatar.png'" alt="{{ 'BUSINESS_REQUEST.COMPANY_LOGO' | translate }}" class="business-avatar">
+          <div class="contact-info">
+            <div class="business-name-small">
+              {{ request.businessmanProfile?.contactName || request.businessmanProfile?.companyName || ('BUSINESS_REQUEST.UNKNOWN_CONTACT' | translate) }}
+            </div>
+            <div class="business-email">
+              {{ request.businessmanProfile?.email || request.businessmanProfile?.contactEmail || ('BUSINESS_REQUEST.EMAIL_NOT_AVAILABLE' | translate) }}
+            </div>
+          </div>
         </div>
 
         <app-button
           *ngIf="activeTab === 'new'"
-          label="{{ 'SUPPLIER.ACCEPT_REQUEST' | translate }}"
+          label="{{ 'BUSINESS_REQUEST.ACCEPT_REQUEST' | translate }}"
           variant="primary"
           [loading]="isLoading"
           (click)="updateRequestStatus(request.id, 'accepted')">
@@ -52,40 +62,105 @@
       <!-- Detalles expandibles del empresario -->
       <div *ngIf="selectedBusinessId === request.businessmanId" class="business-details">
         <div class="request-details">
-          <p><strong>RUC:</strong> {{ request.businessmanProfile?.ruc || ('SUPPLIER.NO_SPECIFIED' | translate) }}</p>
-          <p><strong>{{ 'SUPPLIER.BUSINESS_TYPE' | translate }}:</strong> {{ request.businessmanProfile?.businessType || ('SUPPLIER.NO_SPECIFIED' | translate) }}</p>
-          <p><strong>{{ 'SUPPLIER.INDUSTRY' | translate }}:</strong> {{ request.businessmanProfile?.industry || ('SUPPLIER.NO_SPECIFIED' | translate) }}</p>
-          <p><strong>{{ 'SUPPLIER.WEBSITE' | translate }}:</strong>
+          <p><strong>{{ 'BUSINESS_REQUEST.RUC' | translate }}:</strong>
+            {{ request.businessmanProfile?.ruc || ('BUSINESS_REQUEST.NOT_SPECIFIED' | translate) }}
+          </p>
+          <p><strong>{{ 'BUSINESS_REQUEST.BUSINESS_TYPE' | translate }}:</strong>
+            {{ request.businessmanProfile?.businessType || ('BUSINESS_REQUEST.NOT_SPECIFIED' | translate) }}
+          </p>
+          <p><strong>{{ 'BUSINESS_REQUEST.INDUSTRY' | translate }}:</strong>
+            {{ request.businessmanProfile?.industry || ('BUSINESS_REQUEST.NOT_SPECIFIED' | translate) }}
+          </p>
+          <p><strong>{{ 'BUSINESS_REQUEST.WEBSITE' | translate }}:</strong>
             <a *ngIf="request.businessmanProfile?.website"
                href="{{ request.businessmanProfile.website }}"
                target="_blank">
               {{ request.businessmanProfile.website }}
             </a>
-            <span *ngIf="!request.businessmanProfile?.website">{{ 'SUPPLIER.NO_SPECIFIED' | translate }}</span>
+            <span *ngIf="!request.businessmanProfile?.website">{{ 'BUSINESS_REQUEST.NOT_SPECIFIED' | translate }}</span>
+          </p>
+          <p><strong>{{ 'BUSINESS_REQUEST.PHONE' | translate }}:</strong>
+            {{ request.businessmanProfile?.phone || ('BUSINESS_REQUEST.NOT_SPECIFIED' | translate) }}
+          </p>
+          <p><strong>{{ 'BUSINESS_REQUEST.LOCATION' | translate }}:</strong>
+            {{ request.businessmanProfile?.location || request.businessmanProfile?.address || ('BUSINESS_REQUEST.NOT_SPECIFIED' | translate) }}
           </p>
         </div>
 
         <div *ngIf="request.message" class="request-message">
-          <h4>{{ 'REQUEST.MESSAGE' | translate }}:</h4>
+          <h4>{{ 'BUSINESS_REQUEST.REQUEST_MESSAGE' | translate }}:</h4>
           <p>{{ request.message }}</p>
         </div>
 
         <!-- Información específica de lotes solicitados -->
         <div *ngIf="request.batchType || request.color || request.quantity || request.address" class="batch-details">
-          <h4>{{ 'SUPPLIER.REQUEST_DETAILS' | translate }}:</h4>
-          <p *ngIf="request.batchType"><strong>{{ 'BATCH.FABRIC_TYPE' | translate }}:</strong> {{ request.batchType }}</p>
-          <p *ngIf="request.color"><strong>{{ 'BATCH.COLOR' | translate }}:</strong> {{ request.color }}</p>
-          <p *ngIf="request.quantity"><strong>{{ 'BATCH.QUANTITY' | translate }}:</strong> {{ request.quantity }}</p>
-          <p *ngIf="request.address"><strong>{{ 'BATCH.ADDRESS' | translate }}:</strong> {{ request.address }}</p>
+          <h4>{{ 'BUSINESS_REQUEST.REQUEST_DETAILS' | translate }}:</h4>
+          <p *ngIf="request.batchType">
+            <strong>{{ 'BUSINESS_REQUEST.FABRIC_TYPE' | translate }}:</strong> {{ request.batchType }}
+          </p>
+          <p *ngIf="request.color">
+            <strong>{{ 'BUSINESS_REQUEST.COLOR' | translate }}:</strong> {{ request.color }}
+          </p>
+          <p *ngIf="request.quantity">
+            <strong>{{ 'BUSINESS_REQUEST.QUANTITY' | translate }}:</strong> {{ request.quantity }}
+          </p>
+          <p *ngIf="request.address">
+            <strong>{{ 'BUSINESS_REQUEST.DELIVERY_ADDRESS' | translate }}:</strong> {{ request.address }}
+          </p>
+          <p *ngIf="request.requestDate">
+            <strong>{{ 'BUSINESS_REQUEST.REQUEST_DATE' | translate }}:</strong> {{ request.requestDate | date:'dd/MM/yyyy' }}
+          </p>
+          <p *ngIf="request.urgency">
+            <strong>{{ 'BUSINESS_REQUEST.URGENCY_LEVEL' | translate }}:</strong> {{ request.urgency }}
+          </p>
+        </div>
+
+        <!-- Información adicional del empresario -->
+        <div *ngIf="request.businessmanProfile?.description || request.businessmanProfile?.yearsInBusiness" class="additional-info">
+          <h4>{{ 'BUSINESS_REQUEST.ADDITIONAL_INFO' | translate }}:</h4>
+          <p *ngIf="request.businessmanProfile?.description">
+            <strong>{{ 'BUSINESS_REQUEST.COMPANY_DESCRIPTION' | translate }}:</strong>
+            {{ request.businessmanProfile.description }}
+          </p>
+          <p *ngIf="request.businessmanProfile?.yearsInBusiness">
+            <strong>{{ 'BUSINESS_REQUEST.YEARS_IN_BUSINESS' | translate }}:</strong>
+            {{ request.businessmanProfile.yearsInBusiness }} {{ 'BUSINESS_REQUEST.YEARS' | translate }}
+          </p>
+          <p *ngIf="request.businessmanProfile?.employeeCount">
+            <strong>{{ 'BUSINESS_REQUEST.EMPLOYEE_COUNT' | translate }}:</strong>
+            {{ request.businessmanProfile.employeeCount }} {{ 'BUSINESS_REQUEST.EMPLOYEES' | translate }}
+          </p>
         </div>
 
         <!-- Acciones adicionales para solicitudes pendientes -->
         <div *ngIf="activeTab === 'new'" class="request-actions">
           <app-button
-            label="{{ 'COMMON.REJECT' | translate }}"
+            label="{{ 'BUSINESS_REQUEST.REJECT' | translate }}"
             variant="secondary"
             [loading]="isLoading"
             (click)="updateRequestStatus(request.id, 'rejected')">
+          </app-button>
+          <app-button
+            label="{{ 'BUSINESS_REQUEST.CONTACT_BUSINESSMAN' | translate }}"
+            variant="primary"
+            icon="phone"
+            (click)="contactBusinessman(request.businessmanProfile)">
+          </app-button>
+        </div>
+
+        <!-- Acciones para empresas actuales -->
+        <div *ngIf="activeTab === 'current'" class="current-actions">
+          <app-button
+            label="{{ 'BUSINESS_REQUEST.VIEW_HISTORY' | translate }}"
+            variant="primary"
+            icon="history"
+            (click)="viewRequestHistory(request.businessmanId)">
+          </app-button>
+          <app-button
+            label="{{ 'BUSINESS_REQUEST.SEND_MESSAGE' | translate }}"
+            variant="primary"
+            icon="send"
+            (click)="sendMessage(request.businessmanProfile)">
           </app-button>
         </div>
       </div>

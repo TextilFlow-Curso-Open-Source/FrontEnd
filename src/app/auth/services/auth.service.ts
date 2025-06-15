@@ -34,7 +34,7 @@ export class AuthService extends BaseService<User> {
   }
 
   /**
-   * Inicia sesión de usuario y maneja todo automáticamente
+   * Inicia sesión y carga configuraciones del usuario automáticamente
    * @param credentials Credenciales de login
    */
   login(credentials: { email: string, password: string }): void {
@@ -48,8 +48,11 @@ export class AuthService extends BaseService<User> {
           // Guardar sesión
           this.saveSession(token, user);
 
-          // Redirigir según rol
-          this.redirectBasedOnRole(user.role);
+          // Cargar y aplicar configuraciones del usuario INMEDIATAMENTE
+          this.loadUserConfigurations(user.id!).then(() => {
+            // Redirigir según rol después de aplicar configuraciones
+            this.redirectBasedOnRole(user.role);
+          });
         } else {
           console.error('Credenciales incorrectas');
         }
@@ -58,6 +61,66 @@ export class AuthService extends BaseService<User> {
         console.error('Error en login:', error);
       }
     });
+  }
+
+  /**
+   * Carga y aplica las configuraciones del usuario inmediatamente
+   * @param userId ID del usuario
+   */
+  private async loadUserConfigurations(userId: string): Promise<void> {
+    try {
+      console.log('⚙️ Cargando configuraciones del usuario...');
+
+      // Importar servicios dinámicamente
+      const [configModule, themeModule, translateModule] = await Promise.all([
+        import('../../configuration/services/configuration.service'),
+        import('../../core/services/theme.service'),
+        import('@ngx-translate/core')
+      ]);
+
+      const configService = this.injector.get(configModule.ConfigurationService);
+      const themeService = this.injector.get(themeModule.ThemeService);
+      const translateService = this.injector.get(translateModule.TranslateService);
+
+      // Cargar configuración del usuario
+      configService.getByUserId(userId).subscribe({
+        next: (configs: any) => {
+          let userConfig = null;
+
+          if (Array.isArray(configs) && configs.length > 0) {
+            userConfig = configs[0];
+          } else if (!Array.isArray(configs) && configs) {
+            userConfig = configs;
+          }
+
+          if (userConfig) {
+            console.log('📋 Aplicando configuraciones:', userConfig);
+
+            // Aplicar idioma del usuario
+            if (userConfig.language) {
+              translateService.use(userConfig.language);
+              localStorage.setItem('userLanguage', userConfig.language);
+              console.log(`🌍 Idioma aplicado: ${userConfig.language}`);
+            }
+
+            // Aplicar tema del usuario
+            if (userConfig.viewMode) {
+              themeService.setTheme(userConfig.viewMode);
+              console.log(`🎨 Tema aplicado: ${userConfig.viewMode}`);
+            }
+
+            console.log('✅ Configuraciones aplicadas exitosamente');
+          } else {
+            console.log('⚠️ No se encontraron configuraciones, usando por defecto');
+          }
+        },
+        error: (error) => {
+          console.error('❌ Error al cargar configuraciones:', error);
+        }
+      });
+    } catch (error) {
+      console.error('❌ Error al importar servicios:', error);
+    }
   }
 
   /**

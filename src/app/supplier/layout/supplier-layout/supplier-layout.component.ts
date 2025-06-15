@@ -6,11 +6,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../auth/services/auth.service';
 import { filter } from 'rxjs/operators';
 import {TranslateModule, TranslateService} from '@ngx-translate/core';
+import {SmartLogoComponent} from '../../../core/components/smart-logo/smart-logo.component';
 
 @Component({
   selector: 'app-supplier-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule, TranslateModule],
+  imports: [CommonModule, RouterModule, MatIconModule, TranslateModule, SmartLogoComponent],
   templateUrl: './supplier-layout.component.html',
   styleUrls: ['./supplier-layout.component.css']
 })
