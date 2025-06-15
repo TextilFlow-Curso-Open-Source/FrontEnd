@@ -1,21 +1,20 @@
-<!-- businessman-batch.component.html -->
 <div class="batch-container">
   <!-- Vista de tabla -->
   <div *ngIf="view === 'table'">
     <div class="table-header">
-      <h2>Mis Lotes</h2>
+      <h2>{{ 'BATCH.MY_BATCHES' | translate }}</h2>
 
       <div class="search-container">
         <app-input
           type="search"
-          placeholder="Buscar"
+          placeholder="{{ 'COMMON.SEARCH' | translate }}"
           [(ngModel)]="searchTerm"
           (keyup)="filterBatches()"
           [fullWidth]="true">
         </app-input>
 
         <app-button
-          label="Filtro"
+          label="{{ 'COMMON.FILTER' | translate }}"
           variant="primary"
           icon="filter_list"
           (click)="filterBatches()">
@@ -24,22 +23,22 @@
     </div>
 
     <div *ngIf="isLoading" class="loading">
-      Cargando...
+      {{ 'COMMON.LOADING' | translate }}
     </div>
 
     <div *ngIf="!isLoading && filteredBatches.length === 0" class="no-results">
-      <p>No se encontraron lotes que coincidan con tu búsqueda.</p>
+      <p>{{ 'BATCH.NO_MATCHING_BATCHES' | translate }}</p>
     </div>
 
     <table *ngIf="!isLoading && filteredBatches.length > 0" class="batch-table">
       <thead>
       <tr>
-        <th>Código</th>
-        <th>Distribuidor</th>
-        <th>Tipo de Tela</th>
-        <th>Fecha</th>
-        <th>Estado</th>
-        <th>Precio</th>
+        <th>{{ 'BATCH.BATCH_CODE' | translate }}</th>
+        <th>{{ 'BATCH.SUPPLIER' | translate }}</th>
+        <th>{{ 'BATCH.FABRIC_TYPE' | translate }}</th>
+        <th>{{ 'BATCH.DATE' | translate }}</th>
+        <th>{{ 'BATCH.STATUS' | translate }}</th>
+        <th>{{ 'BATCH.PRICE' | translate }}</th>
       </tr>
       </thead>
       <tbody>
@@ -67,67 +66,67 @@
         variant="back"
         (click)="backToTable()">
       </app-button>
-      <h2>Detalle del lote {{ selectedBatch.code }} – {{ selectedBatch.client }}</h2>
+      <h2>{{ 'BATCH.BATCH_DETAIL' | translate }} {{ selectedBatch.code }} – {{ selectedBatch.client }}</h2>
     </div>
 
     <div class="detail-content">
       <div class="detail-grid">
         <div class="detail-item">
-          <label>Código:</label>
+          <label>{{ 'BATCH.BATCH_CODE' | translate }}:</label>
           <div class="detail-value">{{ selectedBatch.code }}</div>
         </div>
 
         <div class="detail-item">
-          <label>Cantidad:</label>
+          <label>{{ 'BATCH.QUANTITY' | translate }}:</label>
           <div class="detail-value">{{ selectedBatch.quantity }}m</div>
         </div>
 
         <div class="detail-item">
-          <label>Cliente:</label>
+          <label>{{ 'BATCH.CLIENT' | translate }}:</label>
           <div class="detail-value">{{ selectedBatch.client }}</div>
         </div>
 
         <div class="detail-item">
-          <label>Precio:</label>
+          <label>{{ 'BATCH.PRICE' | translate }}:</label>
           <div class="detail-value">s/{{ selectedBatch.price }}</div>
         </div>
 
         <div class="detail-item">
-          <label>Tipo de tela:</label>
+          <label>{{ 'BATCH.FABRIC_TYPE' | translate }}:</label>
           <div class="detail-value">{{ selectedBatch.fabricType }}</div>
         </div>
 
         <div class="detail-item">
-          <label>Observaciones:</label>
-          <div class="detail-value">{{ selectedBatch.observations || 'Sin observaciones' }}</div>
+          <label>{{ 'BATCH.OBSERVATIONS' | translate }}:</label>
+          <div class="detail-value">{{ selectedBatch.observations || ('BATCH.NO_OBSERVATIONS' | translate) }}</div>
         </div>
 
         <div class="detail-item">
-          <label>Color del lote:</label>
+          <label>{{ 'BATCH.COLOR' | translate }}:</label>
           <div class="detail-value">{{ selectedBatch.color }}</div>
         </div>
 
         <div class="detail-item">
-          <label>Fecha de registro:</label>
+          <label>{{ 'BATCH.REGISTER_DATE' | translate }}:</label>
           <div class="detail-value">{{ selectedBatch.date | date:'dd/MM/yyyy' }}</div>
         </div>
       </div>
 
       <!-- Mostrar imagen si existe -->
       <div *ngIf="selectedBatch.imageUrl" class="batch-image-container">
-        <img [src]="selectedBatch.imageUrl" alt="Imagen del lote" class="batch-image">
+        <img [src]="selectedBatch.imageUrl" alt="{{ 'BATCH.BATCH_IMAGE' | translate }}" class="batch-image">
       </div>
 
       <!-- Botones de acción solo si el lote está en estado enviado -->
       <div *ngIf="canApproveOrReject(selectedBatch)" class="action-buttons">
         <app-button
-          label="Aprobado"
+          label="{{ 'BATCH.APPROVE' | translate }}"
           variant="primary"
           (click)="approveBatch()">
         </app-button>
 
         <app-button
-          label="Rechazado"
+          label="{{ 'BATCH.REJECT' | translate }}"
           variant="secondary"
           (click)="showRejectForm()">
         </app-button>
@@ -144,22 +143,22 @@
         variant="back"
         (click)="view = 'detail'">
       </app-button>
-      <h2>Motivo del rechazo</h2>
+      <h2>{{ 'BATCH.REJECT_REASON' | translate }}</h2>
     </div>
 
     <div class="reject-content">
       <div class="form-group">
-        <label>Observaciones:</label>
+        <label>{{ 'BATCH.OBSERVATIONS' | translate }}:</label>
         <app-input
           type="textarea"
           [(ngModel)]="rejectReason"
-          placeholder="Ingrese el motivo del rechazo"
+          placeholder="{{ 'BATCH.ENTER_REASON' | translate }}"
           [fullWidth]="true">
         </app-input>
       </div>
 
       <div class="form-group">
-        <label>Evidencia:</label>
+        <label>{{ 'BATCH.EVIDENCE' | translate }}:</label>
         <div class="upload-container">
           <input
             type="file"
@@ -169,7 +168,7 @@
             style="display: none">
 
           <div class="image-preview" *ngIf="rejectImage">
-            <img [src]="rejectImage" alt="Vista previa" class="preview-image">
+            <img [src]="rejectImage" alt="{{ 'BATCH.PREVIEW' | translate }}" class="preview-image">
           </div>
 
           <div *ngIf="!rejectImage" class="upload-placeholder" (click)="triggerFileInput()">
@@ -180,7 +179,7 @@
 
       <div class="form-actions">
         <app-button
-          label="Enviar"
+          label="{{ 'COMMON.SEND' | translate }}"
           variant="primary"
           [loading]="isLoading"
           [disabled]="!rejectReason.trim()"

@@ -8,11 +8,11 @@ export const OBSERVATION_STATUS = {
 export type ObservationStatus = typeof OBSERVATION_STATUS[keyof typeof OBSERVATION_STATUS];
 
 export class Observation {
-  id?: number;
-  batchId: number;
+  id?: string;              // ← CAMBIO: number → string
+  batchId: string;          // ← CAMBIO: number → string
   batchCode: string;
-  businessmanId: number;
-  supplierId: number;
+  businessmanId: string;    // ← CAMBIO: number → string
+  supplierId: string;       // ← CAMBIO: number → string
   reason: string;
   imageUrl?: string;
   status: ObservationStatus;
@@ -20,11 +20,11 @@ export class Observation {
   updatedAt?: string;
 
   constructor(data: {
-    id?: number;
-    batchId: number;
+    id?: string;            // ← CAMBIO: number → string
+    batchId: string;        // ← CAMBIO: number → string
     batchCode: string;
-    businessmanId: number;
-    supplierId: number;
+    businessmanId: string;  // ← CAMBIO: number → string
+    supplierId: string;     // ← CAMBIO: number → string
     reason: string;
     imageUrl?: string;
     status: ObservationStatus;

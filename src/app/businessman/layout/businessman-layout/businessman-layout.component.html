@@ -2,7 +2,7 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="logo-container">
-      <div class="logo"></div>
+      <app-smart-logo type="sidebar"></app-smart-logo>
     </div>
 
     <nav class="sidebar-menu">
@@ -11,7 +11,7 @@
             [ngClass]="['menu-item', isRouteActive(item.route) ? 'active' : '']"
             (click)="navigateTo(item.route)">
           <mat-icon class="menu-icon">{{ item.icon }}</mat-icon>
-          <span>{{ item.label }}</span>
+          <span>{{ item.label | translate }}</span>
         </li>
       </ul>
     </nav>
@@ -26,7 +26,7 @@
             [ngClass]="['menu-item', isRouteActive(item.route) ? 'active' : '']"
             (click)="navigateTo(item.route)">
           <mat-icon class="menu-icon">{{ item.icon }}</mat-icon>
-          <span>{{ item.label }}</span>
+          <span>{{ item.label | translate }}</span>
         </li>
       </ul>
     </nav>
@@ -36,7 +36,7 @@
   <div class="main-wrapper">
     <!-- Barra superior con título -->
     <header class="header-bar">
-      <h1 class="page-title">{{ currentPageTitle }}</h1>
+      <h1 class="page-title">{{ currentPageTitle | translate }}</h1>
     </header>
 
     <div class="content-area">

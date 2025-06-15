@@ -15,6 +15,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { AppInputComponent } from '../../../core/components/app-input/app-input.component';
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-supplier-batch',
@@ -31,7 +32,8 @@ import { AppNotificationComponent } from '../../../core/components/app-notificat
     MatButtonModule,
     AppInputComponent,
     AppButtonComponent,
-    AppNotificationComponent
+    AppNotificationComponent,
+    TranslateModule
   ]
 })
 export class SupplierBatchComponent implements OnInit {
@@ -49,7 +51,6 @@ export class SupplierBatchComponent implements OnInit {
   // Estados disponibles para el selector
   statusOptions = [
     { label: 'Aceptado', value: STATUS.ACEPTADO },
-    { label: 'Completado', value: STATUS.COMPLETADO },
     { label: 'Por Enviar', value: STATUS.POR_ENVIAR },
     { label: 'Enviado', value: STATUS.ENVIADO }
   ];
@@ -57,7 +58,7 @@ export class SupplierBatchComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  currentUserId!: number;
+  currentUserId!: string;
 
   constructor(
     private batchService: BatchService,
@@ -66,11 +67,16 @@ export class SupplierBatchComponent implements OnInit {
     private fb: FormBuilder
   ) {}
 
+
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();
-    if (currentUser) {
+    if (currentUser && currentUser.id) {
       this.currentUserId = currentUser.id;
       this.loadBatches();
+    } else {
+      console.error('No hay usuario autenticado o falta ID');
+      // Redirigir al login si no hay usuario
+      this.authService.logout();
     }
   }
 

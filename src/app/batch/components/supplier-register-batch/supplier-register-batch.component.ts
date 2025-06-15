@@ -12,6 +12,7 @@ import { AppInputComponent } from '../../../core/components/app-input/app-input.
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
 import { MatIconModule } from '@angular/material/icon';
+import {TranslateModule} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-supplier-register-batch',
@@ -24,7 +25,8 @@ import { MatIconModule } from '@angular/material/icon';
     AppInputComponent,
     AppButtonComponent,
     AppNotificationComponent,
-    MatIconModule
+    MatIconModule,
+    TranslateModule
   ]
 })
 export class SupplierRegisterBatchComponent implements OnInit {
@@ -58,7 +60,7 @@ export class SupplierRegisterBatchComponent implements OnInit {
   imagePreview: string = '';
 
   // Usuario actual
-  currentUserId: number = 0;
+  currentUserId: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -149,6 +151,24 @@ export class SupplierRegisterBatchComponent implements OnInit {
     }
   }
 
+  // Método para obtener el icono según el estado
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case STATUS.PENDIENTE:
+        return 'pending';
+      case STATUS.ACEPTADO:
+        return 'check_circle';
+      case STATUS.RECHAZADO:
+        return 'cancel';
+      case STATUS.POR_ENVIAR:
+        return 'schedule_send';
+      case STATUS.ENVIADO:
+        return 'local_shipping';
+      default:
+        return 'help_outline';
+    }
+  }
+
   onFileChange(event: any): void {
     const file = event.target.files[0];
     if (file && file.type.match(/image\/*/) && this.form) {
@@ -214,6 +234,7 @@ export class SupplierRegisterBatchComponent implements OnInit {
 
     if (this.form.invalid) {
       this.showNotification('Por favor complete todos los campos requeridos', 'warning');
+      this.markFormGroupTouched();
       return;
     }
 
@@ -240,7 +261,7 @@ export class SupplierRegisterBatchComponent implements OnInit {
     if (!this.selectedBatch) return;
 
     // Obtener el lote completo antes de actualizarlo
-    this.batchService.getById(this.selectedBatch.id as number).subscribe({
+    this.batchService.getById(this.selectedBatch.id as string).subscribe({
       next: (originalBatch: Batch) => {
         // Combinar el lote original con los campos a actualizar
         const updatedBatch: Batch = {
@@ -255,7 +276,7 @@ export class SupplierRegisterBatchComponent implements OnInit {
         }
 
         // Actualizar el lote completo
-        this.batchService.update(this.selectedBatch?.id as number, updatedBatch).subscribe({
+        this.batchService.update(this.selectedBatch?.id as string, updatedBatch).subscribe({
           next: () => {
             this.showNotification(`Lote actualizado y marcado como ${newStatus} correctamente`, 'success');
             this.loadPendingBatches();
@@ -281,6 +302,14 @@ export class SupplierRegisterBatchComponent implements OnInit {
     this.setActiveTab('pending');
     this.form.reset();
     this.initForm();
+  }
+
+  // Método auxiliar para marcar todos los campos como tocados (para mostrar errores)
+  private markFormGroupTouched(): void {
+    Object.keys(this.form.controls).forEach(key => {
+      const control = this.form.get(key);
+      control?.markAsTouched();
+    });
   }
 
   showNotification(message: string, type: 'success' | 'error' | 'warning' | 'info'): void {

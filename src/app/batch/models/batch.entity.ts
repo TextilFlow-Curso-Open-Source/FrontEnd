@@ -12,11 +12,11 @@ export const STATUS = {
 export type BatchStatus = typeof STATUS[keyof typeof STATUS];
 
 export class Batch {
-  id?: number;
+  id?: string;              // ← CAMBIO: number → string
   code: string;
   client: string;
-  businessmanId: number;
-  supplierId: number;
+  businessmanId: string;    // ← CAMBIO: number → string
+  supplierId: string;       // ← CAMBIO: number → string
   fabricType: string;
   color: string;
   quantity: number;
@@ -27,14 +27,14 @@ export class Batch {
   status: BatchStatus;
   createdAt?: string;
   updatedAt?: string;
-  imageUrl?: string; // Añadida para resolver el error
+  imageUrl?: string;
 
   constructor(data: {
-    id?: number;
+    id?: string;            // ← CAMBIO: number → string
     code: string;
     client: string;
-    businessmanId: number;
-    supplierId: number;
+    businessmanId: string;  // ← CAMBIO: number → string
+    supplierId: string;     // ← CAMBIO: number → string
     fabricType: string;
     color: string;
     quantity: number;
@@ -77,9 +77,9 @@ export const REQUEST_STATUS = {
 export type BatchRequestStatus = typeof REQUEST_STATUS[keyof typeof REQUEST_STATUS];
 
 export class BatchRequest {
-  id?: number;
-  businessmanId: number;
-  supplierId: number;
+  id?: string;              // ← CAMBIO: number → string
+  businessmanId: string;    // ← CAMBIO: number → string
+  supplierId: string;       // ← CAMBIO: number → string
   batchType: string;
   color: string;
   quantity: number;
@@ -90,9 +90,9 @@ export class BatchRequest {
   updatedAt?: string;
 
   constructor(data: {
-    id?: number;
-    businessmanId: number;
-    supplierId: number;
+    id?: string;            // ← CAMBIO: number → string
+    businessmanId: string;  // ← CAMBIO: number → string
+    supplierId: string;     // ← CAMBIO: number → string
     batchType: string;
     color: string;
     quantity: number;

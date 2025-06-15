@@ -4,6 +4,9 @@ import { Routes } from '@angular/router';
 import { UserLoginComponent } from './auth/views/user-login/user-login.component';
 import { UserRegisterComponent } from './auth/views/user-register/user-register.component';
 import { UserRoleSelectorComponent } from './auth/views/user-role-selector/user-role-selector.component';
+import {
+  SupplierProfileConfigurationComponent
+} from './configuration/components/supplier-profile-configuration/supplier-profile-configuration.component';
 
 // Lazy loading para los layouts y componentes
 const BusinessmanLayoutComponent = () => import('./businessman/layout/businessman-layout/businessman-layout.component').then(m => m.BusinessmanLayoutComponent);
