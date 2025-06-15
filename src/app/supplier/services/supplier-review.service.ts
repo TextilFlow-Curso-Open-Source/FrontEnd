@@ -26,7 +26,7 @@ export class SupplierReviewService extends BaseService<SupplierReview> {
    * @param comment Comentario de la reseña
    * @param businessmanName Nombre del empresario (opcional)
    */
-  addReview(supplierId: number, businessmanId: number, rating: number, comment: string, businessmanName?: string): any {
+  addReview(supplierId: string, businessmanId: string, rating: number, comment: string, businessmanName?: string): any {
     const newReview: SupplierReview = {
       supplierId,
       businessmanId,
@@ -44,7 +44,7 @@ export class SupplierReviewService extends BaseService<SupplierReview> {
    * @param supplierId ID del proveedor
    * @param callback Función de retorno con las reseñas
    */
-  getReviewsForSupplier(supplierId: number, callback: Function): void {
+  getReviewsForSupplier(supplierId: string, callback: Function): void {
     this.http.get<SupplierReview[]>(`${this.serverBaseUrl}${this.resourceEndpoint}?supplierId=${supplierId}`)
       .subscribe({
         next: (reviews) => {
@@ -62,7 +62,7 @@ export class SupplierReviewService extends BaseService<SupplierReview> {
    * @param supplierId ID del proveedor
    * @param callback Función de retorno con el rating promedio y el total de reseñas
    */
-  calculateAverageRating(supplierId: number, callback: Function): void {
+  calculateAverageRating(supplierId: string, callback: Function): void {
     this.getReviewsForSupplier(supplierId, (reviews: SupplierReview[]) => {
       if (!reviews || reviews.length === 0) {
         callback(0, 0);
@@ -81,7 +81,7 @@ export class SupplierReviewService extends BaseService<SupplierReview> {
    * @param businessmanId ID del empresario
    * @param callback Función de retorno con booleano que indica si ya existe una reseña
    */
-  hasBusinessmanReviewed(supplierId: number, businessmanId: number, callback: Function): void {
+  hasBusinessmanReviewed(supplierId: string, businessmanId: string, callback: Function): void {
     this.http.get<SupplierReview[]>(
       `${this.serverBaseUrl}${this.resourceEndpoint}?supplierId=${supplierId}&businessmanId=${businessmanId}`
     ).subscribe({
@@ -95,7 +95,7 @@ export class SupplierReviewService extends BaseService<SupplierReview> {
     });
   }
 
-  updateReview(reviewId: number, rating: number, comment: string): any {
+  updateReview(reviewId: string, rating: number, comment: string): any {
     // Alternativa más simple sin usar switchMap
     return {
       subscribe: (observer: any) => {

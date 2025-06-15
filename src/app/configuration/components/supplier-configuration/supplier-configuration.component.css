@@ -1,63 +1,83 @@
-.configuracion-wrapper {
-  padding: 2rem;
+.configuration-container {
   max-width: 600px;
-  margin: auto;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.configuracion-wrapper h2 {
-  font-size: 20px;
-  margin-bottom: 1.5rem;
+.form-group {
+  margin-bottom: 20px;
 }
 
-.config-form .config-section {
-  margin-bottom: 1.2rem;
-}
-
-.config-form label {
+label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 5px;
   font-weight: 500;
-}
-
-.config-form select {
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-.button-group {
-  display: flex;
-  gap: 10px;
-  margin-top: 1rem;
-}
-
-.btn-save, .btn-cancel {
-  padding: 0.5rem 1.2rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-save {
-  background-color: #777;
-  color: #fff;
-}
-
-.btn-cancel {
-  background-color: #ccc;
   color: #333;
 }
 
-.alert-success {
-  margin-top: 1rem;
-  color: green;
+.language-options {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
 }
 
-.alert-error {
-  margin-top: 1rem;
-  color: red;
+.language-button {
+  padding: 8px 16px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #333;
+}
+
+.language-button:hover {
+  background-color: #e8e8e8;
+}
+
+.language-button.active {
+  background-color: #866C52;
+  color: white;
+  border-color: #866C52;
+}
+
+.button-container {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.loading-indicator {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+/* ===== DARK MODE ===== */
+[data-theme="dark"] .configuration-container {
+  background-color: var(--background-color);
+}
+
+[data-theme="dark"] label {
+  color: var(--text-dark);
+}
+
+[data-theme="dark"] .language-button {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-dark);
+}
+
+[data-theme="dark"] .language-button:hover {
+  background-color: var(--border-color);
+}
+
+[data-theme="dark"] .language-button.active {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+  border-color: var(--primary-color);
+}
+
+[data-theme="dark"] .loading-indicator {
+  color: var(--text-light);
 }

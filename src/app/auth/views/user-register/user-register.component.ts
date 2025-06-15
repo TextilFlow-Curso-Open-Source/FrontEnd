@@ -7,11 +7,12 @@ import { AuthService } from '../../services/auth.service';
 import { AppInputComponent } from '../../../core/components/app-input/app-input.component';
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { HttpClient } from '@angular/common/http';
+import {SmartLogoComponent} from '../../../core/components/smart-logo/smart-logo.component';
 
 @Component({
   selector: 'app-user-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, AppInputComponent, AppButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, AppInputComponent, AppButtonComponent, SmartLogoComponent],
   templateUrl: './user-register.component.html',
   styleUrls: ['./user-register.component.css']
 })
@@ -111,17 +112,11 @@ export class UserRegisterComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.authService.register(this.registerForm.value, (user: any) => {
-      if (user) {
-        // Al registrarse exitosamente, iniciar sesión
-        this.authService.login({
-          email: this.registerForm.value.email,
-          password: this.registerForm.value.password
-        });
-      } else {
-        this.isLoading = false;
-        this.errorMessage = 'Error al registrar usuario. Por favor, intente nuevamente.';
-      }
-    });
+    // AuthService ahora maneja todo automáticamente
+    // Registra el usuario, inicia sesión y redirige
+    this.authService.register(this.registerForm.value);
+
+    // El loading se mantendrá hasta que el usuario sea redirigido
+    // AuthService maneja todo internamente
   }
 }

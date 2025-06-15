@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  serverBaseUrl: 'https://6827756e6b7628c529106db9.mockapi.io', // Usar la URL local con el prefijo de la API
+  serverBaseUrl: 'https://6827756e6b7628c529106db9.mockapi.io',
   authEndpointPath: '',
   userEndpointPath: '/users',
   batchesEndpointPath: '/batches',
@@ -9,5 +9,6 @@ export const environment = {
   businessSupplierRequests: '/businessSupplierRequests',
   supplierReviewEndpointPath:'/supplierReviews',
   observationEndpointPath: '/observation',
+  configurationEndpointPath: '/configuration',
 };
 

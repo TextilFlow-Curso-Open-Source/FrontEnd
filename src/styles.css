@@ -1,11 +1,11 @@
 /* Importación de fuentes */
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
-
+@import './dark-mode.css';
 /* Variables de colores personalizados */
 :root {
+  --background-color: #ffffff;
   --primary-color: #866C52;
   --primary-dark: #6e573f;
   --primary-light: rgba(134, 108, 82, 0.1);
@@ -22,6 +22,11 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+
+body {
+  background-color: var(--background-color);
 }
 
 /* Estilos generales */
@@ -101,10 +106,45 @@ body {
   padding: 0;
 }
 
-/* Tema oscuro básico
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text-color: rgba(255, 255, 255, 0.87);
-    --background-color: #121212;
-  }
-}*/
+/* ===== CUSTOM SCROLLBAR STYLES - GENERAL ===== */
+
+/* Scrollbar general para navegadores WebKit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 6px;
+  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #a68b6b 0%, #8a7556 100%);
+  border-radius: 6px;
+  border: 1px solid rgba(166, 139, 107, 0.2);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #b59a7a 0%, #9c8263 100%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  transform: scale(1.05);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, #8a7556 0%, #6d5a42 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-corner {
+  background: #f5f5f5;
+}
+
+/* ===== SCROLLBAR PARA FIREFOX ===== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #a68b6b #f5f5f5;
+}

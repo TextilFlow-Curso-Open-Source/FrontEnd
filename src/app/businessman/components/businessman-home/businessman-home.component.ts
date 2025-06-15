@@ -1,53 +1,127 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
+import { Router } from '@angular/router';
+import { BatchService } from '../../../batch/services/batch.service.service';
+import { AuthService } from '../../../auth/services/auth.service';
+import { Batch, STATUS } from '../../../batch/models/batch.entity';
 
 interface LotSummary {
+  receivedToday: number;
   pending: number;
-  sent: number;
-  confirmed: number;
+  approved: number;
+  rejected: number;
 }
 
 interface Notification {
-  message: string;
-  id: string;
+  code: string;
+  messages: string[];
 }
 
 @Component({
   selector: 'app-businessman-home',
-  standalone:true,
-  imports: [CommonModule],
+  standalone: true,
+  imports: [CommonModule, TranslateModule],
   templateUrl: './businessman-home.component.html',
   styleUrl: './businessman-home.component.css'
 })
-export class BusinessmanHomeComponent {
-  supplierName = 'Nome';
+export class BusinessmanHomeComponent implements OnInit {
+  private batchService = inject(BatchService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  lotSummary: LotSummary = {
-    pending: 4,
-    sent: 12,
-    confirmed: 8
-  };
+  businessmanName = 'Empresario';
+  lotSummary: LotSummary = { receivedToday: 0, pending: 0, approved: 0, rejected: 0 };
+  notificationsGrouped: Notification[] = [];
+  showNotifications = true;
 
-  notifications: Notification[] = [
-    { id: 'n1', message: 'Falta subir evidencia del lote L-007.' },
-    { id: 'n2', message: 'Recuerda enviar el lote L-008 hoy.' },
-    { id: 'n3', message: 'El cliente Telas Perú dejó una observación en el lote L-003.' }
-  ];
+  ngOnInit(): void {
+    const currentUser = this.authService.getCurrentUser();
 
-  constructor() { }
+    if (currentUser) {
+      const name = currentUser.name ?? '';
+      const email = currentUser.email ?? '';
+
+      if (name.trim()) {
+        this.businessmanName = name.trim();
+      } else if (email.includes('@')) {
+        this.businessmanName = email.split('@')[0] || 'Empresario';
+      }
+    }
+
+    this.batchService.getAll().subscribe((batches: Batch[]) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const summary = { receivedToday: 0, pending: 0, approved: 0, rejected: 0 };
+      const notificationMap: { [code: string]: string[] } = {};
+
+      // Ordenar los lotes por fecha descendente (últimos primero)
+      const sortedBatches = [...batches].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+
+      for (const batch of sortedBatches) {
+        const batchDate = new Date(batch.date);
+        batchDate.setHours(0, 0, 0, 0);
+
+        // Lotes recibidos hoy
+        if (batchDate.getTime() === today.getTime()) {
+          summary.receivedToday++;
+        }
+
+        // Contar por estado
+        if (batch.status === STATUS.PENDIENTE) {
+          summary.pending++;
+
+          const batchCode = batch.code ?? 'Sin código';
+          if (!notificationMap[batchCode]) {
+            notificationMap[batchCode] = [];
+          }
+
+          // Verificar si lleva más de 2 días pendiente
+          const daysDiff = (new Date().getTime() - batchDate.getTime()) / (1000 * 3600 * 24);
+          if (daysDiff > 2) {
+            notificationMap[batchCode].push(`El lote ${batchCode} lleva más de 2 días pendiente de revisión.`);
+          }
+
+          if (batch.observations && batch.observations.trim() !== '') {
+            notificationMap[batchCode].push(`Hay observaciones en el lote ${batchCode}.`);
+          }
+
+          const imageUrl = batch.imageUrl ?? '';
+          if (!imageUrl.trim()) {
+            notificationMap[batchCode].push(`Falta evidencia en el lote ${batchCode}.`);
+          }
+        } else if (batch.status === STATUS.ACEPTADO) {
+          summary.approved++;
+        } else if (batch.status === STATUS.RECHAZADO) {
+          summary.rejected++;
+        }
+      }
+
+      this.lotSummary = summary;
+
+      this.notificationsGrouped = Object.entries(notificationMap).map(([code, messages]) => ({
+        code,
+        messages
+      }));
+    });
+  }
 
   viewDetails(type: string): void {
-    console.log(`Ver detalles de lotes ${type}`);
-    // Aquí implementarías la navegación o lógica para mostrar más detalles
+    this.router.navigate(['/businessman/lotes']);
   }
 
   viewMoreNotifications(): void {
-    console.log('Ver más notificaciones');
-    // Aquí implementarías la navegación a la página de notificaciones
+    this.router.navigate(['/businessman/lotes']);
   }
 
   closeNotifications(): void {
-    console.log('Cerrar notificaciones');
-    // Lógica para cerrar o minimizar el panel de notificaciones
+    this.showNotifications = false;
+  }
+
+  openNotifications(): void {
+    this.showNotifications = true;
   }
 }

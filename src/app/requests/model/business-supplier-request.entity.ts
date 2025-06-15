@@ -1,8 +1,8 @@
 // /src/app/core/models/business-supplier-request.model.ts
 export class BusinessSupplierRequest {
-  id?: number;
-  businessmanId: number;
-  supplierId: number;
+  id?: string;
+  businessmanId: string;
+  supplierId: string;
   status: 'pending' | 'accepted' | 'rejected';
   message?: string;
   // Nuevos campos para el formulario de solicitud
@@ -14,9 +14,9 @@ export class BusinessSupplierRequest {
   updatedAt?: string;
 
   constructor(data: {
-    id?: number;
-    businessmanId: number;
-    supplierId: number;
+    id?: string;
+    businessmanId: string;
+    supplierId: string;
     status?: 'pending' | 'accepted' | 'rejected';
     message?: string;
     // Nuevos campos opcionales

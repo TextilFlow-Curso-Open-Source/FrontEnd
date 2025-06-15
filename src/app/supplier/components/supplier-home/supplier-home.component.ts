@@ -34,8 +34,9 @@ export class SupplierHomeComponent implements OnInit {
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();
 
-    if (!currentUser) {
-      console.error('No hay usuario autenticado');
+    if (!currentUser || !currentUser.id) {
+      console.error('No hay usuario autenticado o falta ID');
+      this.authService.logout();
       return;
     }
 
