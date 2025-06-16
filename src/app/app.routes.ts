@@ -4,14 +4,12 @@ import { Routes } from '@angular/router';
 import { UserLoginComponent } from './auth/views/user-login/user-login.component';
 import { UserRegisterComponent } from './auth/views/user-register/user-register.component';
 import { UserRoleSelectorComponent } from './auth/views/user-role-selector/user-role-selector.component';
-import {
-  SupplierProfileConfigurationComponent
-} from './configuration/components/supplier-profile-configuration/supplier-profile-configuration.component';
+
 
 // Lazy loading para los layouts y componentes
 const BusinessmanLayoutComponent = () => import('./businessman/layout/businessman-layout/businessman-layout.component').then(m => m.BusinessmanLayoutComponent);
 const SupplierLayoutComponent = () => import('./supplier/layout/supplier-layout/supplier-layout.component').then(m => m.SupplierLayoutComponent);
-
+import { ForgotPasswordComponent } from './auth/views/forgot-password/forgot-password.component';
 
 // Componentes de Businessman (lazy loaded)
 const BusinessmanHomeComponent = () => import('./businessman/components/businessman-home/businessman-home.component').then(m => m.BusinessmanHomeComponent);
@@ -61,6 +59,10 @@ export const routes: Routes = [
     component: UserRegisterComponent
   },
 
+  {
+    path: 'forgot-password',
+    component: ForgotPasswordComponent
+  },
   // Rutas para Businessman
   {
     path: 'businessman',

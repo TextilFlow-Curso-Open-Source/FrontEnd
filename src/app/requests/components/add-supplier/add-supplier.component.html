@@ -16,7 +16,6 @@
   </div>
 
   <!-- Barra de búsqueda -->
-  <!-- Barra de búsqueda -->
   <div class="search-container">
     <div class="search-input-wrapper">
       <i class="material-icons search-icon">search</i>
@@ -56,7 +55,8 @@
   <div *ngIf="activeTab === 'current'" class="suppliers-grid">
     <div *ngFor="let supplier of filteredSuppliers" class="supplier-card">
       <div class="supplier-header" (click)="toggleSupplierExpansion(supplier.id)">
-        <h3 class="supplier-title">{{ supplier.profile?.companyName || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</h3>
+        <!-- ARREGLADO: Usar directamente companyName del supplier -->
+        <h3 class="supplier-title">{{ supplier.companyName || supplier.profile?.companyName || ('ADD_SUPPLIER.NO_COMPANY_NAME' | translate) }}</h3>
         <div class="dropdown-arrow" [class.expanded]="expandedSupplierId === supplier.id"></div>
       </div>
 
@@ -65,9 +65,23 @@
           <img [src]="supplier.profile?.logo || 'assets/default-avatar.png'" alt="avatar" class="supplier-avatar">
           <span>{{ supplier.email }}</span>
         </div>
-        <div class="supplier-rating">
-          <span *ngFor="let star of getFilledStars(supplier.averageRating || 0)" class="star filled">★</span>
-          <span *ngFor="let star of getEmptyStars(supplier.averageRating || 0)" class="star">☆</span>
+        <!-- Si no hay rating, mostrar 5 estrellas vacías visibles -->
+        <div class="supplier-rating" *ngIf="!supplier.averageRating || supplier.averageRating === 0">
+          <span class="star empty">☆</span>
+          <span class="star empty">☆</span>
+          <span class="star empty">☆</span>
+          <span class="star empty">☆</span>
+          <span class="star empty">☆</span>
+          <span class="no-rating-text">(Sin calificaciones)</span>
+        </div>
+
+        <!-- Si hay rating, mostrar las estrellas llenas -->
+        <div class="supplier-rating" *ngIf="supplier.averageRating && supplier.averageRating > 0">
+          <span class="star" [ngClass]="{'filled': supplier.averageRating >= 1}">★</span>
+          <span class="star" [ngClass]="{'filled': supplier.averageRating >= 2}">★</span>
+          <span class="star" [ngClass]="{'filled': supplier.averageRating >= 3}">★</span>
+          <span class="star" [ngClass]="{'filled': supplier.averageRating >= 4}">★</span>
+          <span class="star" [ngClass]="{'filled': supplier.averageRating >= 5}">★</span>
         </div>
         <app-button
           label="{{ 'ADD_SUPPLIER.ORDER_BATCH' | translate }}"
@@ -82,10 +96,10 @@
         <!-- Información del proveedor -->
         <div class="supplier-details">
           <h4>{{ 'ADD_SUPPLIER.SUPPLIER_INFO' | translate }}</h4>
-          <p><strong>{{ 'ADD_SUPPLIER.SPECIALIZATION' | translate }}:</strong> {{ supplier.profile?.specialization || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</p>
-          <p><strong>{{ 'ADD_SUPPLIER.CATEGORIES' | translate }}:</strong> {{ supplier.profile?.productCategories?.join(', ') || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</p>
-          <p><strong>{{ 'ADD_SUPPLIER.LOCATION' | translate }}:</strong> {{ supplier.profile?.warehouseLocation || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</p>
-          <p><strong>{{ 'ADD_SUPPLIER.MIN_ORDER' | translate }}:</strong> {{ supplier.profile?.minimumOrderQuantity || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</p>
+          <p><strong>{{ 'ADD_SUPPLIER.SPECIALIZATION' | translate }}:</strong> {{ supplier.specialization || supplier.profile?.specialization || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</p>
+          <p><strong>{{ 'ADD_SUPPLIER.CATEGORIES' | translate }}:</strong> {{ supplier.productCategories?.join(', ') || supplier.profile?.productCategories?.join(', ') || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</p>
+          <p><strong>{{ 'ADD_SUPPLIER.LOCATION' | translate }}:</strong> {{ supplier.warehouseLocation || supplier.profile?.warehouseLocation || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</p>
+          <p><strong>{{ 'ADD_SUPPLIER.MIN_ORDER' | translate }}:</strong> {{ supplier.minimumOrderQuantity || supplier.profile?.minimumOrderQuantity || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</p>
         </div>
 
         <!-- Reseñas -->
@@ -107,9 +121,13 @@
                 <img [src]="'assets/default-avatar.png'" alt="reviewer" class="reviewer-avatar">
                 <div class="review-info">
                   <div class="review-email">{{ review.businessmanName || ('COMMON.USER' | translate) }}</div>
+                  <!-- ARREGLADO: Lógica de estrellas simplificada -->
                   <div class="review-rating">
-                    <span *ngFor="let star of getFilledStars(review.rating)" class="star filled">★</span>
-                    <span *ngFor="let star of getEmptyStars(review.rating)" class="star">☆</span>
+                    <span class="star" [ngClass]="{'filled': (review.rating || 0) >= 1}">★</span>
+                    <span class="star" [ngClass]="{'filled': (review.rating || 0) >= 2}">★</span>
+                    <span class="star" [ngClass]="{'filled': (review.rating || 0) >= 3}">★</span>
+                    <span class="star" [ngClass]="{'filled': (review.rating || 0) >= 4}">★</span>
+                    <span class="star" [ngClass]="{'filled': (review.rating || 0) >= 5}">★</span>
                   </div>
                   <div class="review-date">{{ review.createdAt | date:'dd/MM/yy' }}</div>
                 </div>
@@ -138,7 +156,8 @@
   <div *ngIf="activeTab === 'add'" class="suppliers-list">
     <div *ngFor="let supplier of filteredSuppliers" class="supplier-item">
       <div class="supplier-header" (click)="selectSupplier(supplier.id)">
-        <h3 class="supplier-name">{{ supplier.profile?.companyName || ('ADD_SUPPLIER.NO_SPECIFIED' | translate) }}</h3>
+        <!-- ARREGLADO: Usar directamente companyName del supplier -->
+        <h3 class="supplier-name">{{ supplier.companyName || supplier.profile?.companyName || ('ADD_SUPPLIER.NO_COMPANY_NAME' | translate) }}</h3>
         <div class="dropdown-arrow" [class.expanded]="selectedSupplierId === supplier.id"></div>
       </div>
 
@@ -147,9 +166,24 @@
           <img [src]="supplier.profile?.logo || 'assets/default-avatar.png'" alt="avatar" class="supplier-avatar">
           <span>{{ supplier.email }}</span>
         </div>
-        <div class="supplier-rating">
-          <span *ngFor="let star of getFilledStars(supplier.averageRating || 0)" class="star filled">★</span>
-          <span *ngFor="let star of getEmptyStars(supplier.averageRating || 0)" class="star">☆</span>
+        <!-- ARREGLADO: Lógica de estrellas simplificada -->
+        <!-- Si no hay rating, mostrar 5 estrellas vacías visibles -->
+        <div class="supplier-rating" *ngIf="!supplier.averageRating || supplier.averageRating === 0">
+          <span class="star empty">☆</span>
+          <span class="star empty">☆</span>
+          <span class="star empty">☆</span>
+          <span class="star empty">☆</span>
+          <span class="star empty">☆</span>
+          <span class="no-rating-text">(Sin calificaciones)</span>
+        </div>
+
+        <!-- Si hay rating, mostrar las estrellas llenas -->
+        <div class="supplier-rating" *ngIf="supplier.averageRating && supplier.averageRating > 0">
+          <span class="star" [ngClass]="{'filled': supplier.averageRating >= 1}">★</span>
+          <span class="star" [ngClass]="{'filled': supplier.averageRating >= 2}">★</span>
+          <span class="star" [ngClass]="{'filled': supplier.averageRating >= 3}">★</span>
+          <span class="star" [ngClass]="{'filled': supplier.averageRating >= 4}">★</span>
+          <span class="star" [ngClass]="{'filled': supplier.averageRating >= 5}">★</span>
         </div>
         <app-button
           label="{{ 'ADD_SUPPLIER.SEND_REQUEST' | translate }}"
@@ -166,9 +200,13 @@
               <img [src]="'assets/default-avatar.png'" alt="reviewer" class="reviewer-avatar">
               <div class="review-info">
                 <div class="review-email">{{ review.businessmanName || ('COMMON.USER' | translate) }}</div>
+                <!-- ARREGLADO: Estrellas con método más directo -->
                 <div class="review-rating">
-                  <span *ngFor="let star of getFilledStars(review.rating)" class="star filled">★</span>
-                  <span *ngFor="let star of getEmptyStars(review.rating)" class="star">☆</span>
+                  <span class="star" [class.filled]="(review.rating || 0) >= 1">★</span>
+                  <span class="star" [class.filled]="(review.rating || 0) >= 2">★</span>
+                  <span class="star" [class.filled]="(review.rating || 0) >= 3">★</span>
+                  <span class="star" [class.filled]="(review.rating || 0) >= 4">★</span>
+                  <span class="star" [class.filled]="(review.rating || 0) >= 5">★</span>
                 </div>
                 <div class="review-date">{{ review.createdAt | date:'dd/MM/yy' }}</div>
               </div>
@@ -364,31 +402,57 @@
     </div>
   </div>
 
-  <!-- Modal para añadir reseña - ACTUALIZADO -->
+  <!-- Modal para añadir reseña -->
   <div *ngIf="showReviewForm" class="modal">
     <div class="modal-backdrop" (click)="closeReviewForm()"></div>
     <div class="modal-content review-modal">
       <button class="close-modal" (click)="closeReviewForm()">×</button>
 
+
       <div class="review-form">
         <h2>{{ isEditingReview ? 'ADD_SUPPLIER.EDIT_REVIEW' : 'ADD_SUPPLIER.ADD_REVIEW' | translate }}</h2>
 
-        <!-- Rating con estrellas clickeables -->
+        <!-- Rating con estrellas clickeables - CON contenido explícito -->
         <div class="form-group">
           <label>{{ 'ADD_SUPPLIER.RATING' | translate }}</label>
           <div class="star-rating-container">
             <div class="clickable-stars">
-            <span
-              *ngFor="let star of [1,2,3,4,5]; let i = index"
-              class="star-click"
-              [class.active]="i < newReview.rating"
-              [class.hover]="i < hoverRatingValue"
-              (click)="setRating(i + 1)"
-              (mouseenter)="hoverRating(i + 1)"
-              (mouseleave)="hoverRating(0)">
-              ★
-            </span>
+              <span class="star-click"
+                    [class.active]="1 <= newReview.rating"
+                    [class.hover]="1 <= hoverRatingValue && hoverRatingValue > 0"
+                    (click)="setRating(1)"
+                    (mouseenter)="hoverRating(1)"
+                    (mouseleave)="hoverRating(0)">★</span>
+
+              <span class="star-click"
+                    [class.active]="2 <= newReview.rating"
+                    [class.hover]="2 <= hoverRatingValue && hoverRatingValue > 0"
+                    (click)="setRating(2)"
+                    (mouseenter)="hoverRating(2)"
+                    (mouseleave)="hoverRating(0)">★</span>
+
+              <span class="star-click"
+                    [class.active]="3 <= newReview.rating"
+                    [class.hover]="3 <= hoverRatingValue && hoverRatingValue > 0"
+                    (click)="setRating(3)"
+                    (mouseenter)="hoverRating(3)"
+                    (mouseleave)="hoverRating(0)">★</span>
+
+              <span class="star-click"
+                    [class.active]="4 <= newReview.rating"
+                    [class.hover]="4 <= hoverRatingValue && hoverRatingValue > 0"
+                    (click)="setRating(4)"
+                    (mouseenter)="hoverRating(4)"
+                    (mouseleave)="hoverRating(0)">★</span>
+
+              <span class="star-click"
+                    [class.active]="5 <= newReview.rating"
+                    [class.hover]="5 <= hoverRatingValue && hoverRatingValue > 0"
+                    (click)="setRating(5)"
+                    (mouseenter)="hoverRating(5)"
+                    (mouseleave)="hoverRating(0)">★</span>
             </div>
+
             <div class="rating-display">
               {{ newReview.rating }}/5
             </div>
