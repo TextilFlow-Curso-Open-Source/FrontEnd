@@ -20,7 +20,7 @@ export class PageNotFoundComponent {
     } else if (currentUrl.includes('/supplier')) {
       return '/supplier/inicio';
     } else {
-      return '/inicio';
+      return '/login';
     }
   }
 }
