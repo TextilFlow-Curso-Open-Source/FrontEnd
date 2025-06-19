@@ -9,7 +9,8 @@ export class Configuration {
   viewMode: 'light' | 'dark' | 'auto';
   createdAt?: string;
   updatedAt?: string;
-
+  subscriptionPlan?: 'basic' | 'corporate';
+  subscriptionStartDate?: string;
   constructor(data: {
     id?: string;
     userId: string;
@@ -19,6 +20,8 @@ export class Configuration {
     viewMode: 'light' | 'dark' | 'auto';
     createdAt?: string;
     updatedAt?: string;
+    subscriptionPlan?: 'basic' | 'corporate';  // ← AGREGAR
+    subscriptionStartDate?: string;
   }) {
     this.id = data.id;
     this.userId = data.userId;
@@ -28,5 +31,7 @@ export class Configuration {
     this.viewMode = data.viewMode;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
+    this.subscriptionPlan = data.subscriptionPlan;      // ← AGREGAR
+    this.subscriptionStartDate = data.subscriptionStartDate;
   }
 }
