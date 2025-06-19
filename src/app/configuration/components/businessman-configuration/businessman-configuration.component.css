@@ -47,3 +47,42 @@ label {
   text-align: center;
   padding: 20px;
 }
+
+.subscription-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.plan-badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.plan-basic {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.plan-corporate {
+  background: #996633;
+  color: white;
+}
+
+.manage-plan-btn {
+  padding: 6px 12px;
+  background: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.manage-plan-btn:hover {
+  background: var(--primary-color);
+  color: white;
+}

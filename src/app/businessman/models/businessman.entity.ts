@@ -14,8 +14,7 @@ export class Businessman extends User {
   logo: string;
 
   constructor(businessman: {
-    // Propiedades base de User
-    id?: string, // ID único heredado de User
+    id?: string,
     name?: string,
     email?: string,
     password?: string,
@@ -24,7 +23,6 @@ export class Businessman extends User {
     city?: string,
     address?: string,
     phone?: string,
-    // Propiedades específicas de Businessman
     companyName?: string,
     ruc?: string,
     businessType?: string,
