@@ -11,6 +11,8 @@ import { AppNotificationComponent} from '../../../core/components/app-notificati
 import { Observation, OBSERVATION_STATUS  } from '../../../observation/models/observation.entity';
 import { ObservationService} from '../../../observation/services/observation.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import {SupplierService} from '../../../supplier/services/supplier.service';
+import {Supplier} from '../../../supplier/models/supplier.entity';
 
 @Component({
   selector: 'app-businessman-batch',
@@ -35,7 +37,7 @@ export class BusinessmanBatchComponent implements OnInit {
   filteredBatches: Batch[] = [];
   selectedBatch: Batch | null = null;
   isCreatingObservation: boolean = false;
-
+  suppliers: Supplier[] = [];
   // Usuario actual
   currentUserId: string = '';
 
@@ -65,6 +67,7 @@ export class BusinessmanBatchComponent implements OnInit {
     private batchService: BatchService,
     private authService: AuthService,
     private observationService: ObservationService,
+    private supplierService: SupplierService
   ) {}
 
   createBatchObservation(batch: Batch): void {
@@ -103,9 +106,24 @@ export class BusinessmanBatchComponent implements OnInit {
     if (user && user.id) {
       this.currentUserId = user.id;
       this.loadBatches();
+      this.loadSuppliers()
     }
   }
-
+  getSupplierCompanyName(supplierId: string): string {
+    const supplier = this.suppliers.find(s => s.id === supplierId);
+    return supplier?.companyName || 'Empresa no encontrada';
+  }
+  loadSuppliers(): void {
+    this.supplierService.getAllSuppliers().subscribe({
+      next: (suppliers) => {
+        this.suppliers = suppliers;
+        console.log('Proveedores cargados:', suppliers);
+      },
+      error: (error) => {
+        console.error('Error al cargar proveedores:', error);
+      }
+    });
+  }
   loadBatches(): void {
     this.isLoading = true;
 
