@@ -1,1 +1,331 @@
-<p>businessman-observation works!</p>
+<div class="observation-container">
+  <!-- Vista de tabla -->
+  <div *ngIf="view === 'table'">
+    <div class="table-header">
+      <div class="header-left">
+        <h2>
+          <i class="material-icons header-icon">report_problem</i>
+          {{ 'OBSERVATION.MY_OBSERVATIONS' | translate }}
+          <span class="observation-count" *ngIf="!isLoading">({{ filteredObservations.length }})</span>
+        </h2>
+      </div>
+
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <i class="material-icons search-icon">search</i>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="{{ 'OBSERVATION.SEARCH_PLACEHOLDER' | translate }}"
+            [(ngModel)]="searchTerm"
+            (input)="filterObservations()"
+            (keyup.enter)="filterObservations()">
+          <button *ngIf="searchTerm" class="clear-search" (click)="clearSearch()">
+            <i class="material-icons">close</i>
+          </button>
+        </div>
+
+        <app-button
+          label="{{ 'COMMON.FILTER' | translate }}"
+          variant="secondary"
+          icon="tune"
+          (click)="toggleFilters()">
+        </app-button>
+
+        <app-button
+          label="{{ 'COMMON.REFRESH' | translate }}"
+          variant="text"
+          icon="refresh"
+          [loading]="isLoading"
+          (click)="loadObservations()">
+        </app-button>
+      </div>
+    </div>
+
+    <!-- Filtros rápidos -->
+    <div class="quick-filters" *ngIf="showQuickFilters">
+      <div class="filter-chips">
+        <button
+          class="filter-chip"
+          [class.active]="!statusFilter"
+          (click)="setStatusFilter(null)">
+          <i class="material-icons">select_all</i>
+          {{ 'OBSERVATION.ALL_STATUSES' | translate }}
+        </button>
+        <button
+          class="filter-chip"
+          [class.active]="statusFilter === OBSERVATION_STATUS.PENDIENTE"
+          (click)="setStatusFilter(OBSERVATION_STATUS.PENDIENTE)">
+          <span class="status-dot status-pending">●</span>
+          {{ 'OBSERVATION.STATUS_PENDING' | translate }}
+        </button>
+        <button
+          class="filter-chip"
+          [class.active]="statusFilter === OBSERVATION_STATUS.VISTO"
+          (click)="setStatusFilter(OBSERVATION_STATUS.VISTO)">
+          <span class="status-dot status-viewed">●</span>
+          {{ 'OBSERVATION.STATUS_VIEWED' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Barra de acciones con selección múltiple -->
+    <div class="bulk-actions" *ngIf="someSelected">
+      <div class="selection-info">
+        <i class="material-icons">check_circle</i>
+        <span>{{ selectedObservations.size }} {{ 'OBSERVATION.SELECTED' | translate }}</span>
+      </div>
+      <div class="bulk-buttons">
+        <app-button
+          label="{{ 'COMMON.DELETE' | translate }}"
+          variant="primary"
+          icon="delete"
+          [loading]="isDeleting"
+          (click)="deleteSelectedObservations()">
+        </app-button>
+        <app-button
+          label="{{ 'COMMON.CLEAR_SELECTION' | translate }}"
+          variant="text"
+          (click)="selectedObservations.clear()">
+        </app-button>
+      </div>
+    </div>
+
+    <!-- Estados de carga -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="skeleton-table">
+        <div class="skeleton-row" *ngFor="let item of [1,2,3,4,5]">
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado vacío -->
+    <div *ngIf="!isLoading && filteredObservations.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <i class="material-icons">report_problem</i>
+      </div>
+      <h3>{{ searchTerm ? ('OBSERVATION.NO_MATCHING_OBSERVATIONS' | translate) : ('OBSERVATION.NO_OBSERVATIONS_YET' | translate) }}</h3>
+      <p>{{ searchTerm ? ('OBSERVATION.TRY_DIFFERENT_SEARCH' | translate) : ('OBSERVATION.START_MAKING_OBSERVATIONS' | translate) }}</p>
+      <app-button
+        *ngIf="searchTerm"
+        label="{{ 'OBSERVATION.CLEAR_SEARCH' | translate }}"
+        variant="primary"
+        (click)="clearSearch()">
+      </app-button>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-wrapper" *ngIf="!isLoading && filteredObservations.length > 0">
+      <table class="observation-table">
+        <thead>
+        <tr>
+          <th class="checkbox-column">
+            <input
+              type="checkbox"
+              class="table-checkbox"
+              [checked]="allSelected"
+              [indeterminate]="someSelected && !allSelected"
+              (change)="toggleSelectAll()">
+          </th>
+          <th class="sortable" (click)="sortBy('batchCode')">
+            <div class="th-content">
+              {{ 'OBSERVATION.BATCH_CODE' | translate }}
+              <i class="material-icons sort-icon">swap_vert</i>
+            </div>
+          </th>
+          <th>{{ 'OBSERVATION.REASON' | translate }}</th>
+          <th class="sortable" (click)="sortBy('createdAt')">
+            <div class="th-content">
+              {{ 'OBSERVATION.DATE_CREATED' | translate }}
+              <i class="material-icons sort-icon">swap_vert</i>
+            </div>
+          </th>
+          <th class="sortable" (click)="sortBy('status')">
+            <div class="th-content">
+              {{ 'OBSERVATION.STATUS' | translate }}
+              <i class="material-icons sort-icon">swap_vert</i>
+            </div>
+          </th>
+          <th>{{ 'OBSERVATION.EVIDENCE' | translate }}</th>
+          <th class="actions-column">{{ 'COMMON.ACTIONS' | translate }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let observation of filteredObservations; trackBy: trackByObservationId"
+            class="clickable-row"
+            [class.selected]="isObservationSelected(observation)"
+            [class.recent]="isRecentObservation(observation)"
+            (click)="viewObservationDetails(observation)">
+          <td class="checkbox-cell" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              class="table-checkbox"
+              [checked]="isObservationSelected(observation)"
+              (change)="toggleObservationSelection(observation)">
+          </td>
+          <td class="code-cell">
+            <div class="batch-code">
+              <i class="material-icons batch-icon">qr_code</i>
+              <strong>{{ observation.batchCode || 'N/A' }}</strong>
+              <span *ngIf="isRecentObservation(observation)" class="recent-badge">{{ 'OBSERVATION.NEW' | translate }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="reason-preview">
+              <span class="reason-text">{{
+                  observation.reason.length > 60
+                    ? (observation.reason | slice:0:60) + '...'
+                    : observation.reason
+                }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="date-text">{{ observation.createdAt | date:'dd/MM/yy HH:mm' }}</span>
+          </td>
+          <td>
+            <div class="status-container">
+              <span [ngClass]="getStatusClass(observation.status)" class="status-badge">
+                <i class="material-icons status-icon">{{ getStatusIcon(observation.status) }}</i>
+                {{ getStatusText(observation.status) }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="evidence-indicator">
+              <i *ngIf="observation.imageUrl"
+                 class="material-icons evidence-icon has-evidence"
+                 [title]="'OBSERVATION.HAS_EVIDENCE' | translate">
+                image
+              </i>
+              <i *ngIf="!observation.imageUrl"
+                 class="material-icons evidence-icon no-evidence"
+                 [title]="'OBSERVATION.NO_EVIDENCE' | translate">
+                image_not_supported
+              </i>
+            </div>
+          </td>
+          <td class="actions-cell" (click)="$event.stopPropagation()">
+            <div class="action-buttons">
+              <button
+                class="action-btn view-btn"
+                (click)="viewObservationDetails(observation)"
+                [title]="'OBSERVATION.VIEW_DETAILS' | translate">
+                <i class="material-icons">visibility</i>
+              </button>
+              <button
+                class="action-btn delete-btn"
+                (click)="deleteObservation(observation)"
+                [title]="'OBSERVATION.DELETE' | translate">
+                <i class="material-icons">delete</i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Vista de detalle -->
+  <div *ngIf="view === 'detail' && selectedObservation" class="detail-view">
+    <div class="detail-header">
+      <app-button
+        label=""
+        icon="arrow_back"
+        variant="back"
+        (click)="backToTable()">
+      </app-button>
+      <h2>
+        <i class="material-icons detail-icon">report_problem</i>
+        {{ 'OBSERVATION.OBSERVATION_DETAIL' | translate }} {{ selectedObservation.batchCode }}
+      </h2>
+    </div>
+
+    <div class="detail-content">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>
+            <i class="material-icons">qr_code</i>
+            {{ 'OBSERVATION.BATCH_CODE' | translate }}:
+          </label>
+          <div class="detail-value">{{ selectedObservation.batchCode }}</div>
+        </div>
+
+        <div class="detail-item">
+          <label>
+            <i class="material-icons">schedule</i>
+            {{ 'OBSERVATION.STATUS' | translate }}:
+          </label>
+          <div class="detail-value">
+            <span [ngClass]="getStatusClass(selectedObservation.status)" class="status-badge">
+              <i class="material-icons status-icon">{{ getStatusIcon(selectedObservation.status) }}</i>
+              {{ getStatusText(selectedObservation.status) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <label>
+            <i class="material-icons">calendar_today</i>
+            {{ 'OBSERVATION.DATE_CREATED' | translate }}:
+          </label>
+          <div class="detail-value">{{ selectedObservation.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+
+        <div class="detail-item" *ngIf="selectedObservation.updatedAt">
+          <label>
+            <i class="material-icons">update</i>
+            {{ 'OBSERVATION.DATE_UPDATED' | translate }}:
+          </label>
+          <div class="detail-value">{{ selectedObservation.updatedAt | date:'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+
+        <div class="detail-item full-width">
+          <label>
+            <i class="material-icons">edit_note</i>
+            {{ 'OBSERVATION.REASON' | translate }}:
+          </label>
+          <div class="detail-value reason-detail">{{ selectedObservation.reason }}</div>
+        </div>
+      </div>
+
+      <!-- Imagen de evidencia -->
+      <div *ngIf="selectedObservation.imageUrl" class="evidence-image-container">
+        <div class="image-header">
+          <i class="material-icons">image</i>
+          <h3>{{ 'OBSERVATION.EVIDENCE_IMAGE' | translate }}</h3>
+        </div>
+        <img [src]="selectedObservation.imageUrl"
+             alt="{{ 'OBSERVATION.EVIDENCE_IMAGE' | translate }}"
+             class="evidence-image"
+             (click)="openImageModal(selectedObservation.imageUrl)">
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="detail-actions">
+        <app-button
+          label="{{ 'OBSERVATION.DELETE' | translate }}"
+          variant="primary"
+          icon="delete"
+          [loading]="isDeleting"
+          (click)="deleteObservation(selectedObservation)">
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificación -->
+  <app-notification
+    [show]="notification.show"
+    [message]="notification.message"
+    [type]="notification.type"
+    [autoClose]="true"
+    (close)="notification.show = false">
+  </app-notification>
+</div>

@@ -132,57 +132,67 @@ export class AddSupplierComponent implements OnInit {
   loadData() {
     this.isLoading = true;
 
-    // Primero cargar todas las solicitudes aceptadas
     this.requestService.getRequestsByBusinessman(this.currentUserId, (requests: any[]) => {
-      // Filtrar solo las solicitudes aceptadas
       const acceptedRequests = requests.filter(req => req.status === 'accepted');
 
-      // Luego cargar todos los proveedores - CORREGIDO: sin callback
       this.supplierService.getAllSuppliers().subscribe({
         next: (suppliers: any[]) => {
           this.suppliers = suppliers;
 
-          // Para cada proveedor, cargar sus detalles - CORREGIDO: sin callback
-          this.suppliers.forEach(supplier => {
-            this.supplierService.getProfileByUserId(supplier.id).subscribe({
-              next: (profile: any) => {
-                // Asignar el perfil directamente (no es un array)
-                supplier.profile = profile || null;
+          // ARREGLO: Los datos YA SON un Supplier completo, solo procesar ratings
+          const supplierPromises = this.suppliers.map(supplier => {
+            return new Promise<void>((resolve) => {
+              // Los datos ya contienen companyName directamente en el supplier
+              // Ya no necesitamos cargar un "profile" separado porque supplier YA ES el profile completo
 
-                // Cargar calificaciones - mantener callback porque reviewService aún lo usa
+              // Si el supplier no tiene profile, usar el supplier mismo como profile
+              if (!supplier.profile) {
+                supplier.profile = {
+                  companyName: supplier.companyName || this.generateCompanyName(supplier),
+                  specialization: supplier.specialization,
+                  productCategories: supplier.productCategories,
+                  warehouseLocation: supplier.warehouseLocation,
+                  minimumOrderQuantity: supplier.minimumOrderQuantity,
+                  logo: supplier.logo
+                };
+              }
+
+              // Usar el averageRating que ya viene en los datos, o calcular si no existe
+              if (supplier.averageRating !== undefined && supplier.totalReviews !== undefined) {
+                // Ya tenemos los datos, no necesitamos calcular
+                resolve();
+              } else {
+                // Solo calcular si no están en los datos
                 this.reviewService.calculateAverageRating(supplier.id, (avgRating: number, totalReviews: number) => {
                   supplier.averageRating = avgRating;
                   supplier.totalReviews = totalReviews;
+                  resolve();
                 });
-              },
-              error: (error) => {
-                console.error('Error al cargar perfil:', error);
-                supplier.profile = null;
               }
             });
           });
 
-          // Separar los proveedores conectados de los disponibles
-          this.connectedSuppliers = [];
-          this.availableSuppliers = [];
+          // Esperar a que se procesen todos los proveedores
+          Promise.all(supplierPromises).then(() => {
+            // Separar los proveedores conectados de los disponibles
+            this.connectedSuppliers = [];
+            this.availableSuppliers = [];
 
-          // Para cada solicitud aceptada, buscar el proveedor correspondiente
-          acceptedRequests.forEach(request => {
-            const connectedSupplier = this.suppliers.find(s => s.id === request.supplierId);
-            if (connectedSupplier) {
-              // Añadir el request a los detalles del proveedor para referencia
-              connectedSupplier.request = request;
-              this.connectedSuppliers.push(connectedSupplier);
-            }
+            acceptedRequests.forEach(request => {
+              const connectedSupplier = this.suppliers.find(s => s.id === request.supplierId);
+              if (connectedSupplier) {
+                connectedSupplier.request = request;
+                this.connectedSuppliers.push(connectedSupplier);
+              }
+            });
+
+            this.availableSuppliers = this.suppliers.filter(supplier =>
+              !this.connectedSuppliers.some(connectedSupplier => connectedSupplier.id === supplier.id)
+            );
+
+            this.updateDisplayedSuppliers();
+            this.isLoading = false;
           });
-
-          // Los proveedores disponibles son aquellos que no están conectados
-          this.availableSuppliers = this.suppliers.filter(supplier =>
-            !this.connectedSuppliers.some(connectedSupplier => connectedSupplier.id === supplier.id)
-          );
-
-          this.updateDisplayedSuppliers();
-          this.isLoading = false;
         },
         error: (error) => {
           console.error('Error al cargar proveedores:', error);
@@ -190,6 +200,26 @@ export class AddSupplierComponent implements OnInit {
         }
       });
     });
+  }
+
+  /**
+   * Genera un nombre de empresa descriptivo cuando no existe companyName
+   */
+  private generateCompanyName(supplier: any): string {
+    // Si hay email, usar la parte antes del @
+    if (supplier.email) {
+      const emailPart = supplier.email.split('@')[0];
+      const cleanName = emailPart.charAt(0).toUpperCase() + emailPart.slice(1);
+      return `${cleanName} Company`;
+    }
+
+    // Si hay nombre de usuario, usarlo
+    if (supplier.name) {
+      return `${supplier.name} Enterprise`;
+    }
+
+    // Fallback genérico
+    return 'Empresa sin nombre';
   }
 
   updateDisplayedSuppliers() {
@@ -218,9 +248,10 @@ export class AddSupplierComponent implements OnInit {
     const suppliersToFilter = this.activeTab === 'current' ?
       this.connectedSuppliers : this.availableSuppliers;
 
-    // Filtrar localmente
+    // Filtrar localmente - buscar en companyName directo y email
     this.filteredSuppliers = suppliersToFilter.filter(supplier =>
       supplier.email?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      supplier.companyName?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
       supplier.profile?.companyName?.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
 
@@ -233,7 +264,6 @@ export class AddSupplierComponent implements OnInit {
       );
     }
   }
-
 
   selectSupplier(supplierId: string) {
     // Si ya está seleccionado, lo deseleccionamos
@@ -634,19 +664,9 @@ export class AddSupplierComponent implements OnInit {
     this.notification.show = false;
   }
 
-  // Funciones auxiliares para mostrar estrellas
-  getFilledStars(rating: number): number[] {
-    const validRating = Math.min(Math.max(0, rating || 0), 5); // Asegurar que esté entre 0 y 5
-    return Array(Math.floor(validRating)).fill(0);
-  }
+  // Estrellas estáticas - sin funciones auxiliares
 
-  getEmptyStars(rating: number): number[] {
-    const validRating = Math.min(Math.max(0, rating || 0), 5); // Asegurar que esté entre 0 y 5
-    return Array(5 - Math.floor(validRating)).fill(0);
-  }
-
-
-// Métodos actualizados para el rating clickeable
+  // Métodos actualizados para el rating clickeable
   setRating(rating: number) {
     this.newReview.rating = rating;
   }
@@ -655,7 +675,7 @@ export class AddSupplierComponent implements OnInit {
     this.hoverRatingValue = rating;
   }
 
-// Actualizar el método openReviewForm para resetear el hover
+  // Actualizar el método openReviewForm para resetear el hover
   openReviewForm(supplierId: string) {
     this.selectedReviewSupplierId = supplierId;
     this.showReviewForm = true;
@@ -668,7 +688,7 @@ export class AddSupplierComponent implements OnInit {
     };
   }
 
-// Actualizar el método editReview para resetear el hover
+  // Actualizar el método editReview para resetear el hover
   editReview(review: any) {
     this.selectedReviewSupplierId = review.supplierId;
     this.editingReviewId = review.id;
@@ -681,7 +701,7 @@ export class AddSupplierComponent implements OnInit {
     };
   }
 
-// Añadir estos métodos a tu clase del componente
+  // Añadir estos métodos a tu clase del componente
   onSearchInput(): void {
     // Opcional: búsqueda en tiempo real
     if (this.searchTerm.length > 2 || this.searchTerm.length === 0) {

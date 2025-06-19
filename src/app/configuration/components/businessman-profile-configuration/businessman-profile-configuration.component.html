@@ -1,1 +1,275 @@
-<p>businessman-profile-configuration works!</p>
+<!-- businessman-profile-configuration.component.html - UPLOAD CORREGIDO -->
+<div class="profile-container">
+  <!-- Header -->
+  <div class="profile-header">
+    <div class="header-content">
+      <app-button
+        [label]="'BUSINESSMAN_PROFILE.GO_BACK' | translate"
+        variant="secondary"
+        size="small"
+        (click)="goBack()">
+      </app-button>
+      <h1>{{ (isEditMode ? 'BUSINESSMAN_PROFILE.EDIT_TITLE' : 'BUSINESSMAN_PROFILE.CREATE_TITLE') | translate }}</h1>
+      <p class="header-subtitle">{{ 'BUSINESSMAN_PROFILE.SUBTITLE' | translate }}</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>{{ 'BUSINESSMAN_PROFILE.LOADING' | translate }}</p>
+  </div>
+
+  <!-- Profile Form -->
+  <div *ngIf="!isLoading" class="profile-form-container">
+    <form [formGroup]="form" (ngSubmit)="saveProfile()" class="profile-form">
+
+      <!-- Logo/Image Section -->
+      <div class="form-section">
+        <h2 class="section-title">
+          <span class="material-icons">business</span>
+          {{ 'BUSINESSMAN_PROFILE.COMPANY_LOGO' | translate }}
+        </h2>
+
+        <div class="logo-upload-section">
+          <div class="logo-preview">
+            <div class="logo-container" [class.has-image]="previewUrl" (click)="triggerFileInput()">
+              <img
+                *ngIf="previewUrl"
+                [src]="previewUrl"
+                [alt]="'BUSINESSMAN_PROFILE.COMPANY_LOGO' | translate"
+                class="logo-image">
+              <div *ngIf="!previewUrl" class="logo-placeholder">
+                <span class="material-icons">add_photo_alternate</span>
+                <span>{{ 'BUSINESSMAN_PROFILE.UPLOAD_LOGO' | translate }}</span>
+              </div>
+            </div>
+
+            <div class="logo-actions">
+              <!-- Input file oculto -->
+              <input
+                type="file"
+                #fileInput
+                accept="image/*"
+                (change)="onFileSelected($event)"
+                style="display: none;">
+
+            </div>
+          </div>
+
+          <div class="upload-instructions">
+            <p><strong>{{ 'BUSINESSMAN_PROFILE.RECOMMENDATIONS' | translate }}:</strong></p>
+            <ul>
+              <li>{{ 'BUSINESSMAN_PROFILE.FORMAT_INFO' | translate }}</li>
+              <li>{{ 'BUSINESSMAN_PROFILE.SIZE_INFO' | translate }}</li>
+              <li>{{ 'BUSINESSMAN_PROFILE.RESOLUTION_INFO' | translate }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Company Information -->
+      <div class="form-section">
+        <h2 class="section-title">
+          <span class="material-icons">domain</span>
+          {{ 'BUSINESSMAN_PROFILE.COMPANY_INFO' | translate }}
+        </h2>
+
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <app-input
+              type="text"
+              [label]="'BUSINESSMAN_PROFILE.COMPANY_NAME' | translate"
+              formControlName="companyName"
+              [placeholder]="'BUSINESSMAN_PROFILE.COMPANY_NAME_PLACEHOLDER' | translate"
+              [fullWidth]="true"
+              [required]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group">
+            <app-input
+              type="text"
+              [label]="'BUSINESSMAN_PROFILE.RUC' | translate"
+              formControlName="ruc"
+              [placeholder]="'BUSINESSMAN_PROFILE.RUC_PLACEHOLDER' | translate"
+              [fullWidth]="true"
+              [required]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group">
+            <app-input
+              type="select"
+              [label]="'BUSINESSMAN_PROFILE.BUSINESS_TYPE' | translate"
+              formControlName="businessType"
+              [placeholder]="'BUSINESSMAN_PROFILE.SELECT_TYPE' | translate"
+              [options]="businessTypes"
+              [fullWidth]="true"
+              [required]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group">
+            <app-input
+              type="select"
+              [label]="'BUSINESSMAN_PROFILE.INDUSTRY' | translate"
+              formControlName="industry"
+              [placeholder]="'BUSINESSMAN_PROFILE.SELECT_INDUSTRY' | translate"
+              [options]="industries"
+              [fullWidth]="true"
+              [required]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group">
+            <app-input
+              type="select"
+              [label]="'BUSINESSMAN_PROFILE.EMPLOYEE_COUNT' | translate"
+              formControlName="employeeCount"
+              [placeholder]="'BUSINESSMAN_PROFILE.SELECT_RANGE' | translate"
+              [options]="employeeRanges"
+              [fullWidth]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group">
+            <app-input
+              type="select"
+              [label]="'BUSINESSMAN_PROFILE.FOUNDING_YEAR' | translate"
+              formControlName="foundingYear"
+              [placeholder]="'BUSINESSMAN_PROFILE.SELECT_YEAR' | translate"
+              [options]="years"
+              [fullWidth]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group full-width">
+            <app-input
+              type="url"
+              [label]="'BUSINESSMAN_PROFILE.WEBSITE' | translate"
+              formControlName="website"
+              [placeholder]="'BUSINESSMAN_PROFILE.WEBSITE_PLACEHOLDER' | translate"
+              [fullWidth]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group full-width">
+            <app-input
+              type="textarea"
+              [label]="'BUSINESSMAN_PROFILE.DESCRIPTION' | translate"
+              formControlName="description"
+              [placeholder]="'BUSINESSMAN_PROFILE.DESCRIPTION_PLACEHOLDER' | translate"
+              [fullWidth]="true">
+            </app-input>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Information (Now Editable) -->
+      <div class="form-section">
+        <h2 class="section-title">
+          <span class="material-icons">person</span>
+          {{ 'BUSINESSMAN_PROFILE.PERSONAL_INFO' | translate }}
+        </h2>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <app-input
+              type="text"
+              [label]="'BUSINESSMAN_PROFILE.FULL_NAME' | translate"
+              formControlName="fullName"
+              [placeholder]="'BUSINESSMAN_PROFILE.FULL_NAME_PLACEHOLDER' | translate"
+              [fullWidth]="true"
+              [required]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group">
+            <app-input
+              type="email"
+              [label]="'BUSINESSMAN_PROFILE.EMAIL' | translate"
+              formControlName="email"
+              [placeholder]="'BUSINESSMAN_PROFILE.EMAIL_PLACEHOLDER' | translate"
+              [fullWidth]="true"
+              [required]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group">
+            <app-input
+              type="select"
+              [label]="'BUSINESSMAN_PROFILE.COUNTRY' | translate"
+              formControlName="country"
+              [placeholder]="'BUSINESSMAN_PROFILE.COUNTRY_PLACEHOLDER' | translate"
+              [options]="countries"
+              [fullWidth]="true"
+              [required]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group">
+            <app-input
+              type="select"
+              [label]="'BUSINESSMAN_PROFILE.CITY' | translate"
+              formControlName="city"
+              [placeholder]="loadingCities ? ('BUSINESSMAN_PROFILE.LOADING_CITIES' | translate) : ('BUSINESSMAN_PROFILE.CITY_PLACEHOLDER' | translate)"
+              [options]="cities"
+              [fullWidth]="true"
+              [required]="true"
+              [disabled]="loadingCities || !form.get('country')?.value">
+            </app-input>
+          </div>
+
+          <div class="form-group full-width">
+            <app-input
+              type="text"
+              [label]="'BUSINESSMAN_PROFILE.ADDRESS' | translate"
+              formControlName="address"
+              [placeholder]="'BUSINESSMAN_PROFILE.ADDRESS_PLACEHOLDER' | translate"
+              [fullWidth]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group">
+            <app-input
+              type="tel"
+              [label]="'BUSINESSMAN_PROFILE.PHONE' | translate"
+              formControlName="phone"
+              [placeholder]="'BUSINESSMAN_PROFILE.PHONE_PLACEHOLDER' | translate"
+              [fullWidth]="true">
+            </app-input>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <app-button
+          type="button"
+          [label]="'BUSINESSMAN_PROFILE.CANCEL' | translate"
+          variant="secondary"
+          (click)="goBack()">
+        </app-button>
+
+        <app-button
+          type="button"
+          [label]="(isEditMode ? 'BUSINESSMAN_PROFILE.UPDATE_PROFILE' : 'BUSINESSMAN_PROFILE.CREATE_PROFILE') | translate"
+          variant="primary"
+          [loading]="isSaving"
+          icon="save"
+          (click)="saveProfile()">
+        </app-button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Notification -->
+  <app-notification
+    [show]="notification.show"
+    [message]="notification.message"
+    [type]="notification.type"
+    [autoClose]="true"
+    (close)="closeNotification()">
+  </app-notification>
+</div>
