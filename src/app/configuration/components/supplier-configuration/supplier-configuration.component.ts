@@ -13,6 +13,7 @@ import { AppNotificationComponent } from '../../../core/components/app-notificat
 import { ThemeSwitcherComponent } from '../../../core/components/theme-switcher/theme-switcher.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
+import {RouterModule} from '@angular/router';
 
 @Component({
   selector: 'app-supplier-configuration',
@@ -24,7 +25,8 @@ import { Subscription } from 'rxjs';
     AppButtonComponent,
     AppNotificationComponent,
     ThemeSwitcherComponent,
-    TranslateModule
+    TranslateModule,
+    RouterModule
   ],
   templateUrl: './supplier-configuration.component.html',
   styleUrls: ['./supplier-configuration.component.css']
@@ -143,8 +145,10 @@ export class SupplierConfigurationComponent implements OnInit, OnDestroy {
             userType: 'supplier',
             language: 'es',
             batchCodeFormat: 'automatic',
-            viewMode: 'auto', // Cambiado a 'auto' por defecto
-            createdAt: new Date().toISOString()
+            viewMode: 'auto',
+            createdAt: new Date().toISOString(),
+            subscriptionPlan: 'basic',
+            subscriptionStartDate: new Date().toISOString()
           });
           this.saveConfiguration();
         }
@@ -162,7 +166,9 @@ export class SupplierConfigurationComponent implements OnInit, OnDestroy {
           language: 'es',
           batchCodeFormat: 'automatic',
           viewMode: 'auto',
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          subscriptionPlan: 'basic',
+          subscriptionStartDate: new Date().toISOString()
         });
       }
     });
