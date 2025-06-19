@@ -13,6 +13,7 @@ import { AppNotificationComponent } from '../../../core/components/app-notificat
 import { ThemeSwitcherComponent } from '../../../core/components/theme-switcher/theme-switcher.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-businessman-configuration',
@@ -24,7 +25,8 @@ import { Subscription } from 'rxjs';
     AppButtonComponent,
     AppNotificationComponent,
     ThemeSwitcherComponent,
-    TranslateModule
+    TranslateModule,
+    RouterModule
   ],
   templateUrl: './businessman-configuration.component.html',
   styleUrls: ['./businessman-configuration.component.css']
@@ -144,7 +146,9 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
             language: 'es',
             batchCodeFormat: 'automatic',
             viewMode: 'auto', // Cambiado a 'auto' por defecto
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            subscriptionPlan: 'basic',           // ← AGREGAR
+            subscriptionStartDate: new Date().toISOString(),
           });
           this.saveConfiguration();
         }
@@ -162,7 +166,9 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
           language: 'es',
           batchCodeFormat: 'automatic',
           viewMode: 'auto',
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          subscriptionPlan: 'basic',
+          subscriptionStartDate: new Date().toISOString()
         });
       }
     });

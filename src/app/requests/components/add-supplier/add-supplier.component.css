@@ -1,11 +1,227 @@
-/* add-supplier.component.css */
+.review-modal {
+  max-width: 650px;
+}
+.no-results::before {
+  content: 'search_off';
+  font-family: 'Material Icons';
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #ccc;
+}/* ===== ESTRELLAS ARREGLADAS - SIN ANIMACIONES ===== */
+
+/* Estrellas normales - COMPLETAMENTE FIJAS */
+.supplier-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 8px 0;
+  padding: 4px 0;
+}
+
+.supplier-rating .star {
+  font-size: 18px !important;
+  display: inline-block !important;
+  width: 20px !important;
+  text-align: center !important;
+  line-height: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  margin-right: 2px !important;
+  position: static !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.supplier-rating .star:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  scale: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+.star.filled {
+  color: #ffc107 !important;
+}
+
+.star.empty {
+  color: #999 !important;
+}
+
+.star {
+  font-size: 20px;
+  color: #ddd;
+  line-height: 1;
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  vertical-align: middle;
+  transition: none !important;
+  text-shadow: none;
+  transform: none !important;
+  animation: none !important;
+}
+
+.star:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  scale: none !important;
+}
+
+.star.filled {
+  color: #ffc107 !important;
+}
+
+/* Estrellas en reviews - COMPLETAMENTE FIJAS */
+.review-rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 4px 0;
+}
+
+.review-rating .star {
+  font-size: 14px !important;
+  display: inline-block !important;
+  width: 16px !important;
+  text-align: center !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  margin-right: 2px !important;
+  position: static !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.review-rating .star:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  scale: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* Asegurar que TODAS las estrellas que NO sean clickeables estén fijas */
+.star:not(.star-click) {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  position: static !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.star:not(.star-click):hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  scale: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* ===== ESTRELLAS CLICKEABLES - MANTENER ANIMACIONES SOLO PARA ESTAS ===== */
+.star-rating-container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.03), rgba(255, 193, 7, 0.08));
+  border-radius: 16px;
+  border: 2px solid rgba(255, 193, 7, 0.2);
+  transition: all 0.3s ease;
+  margin: 12px 0;
+  box-shadow: 0 4px 20px rgba(255, 193, 7, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.star-rating-container:hover {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.08), rgba(255, 193, 7, 0.15));
+  border-color: rgba(255, 193, 7, 0.4);
+  box-shadow: 0 8px 30px rgba(255, 193, 7, 0.2);
+  transform: translateY(-2px);
+}
+
+.clickable-stars {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.star-click {
+  font-size: 44px;
+  color: #e0e0e0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transform-origin: center;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  position: relative;
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid transparent;
+}
+
+.star-click.active {
+  color: #ffc107 !important;
+  text-shadow: 0 4px 15px rgba(255, 193, 7, 0.7);
+  transform: scale(1.15);
+  background: rgba(255, 193, 7, 0.2);
+  border-color: rgba(255, 193, 7, 0.4);
+}
+
+.rating-display {
+  font-size: 24px;
+  font-weight: 800;
+  color: #333;
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.25), rgba(255, 193, 7, 0.15));
+  padding: 16px 28px;
+  border-radius: 16px;
+  border: 3px solid rgba(255, 193, 7, 0.3);
+  min-width: 80px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(255, 193, 7, 0.2);
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+  position: relative;
+  z-index: 1;
+}
+
+.rating-display:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+}
+
+/* ===== CONTENEDOR PRINCIPAL - SIN DOBLE SCROLL ===== */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  height: auto;
+  overflow: hidden;
 }
 
-/* Estilos para las pestañas */
+/* Pestañas */
 .tab-navigation {
   display: flex;
   background: white;
@@ -51,14 +267,13 @@
   border-radius: 2px 2px 0 0;
 }
 
-/* ===== NUEVO INPUT DE BÚSQUEDA - MODO CLARO ===== */
-
+/* Búsqueda */
 .search-container {
   display: flex;
   gap: 16px;
   align-items: center;
   margin: 20px 0;
-  max-width: 800px; /* Más ancho */
+  max-width: 800px;
   width: 100%;
 }
 
@@ -72,7 +287,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   min-height: 48px;
-  flex: 1; /* Toma todo el espacio disponible */
+  flex: 1;
   overflow: hidden;
 }
 
@@ -86,7 +301,6 @@
   box-shadow: 0 0 0 3px rgba(166, 139, 107, 0.15);
 }
 
-/* Icono de búsqueda */
 .search-icon {
   position: absolute;
   left: 16px;
@@ -102,13 +316,12 @@
   color: #a68b6b;
 }
 
-/* Input principal */
 .search-input {
   width: 100%;
   border: none;
   outline: none;
   background: transparent;
-  padding: 14px 50px 14px 52px; /* Espacio para iconos */
+  padding: 14px 50px 14px 52px;
   font-size: 16px;
   color: #333333;
   font-family: inherit;
@@ -119,7 +332,6 @@
   font-weight: 400;
 }
 
-/* Botón de limpiar */
 .clear-button {
   position: absolute;
   right: 12px;
@@ -143,7 +355,8 @@
 .clear-button .material-icons {
   font-size: 18px !important;
 }
-/* Estilos comunes */
+
+/* Títulos */
 h2 {
   font-size: 24px;
   font-weight: 600;
@@ -169,7 +382,7 @@ h2::before {
   text-align: center;
   padding: 60px 20px;
   color: #666;
-  background: white;
+  background: transparent;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
@@ -180,7 +393,6 @@ h2::before {
   font-size: 48px;
   margin-bottom: 16px;
   color: var(--primary-color);
-  animation: spin 2s linear infinite;
 }
 
 .no-results::before {
@@ -191,36 +403,7 @@ h2::before {
   color: #ccc;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Estilos para estrellas */
-.supplier-rating {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  margin: 8px 0;
-}
-
-.star {
-  font-size: 16px;
-  color: #e0e0e0;
-  transition: all 0.2s ease;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.star.filled {
-  color: #ffc107;
-  text-shadow: 0 1px 3px rgba(255, 193, 7, 0.3);
-}
-
-/* Estilos para la pestaña Distribuidores Actuales */
+/* ===== PESTAÑA DISTRIBUIDORES ACTUALES ===== */
 .suppliers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -234,11 +417,35 @@ h2::before {
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
 .supplier-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* ===== PESTAÑA AÑADIR DISTRIBUIDOR - SIN SCROLL INTERNO ===== */
+.suppliers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+  height: 100%;
+}
+
+.supplier-item {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  overflow: visible;
+}
+
+.supplier-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 .supplier-header {
@@ -316,23 +523,11 @@ h2::before {
   transform: scale(1.05);
 }
 
-/* Estilos para sección expandible */
+/* Sección expandible SIN scroll */
 .supplier-expanded {
   padding: 18px;
   background: linear-gradient(135deg, #fafbfc 0%, #f8f9fa 100%);
   border-top: 1px solid rgba(0, 0, 0, 0.05);
-  animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .supplier-details {
@@ -372,9 +567,10 @@ h2::before {
   font-weight: 500;
 }
 
-/* Estilos para reseñas */
+/* Reviews sin efectos especiales */
 .reviews-section {
   margin-top: 16px;
+  overflow: visible;
 }
 
 .reviews-header {
@@ -486,28 +682,7 @@ h2::before {
   color: #ccc;
 }
 
-/* Estilos para la pestaña Añadir Distribuidor */
-.suppliers-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.supplier-item {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.supplier-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-
-/* Estilos para modales */
+/* Modales */
 .modal {
   position: fixed;
   top: 0;
@@ -519,16 +694,6 @@ h2::before {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 .modal-backdrop {
@@ -551,18 +716,10 @@ h2::before {
   max-height: 90vh;
   overflow-y: auto;
   z-index: 1001;
-  animation: slideUp 0.3s ease-out;
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.review-modal {
+  max-width: 650px;
 }
 
 .close-modal {
@@ -584,10 +741,9 @@ h2::before {
 .close-modal:hover {
   background: rgba(0, 0, 0, 0.2);
   color: #333;
-  transform: scale(1.1);
 }
 
-/* Estilos para formularios */
+/* Formularios */
 .request-form,
 .batch-form,
 .review-form {
@@ -623,66 +779,6 @@ label {
   font-weight: 600;
   color: var(--text-dark);
   font-size: 14px;
-}
-
-/* Estrellas clickeables para el modal de reseña */
-.star-rating-container {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: rgba(0, 0, 0, 0.02);
-  border-radius: 8px;
-  border: 1px solid rgba(166, 139, 107, 0.2);
-  transition: all 0.2s ease;
-}
-
-.star-rating-container:hover {
-  background: rgba(166, 139, 107, 0.05);
-  border-color: rgba(166, 139, 107, 0.4);
-}
-
-.clickable-stars {
-  display: flex;
-  gap: 4px;
-}
-
-.star-click {
-  font-size: 32px;
-  color: #ddd;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transform-origin: center;
-}
-
-.star-click:hover {
-  color: #ffc107;
-  transform: scale(1.1);
-  text-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
-}
-
-.star-click.active {
-  color: #ffc107;
-  text-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
-}
-
-.star-click.hover {
-  color: #ffca28;
-  transform: scale(1.05);
-}
-
-.rating-display {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-dark);
-  background: rgba(255, 193, 7, 0.1);
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 193, 7, 0.2);
-  min-width: 50px;
-  text-align: center;
 }
 
 /* Responsive */
@@ -726,6 +822,28 @@ label {
     align-items: flex-start;
     gap: 8px;
   }
+
+  .star-click {
+    font-size: 36px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .clickable-stars {
+    gap: 8px;
+  }
+
+  .rating-display {
+    font-size: 20px;
+    padding: 12px 20px;
+    min-width: 70px;
+  }
+
+  .star-rating-container {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -735,5 +853,19 @@ label {
 
   .modal-content {
     border-radius: 8px;
+  }
+
+  .star-click {
+    font-size: 32px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .star {
+    font-size: 18px;
+  }
+
+  .review-rating .star {
+    font-size: 14px;
   }
 }

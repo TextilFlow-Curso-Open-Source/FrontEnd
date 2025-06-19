@@ -11,6 +11,8 @@ import { AppNotificationComponent} from '../../../core/components/app-notificati
 import { Observation, OBSERVATION_STATUS  } from '../../../observation/models/observation.entity';
 import { ObservationService} from '../../../observation/services/observation.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import {SupplierService} from '../../../supplier/services/supplier.service';
+import {Supplier} from '../../../supplier/models/supplier.entity';
 
 @Component({
   selector: 'app-businessman-batch',
@@ -35,12 +37,16 @@ export class BusinessmanBatchComponent implements OnInit {
   filteredBatches: Batch[] = [];
   selectedBatch: Batch | null = null;
   isCreatingObservation: boolean = false;
-
-  // Usuario actual - CAMBIO: de number a string
+  suppliers: Supplier[] = [];
+  // Usuario actual
   currentUserId: string = '';
 
-  // Búsqueda
+  // Búsqueda y filtros
   searchTerm: string = '';
+  showQuickFilters: boolean = false;
+  statusFilter: string | null = null;
+  sortField: string = 'date';
+  sortDirection: 'asc' | 'desc' = 'desc';
 
   // Estado de carga
   isLoading: boolean = false;
@@ -61,6 +67,7 @@ export class BusinessmanBatchComponent implements OnInit {
     private batchService: BatchService,
     private authService: AuthService,
     private observationService: ObservationService,
+    private supplierService: SupplierService
   ) {}
 
   createBatchObservation(batch: Batch): void {
@@ -87,7 +94,7 @@ export class BusinessmanBatchComponent implements OnInit {
         console.log('Registro de observación creado correctamente');
         this.isCreatingObservation = false;
       },
-      error: (error: any) => { // CAMBIO: Agregar tipo any
+      error: (error: any) => {
         console.error('Error al crear registro de observación:', error);
         this.isCreatingObservation = false;
       }
@@ -97,11 +104,26 @@ export class BusinessmanBatchComponent implements OnInit {
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
     if (user && user.id) {
-      this.currentUserId = user.id; // CAMBIO: Ahora user.id es string
+      this.currentUserId = user.id;
       this.loadBatches();
+      this.loadSuppliers()
     }
   }
-
+  getSupplierCompanyName(supplierId: string): string {
+    const supplier = this.suppliers.find(s => s.id === supplierId);
+    return supplier?.companyName || 'Empresa no encontrada';
+  }
+  loadSuppliers(): void {
+    this.supplierService.getAllSuppliers().subscribe({
+      next: (suppliers) => {
+        this.suppliers = suppliers;
+        console.log('Proveedores cargados:', suppliers);
+      },
+      error: (error) => {
+        console.error('Error al cargar proveedores:', error);
+      }
+    });
+  }
   loadBatches(): void {
     this.isLoading = true;
 
@@ -110,27 +132,24 @@ export class BusinessmanBatchComponent implements OnInit {
         console.log("Todos los lotes:", batches);
         console.log("ID de usuario actual:", this.currentUserId);
 
-        // Filtrar lotes del usuario actual o sin businessmanId (posiblemente lotes actualizados)
+        // Filtrar lotes del usuario actual o sin businessmanId
         this.batches = batches.filter(batch => {
-          // Si no tiene businessmanId, verificar si tiene algún otro indicio de que pertenece al usuario
           if (!batch.businessmanId) {
-            // Por ejemplo, si el cliente coincide con el nombre del usuario actual
             const user = this.authService.getCurrentUser();
             if (user && user.name && batch.client === user.name) {
               return true;
             }
-            // Opcional: también podríamos verificar supplierId si tenemos esa relación
             return false;
           }
-
           return batch.businessmanId === this.currentUserId;
         });
 
         console.log("Lotes filtrados:", this.batches);
         this.filteredBatches = [...this.batches];
+        this.filterBatches();
         this.isLoading = false;
       },
-      error: (error: any) => { // CAMBIO: Agregar tipo any
+      error: (error: any) => {
         console.error('Error al cargar lotes:', error);
         this.showNotification('Error al cargar los lotes', 'error');
         this.isLoading = false;
@@ -138,21 +157,130 @@ export class BusinessmanBatchComponent implements OnInit {
     });
   }
 
-  // Manejo de filtros y búsqueda
+  // Limpiar búsqueda
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.filterBatches();
+  }
+
+  // Toggle filtros rápidos
+  toggleFilters(): void {
+    this.showQuickFilters = !this.showQuickFilters;
+  }
+
+  // Filtrar por estado
+  setStatusFilter(status: string | null): void {
+    this.statusFilter = status;
+    this.filterBatches();
+  }
+
+  // Filtros mejorados que incluyen estado
   filterBatches(): void {
-    if (!this.searchTerm.trim()) {
-      this.filteredBatches = [...this.batches];
-      return;
+    let filtered = [...this.batches];
+
+    // Filtro por texto
+    if (this.searchTerm && this.searchTerm.trim()) {
+      const search = this.searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(batch =>
+        (batch.code && batch.code.toLowerCase().includes(search)) ||
+        (batch.client && batch.client.toLowerCase().includes(search)) ||
+        (batch.fabricType && batch.fabricType.toLowerCase().includes(search)) ||
+        (batch.color && batch.color.toLowerCase().includes(search)) ||
+        (batch.status && batch.status.toLowerCase().includes(search))
+      );
     }
 
-    const search = this.searchTerm.toLowerCase().trim();
-    this.filteredBatches = this.batches.filter(batch =>
-      batch.code.toLowerCase().includes(search) ||
-      batch.client.toLowerCase().includes(search) ||
-      batch.fabricType.toLowerCase().includes(search) ||
-      batch.color.toLowerCase().includes(search) ||
-      batch.status.toLowerCase().includes(search)
-    );
+    // Filtro por estado
+    if (this.statusFilter) {
+      filtered = filtered.filter(batch => batch.status === this.statusFilter);
+    }
+
+    // Aplicar ordenamiento
+    filtered = this.sortBatches(filtered);
+
+    this.filteredBatches = filtered;
+  }
+
+  // Ordenamiento
+  sortBy(field: string): void {
+    if (this.sortField === field) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortField = field;
+      this.sortDirection = 'asc';
+    }
+    this.filterBatches();
+  }
+
+  // Método de ordenamiento
+  private sortBatches(batches: Batch[]): Batch[] {
+    return batches.sort((a, b) => {
+      let valueA: any;
+      let valueB: any;
+
+      switch (this.sortField) {
+        case 'code':
+          valueA = a.code || '';
+          valueB = b.code || '';
+          break;
+        case 'client':
+          valueA = a.client || '';
+          valueB = b.client || '';
+          break;
+        case 'date':
+          valueA = new Date(a.date);
+          valueB = new Date(b.date);
+          break;
+        case 'price':
+          valueA = a.price || 0;
+          valueB = b.price || 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (valueA < valueB) {
+        return this.sortDirection === 'asc' ? -1 : 1;
+      }
+      if (valueA > valueB) {
+        return this.sortDirection === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }
+
+  // TrackBy para mejor performance
+  trackByBatchId(index: number, batch: Batch): string {
+    return batch.id || index.toString();
+  }
+
+  // Verificar si un lote es urgente (más de 7 días sin acción)
+  isUrgentBatch(batch: Batch): boolean {
+    if (batch.status !== STATUS.ACEPTADO) return false;
+
+    const batchDate = new Date(batch.date);
+    const now = new Date();
+    const daysDiff = Math.floor((now.getTime() - batchDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    return daysDiff > 7;
+  }
+
+  // Iconos para estados
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case STATUS.ACEPTADO:
+        return 'check_circle';
+      case STATUS.ENVIADO:
+        return 'local_shipping';
+      case STATUS.POR_ENVIAR:
+        return 'schedule';
+      case STATUS.RECHAZADO:
+        return 'cancel';
+      case STATUS.COMPLETADO:
+        return 'task_alt';
+      default:
+        return 'help';
+    }
   }
 
   // Vista de detalles
@@ -165,6 +293,25 @@ export class BusinessmanBatchComponent implements OnInit {
   backToTable(): void {
     this.view = 'table';
     this.selectedBatch = null;
+  }
+
+  // Aprobación rápida desde tabla
+  quickApprove(batch: Batch): void {
+    if (!this.canApproveOrReject(batch)) return;
+
+    // Confirmación rápida
+    if (confirm(`¿Aprobar el lote ${batch.code}?`)) {
+      this.selectedBatch = batch;
+      this.approveBatch();
+    }
+  }
+
+  // Rechazo rápido desde tabla
+  quickReject(batch: Batch): void {
+    if (!this.canApproveOrReject(batch)) return;
+
+    this.selectedBatch = batch;
+    this.showRejectForm();
   }
 
   // Aprobar lote
@@ -184,7 +331,7 @@ export class BusinessmanBatchComponent implements OnInit {
         this.loadBatches();
         this.backToTable();
       },
-      error: (error: any) => { // CAMBIO: Agregar tipo any
+      error: (error: any) => {
         console.error('Error al aprobar lote:', error);
         this.showNotification('Error al aprobar el lote', 'error');
         this.isLoading = false;
@@ -203,11 +350,22 @@ export class BusinessmanBatchComponent implements OnInit {
   // Manejar carga de imagen
   onFileChange(event: any): void {
     const file = event.target.files[0];
-    if (file && file.type.match(/image\/*/) && file.size < 5000000) { // < 5MB
+    if (file) {
+      this.handleFileSelection(file);
+    }
+  }
+
+  // Método mejorado para manejar archivos
+  private handleFileSelection(file: File): void {
+    if (file && file.type.match(/image\/*/) && file.size < 5000000) {
       this.selectedFile = file;
       this.readAndCompressImage(file);
     } else {
-      this.showNotification('Por favor seleccione una imagen válida (máx. 5MB)', 'warning');
+      if (!file.type.match(/image\/*/)) {
+        this.showNotification('Por favor seleccione solo archivos de imagen', 'warning');
+      } else if (file.size >= 5000000) {
+        this.showNotification('La imagen debe ser menor a 5MB', 'warning');
+      }
     }
   }
 
@@ -254,6 +412,42 @@ export class BusinessmanBatchComponent implements OnInit {
     reader.readAsDataURL(file);
   }
 
+  // Mejorar el drag & drop
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const uploadArea = event.currentTarget as HTMLElement;
+    uploadArea.classList.add('drag-over');
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const uploadArea = event.currentTarget as HTMLElement;
+    uploadArea.classList.remove('drag-over');
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const uploadArea = event.currentTarget as HTMLElement;
+    uploadArea.classList.remove('drag-over');
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      this.handleFileSelection(file);
+    }
+  }
+
+  // Remover imagen
+  removeImage(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.rejectImage = '';
+    this.selectedFile = null;
+  }
+
   // Enviar rechazo
   submitReject(): void {
     if (!this.selectedBatch) return;
@@ -280,12 +474,18 @@ export class BusinessmanBatchComponent implements OnInit {
         this.loadBatches();
         this.backToTable();
       },
-      error: (error: any) => { // CAMBIO: Agregar tipo any
+      error: (error: any) => {
         console.error('Error al rechazar lote:', error);
         this.showNotification('Error al rechazar el lote', 'error');
         this.isLoading = false;
       }
     });
+  }
+
+  // Abrir modal de imagen
+  openImageModal(imageUrl: string): void {
+    // Implementar modal de imagen o usar una librería de lightbox
+    window.open(imageUrl, '_blank');
   }
 
   // Método auxiliar para mostrar notificaciones

@@ -1,0 +1,548 @@
+/* businessman-profile-configuration.component.css - SOLO CUADRITO OPTIMIZADO */
+
+/* ===== VARIABLES ===== */
+:root {
+  --primary-color: #a68b6b;
+  --primary-dark: #8b7355;
+  --primary-light: rgba(166, 139, 107, 0.1);
+  --background-color: #f8f9fa;
+  --surface-color: #ffffff;
+  --text-dark: #2c3e50;
+  --text-light: #6c757d;
+  --text-muted: #9ca3af;
+  --border-color: #e0e6ed;
+  --border-light: #f1f3f4;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.12);
+  --border-radius: 12px;
+  --border-radius-sm: 8px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.profile-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--background-color) 0%, #f1f5f9 100%);
+  padding: 24px;
+}
+
+/* ===== HEADER ===== */
+.profile-header {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 24px;
+  overflow: hidden;
+  position: relative;
+}
+
+.profile-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+}
+
+.header-content {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header-content h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-dark);
+  line-height: 1.2;
+}
+
+.header-subtitle {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-light);
+  font-weight: 400;
+}
+
+/* ===== LOADING STATE ===== */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 16px;
+}
+
+/* ===== FORMULARIO PRINCIPAL ===== */
+.profile-form-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* ===== SECCIONES DEL FORMULARIO ===== */
+.form-section {
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  padding: 32px;
+  border: 1px solid var(--border-color);
+  transition: var(--transition);
+}
+
+.form-section:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 24px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-dark);
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border-light);
+}
+
+.section-title .material-icons {
+  font-size: 24px;
+  color: var(--primary-color);
+}
+
+/* ===== SECCIÓN DE LOGO - SOLO CUADRITO OPTIMIZADO ===== */
+.logo-upload-section {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.logo-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-container {
+  width: 200px;
+  height: 200px;
+  border: 3px dashed var(--border-color);
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--background-color);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+}
+
+.logo-container:hover {
+  border-color: var(--primary-color);
+  background: var(--primary-light);
+  transform: scale(1.03);
+  box-shadow: var(--shadow-md);
+}
+
+.logo-container:active {
+  transform: scale(0.98);
+}
+
+.logo-container.has-image {
+  border-style: solid;
+  border-color: var(--primary-color);
+  background: transparent;
+  box-shadow: var(--shadow-sm);
+}
+
+.logo-container.has-image:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-dark);
+}
+
+.logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: calc(var(--border-radius) - 3px);
+  transition: var(--transition);
+}
+
+.logo-container.has-image:hover .logo-image {
+  transform: scale(1.02);
+}
+
+.logo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 20px;
+  pointer-events: none;
+  transition: var(--transition);
+}
+
+.logo-container:hover .logo-placeholder {
+  color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.logo-placeholder .material-icons {
+  font-size: 56px;
+  opacity: 0.6;
+  transition: var(--transition);
+}
+
+.logo-container:hover .logo-placeholder .material-icons {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.logo-placeholder span {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* ===== TEXTO EXPLICATIVO DEBAJO DEL CUADRITO ===== */
+.logo-hint {
+  font-size: 14px;
+  color: var(--text-light);
+  text-align: center;
+  font-style: italic;
+  margin-top: 8px;
+  opacity: 0.8;
+}
+
+/* ===== INPUT FILE OCULTO ===== */
+input[type="file"] {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* ===== INSTRUCCIONES DE UPLOAD - MEJORADAS ===== */
+.upload-instructions {
+  background: var(--primary-light);
+  padding: 24px;
+  border-radius: var(--border-radius-sm);
+  border-left: 4px solid var(--primary-color);
+  max-width: 400px;
+}
+
+.upload-instructions p {
+  margin: 0 0 16px 0;
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 16px;
+}
+
+.upload-instructions ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-light);
+  list-style-type: none;
+  position: relative;
+}
+
+.upload-instructions li {
+  margin-bottom: 8px;
+  font-size: 14px;
+  padding-left: 20px;
+  position: relative;
+  line-height: 1.4;
+}
+
+.upload-instructions li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--primary-color);
+  font-weight: bold;
+  font-size: 12px;
+}
+
+/* ===== GRID DEL FORMULARIO ===== */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+/* ===== BOTONES DE ACCIÓN ===== */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 24px 32px;
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  margin-top: 8px;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 16px;
+  }
+
+  .header-content {
+    padding: 24px;
+  }
+
+  .header-content h1 {
+    font-size: 24px;
+  }
+
+  .form-section {
+    padding: 24px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .logo-upload-section {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .logo-container {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+  }
+
+  .upload-instructions {
+    max-width: none;
+    text-align: left;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 12px;
+  }
+
+  .header-content {
+    padding: 20px;
+  }
+
+  .form-section {
+    padding: 20px;
+  }
+
+  .logo-container {
+    width: 150px;
+    height: 150px;
+  }
+
+  .logo-placeholder .material-icons {
+    font-size: 42px;
+  }
+
+  .logo-placeholder span {
+    font-size: 14px;
+  }
+
+  .section-title .material-icons {
+    font-size: 20px;
+  }
+
+  .upload-instructions {
+    padding: 20px;
+  }
+}
+
+/* ===== MODO OSCURO ===== */
+[data-theme="dark"] {
+  --background-color: #1a1a1a;
+  --surface-color: #2d2d2d;
+  --text-dark: #ffffff;
+  --text-light: #b3b3b3;
+  --text-muted: #888888;
+  --border-color: #404040;
+  --border-light: #505050;
+}
+
+[data-theme="dark"] .profile-header::before {
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+}
+
+[data-theme="dark"] .logo-container {
+  background: #333333;
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .logo-container:hover {
+  background: rgba(166, 139, 107, 0.15);
+  border-color: var(--primary-color);
+}
+
+[data-theme="dark"] .upload-instructions {
+  background: rgba(166, 139, 107, 0.1);
+  border-left-color: var(--primary-color);
+}
+
+/* ===== ANIMACIONES OPTIMIZADAS ===== */
+.form-section {
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.logo-container {
+  animation: fadeInScale 0.6s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== EFECTO PULSO PARA LLAMAR ATENCIÓN ===== */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(166, 139, 107, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(166, 139, 107, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(166, 139, 107, 0);
+  }
+}
+
+.logo-container:not(.has-image):hover {
+  animation: pulse 1.5s ease-out;
+}
+
+/* ===== MEJORAS DE ACCESIBILIDAD ===== */
+.logo-container:focus-within {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .logo-container:hover {
+    transform: none !important;
+  }
+}
+
+/* ===== INDICADOR VISUAL ADICIONAL ===== */
+.logo-container::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border: 3px solid transparent;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  pointer-events: none;
+}
+
+.logo-container:hover::after {
+  border-color: var(--primary-color);
+  opacity: 0.3;
+}

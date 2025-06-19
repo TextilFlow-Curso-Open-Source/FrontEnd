@@ -1,4 +1,3 @@
-<!-- /src/app/auth/views/user-login/user-login.component.html -->
 <div class="auth-layout">
   <!-- Columna izquierda (contenido) -->
   <div class="content-col">
@@ -10,43 +9,90 @@
       <h2>Bienvenido de nuevo</h2>
       <p>Introduce tus datos para iniciar sesión</p>
 
+      <!-- Loading overlay -->
+      <div class="loading-overlay" *ngIf="isLoading">
+        <div class="loading-content">
+          <div class="spinner"></div>
+          <p>Verificando credenciales...</p>
+        </div>
+      </div>
+
+      <!-- Success message minimalista -->
+      <div class="success-toast" *ngIf="showSuccessMessage">
+        <mat-icon>check_circle</mat-icon>
+        <span>¡Inicio exitoso!</span>
+      </div>
+
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <app-input
           label="Email"
           type="email"
           placeholder="Ingrese su email"
           [required]="true"
-          [error]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid ?
+          [error]="loginForm.get('email')?.touched && loginForm.get('email')?.invalid && errorType !== 'credentials' ?
                   (loginForm.get('email')?.errors?.['required'] ? 'El email es requerido' :
                    loginForm.get('email')?.errors?.['email'] ? 'Ingrese un email válido' : '') : ''"
           [fullWidth]="true"
           formControlName="email">
         </app-input>
 
-        <app-input
-          label="Contraseña"
-          type="password"
-          placeholder="Ingrese su contraseña"
-          [required]="true"
-          [error]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid ?
-                  (loginForm.get('password')?.errors?.['required'] ? 'La contraseña es requerida' :
-                   loginForm.get('password')?.errors?.['minlength'] ? 'La contraseña debe tener al menos 6 caracteres' : '') : ''"
-          [fullWidth]="true"
-          formControlName="password">
-        </app-input>
-
-        <div class="forgot-password">
-          <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+        <div class="password-container">
+          <app-input
+            label="Contraseña"
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Ingrese su contraseña"
+            [required]="true"
+            [error]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid && errorType !== 'credentials' ?
+                    (loginForm.get('password')?.errors?.['required'] ? 'La contraseña es requerida' :
+                     loginForm.get('password')?.errors?.['minlength'] ? 'La contraseña debe tener al menos 6 caracteres' : '') : ''"
+            [fullWidth]="true"
+            formControlName="password">
+          </app-input>
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
         </div>
 
-        <div class="error-message" *ngIf="errorMessage">
-          {{ errorMessage }}
+        <!-- Remember me option -->
+        <div class="form-options">
+          <label class="remember-me">
+            <input
+              type="checkbox"
+              formControlName="rememberMe">
+            <span class="checkmark"></span>
+            <span class="remember-text">Recordarme</span>
+          </label>
+
+          <div class="forgot-password">
+            <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+          </div>
+        </div>
+
+        <!-- Error messages with specific types - SOLO AQUÍ -->
+        <div class="error-message" *ngIf="errorMessage" [ngClass]="errorType">
+          <mat-icon class="error-icon" *ngIf="errorType === 'blocked'">lock</mat-icon>
+          <mat-icon class="error-icon" *ngIf="errorType === 'credentials'">warning</mat-icon>
+          <mat-icon class="error-icon" *ngIf="errorType === 'network'">wifi_off</mat-icon>
+          <mat-icon class="error-icon" *ngIf="errorType === 'timeout'">schedule</mat-icon>
+          <span class="error-text">{{ errorMessage }}</span>
+          <button
+            *ngIf="errorType === 'network' || errorType === 'timeout'"
+            type="button"
+            class="retry-button"
+            (click)="retryLogin()">
+            <mat-icon>refresh</mat-icon>
+            Reintentar
+          </button>
         </div>
 
         <app-button
           label="Iniciar sesión"
           [loading]="isLoading"
-          [disabled]="loginForm.invalid"
+          [disabled]="loginForm.invalid || isLoading"
           [fullWidth]="true"
           variant="primary"
           (click)="onSubmit()">

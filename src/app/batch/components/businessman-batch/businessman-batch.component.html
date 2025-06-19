@@ -2,59 +2,192 @@
   <!-- Vista de tabla -->
   <div *ngIf="view === 'table'">
     <div class="table-header">
-      <h2>{{ 'BATCH.MY_BATCHES' | translate }}</h2>
+      <div class="header-left">
+        <h2>
+          <i class="material-icons header-icon">inventory_2</i>
+          {{ 'BATCH.MY_BATCHES' | translate }}
+          <span class="batch-count" *ngIf="!isLoading">({{ filteredBatches.length }})</span>
+        </h2>
+      </div>
 
       <div class="search-container">
-        <app-input
-          type="search"
-          placeholder="{{ 'COMMON.SEARCH' | translate }}"
-          [(ngModel)]="searchTerm"
-          (keyup)="filterBatches()"
-          [fullWidth]="true">
-        </app-input>
+        <div class="search-input-wrapper">
+          <i class="material-icons search-icon">search</i>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="{{ 'BATCH.SEARCH_PLACEHOLDER' | translate }}"
+            [(ngModel)]="searchTerm"
+            (input)="filterBatches()"
+            (keyup.enter)="filterBatches()">
+          <button *ngIf="searchTerm" class="clear-search" (click)="clearSearch()">
+            <i class="material-icons">close</i>
+          </button>
+        </div>
 
         <app-button
           label="{{ 'COMMON.FILTER' | translate }}"
-          variant="primary"
-          icon="filter_list"
-          (click)="filterBatches()">
+          variant="secondary"
+          icon="tune"
+          (click)="toggleFilters()">
+        </app-button>
+
+        <app-button
+          label="{{ 'COMMON.REFRESH' | translate }}"
+          variant="text"
+          icon="refresh"
+          [loading]="isLoading"
+          (click)="loadBatches()">
         </app-button>
       </div>
     </div>
 
-    <div *ngIf="isLoading" class="loading">
-      {{ 'COMMON.LOADING' | translate }}
+    <!-- Filtros rápidos -->
+    <div class="quick-filters" *ngIf="showQuickFilters">
+      <div class="filter-chips">
+        <button
+          class="filter-chip"
+          [class.active]="!statusFilter"
+          (click)="setStatusFilter(null)">
+          <i class="material-icons">select_all</i>
+          {{ 'BATCH.ALL_STATUSES' | translate }}
+        </button>
+        <button
+          class="filter-chip"
+          [class.active]="statusFilter === 'Enviado'"
+          (click)="setStatusFilter('Enviado')">
+          <span class="status-dot status-sent">●</span>
+          {{ 'BATCH.STATUS_SENT' | translate }}
+        </button>
+        <button
+          class="filter-chip"
+          [class.active]="statusFilter === 'Aceptado'"
+          (click)="setStatusFilter('Aceptado')">
+          <span class="status-dot status-approved">●</span>
+          {{ 'BATCH.STATUS_ACCEPTED' | translate }}
+        </button>
+      </div>
     </div>
 
-    <div *ngIf="!isLoading && filteredBatches.length === 0" class="no-results">
-      <p>{{ 'BATCH.NO_MATCHING_BATCHES' | translate }}</p>
+    <!-- Estados de carga -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="skeleton-table">
+        <div class="skeleton-row" *ngFor="let item of [1,2,3,4,5]">
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+        </div>
+      </div>
     </div>
 
-    <table *ngIf="!isLoading && filteredBatches.length > 0" class="batch-table">
-      <thead>
-      <tr>
-        <th>{{ 'BATCH.BATCH_CODE' | translate }}</th>
-        <th>{{ 'BATCH.SUPPLIER' | translate }}</th>
-        <th>{{ 'BATCH.FABRIC_TYPE' | translate }}</th>
-        <th>{{ 'BATCH.DATE' | translate }}</th>
-        <th>{{ 'BATCH.STATUS' | translate }}</th>
-        <th>{{ 'BATCH.PRICE' | translate }}</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let batch of filteredBatches" (click)="viewBatchDetails(batch)" class="clickable-row">
-        <td>{{ batch.code || 'N/A' }}</td>
-        <td>{{ batch.client || 'N/A' }}</td>
-        <td>{{ batch.fabricType || 'N/A' }}</td>
-        <td>{{ batch.date | date:'dd/MM/yy' }}</td>
-        <td>
-          <span [ngClass]="getStatusClass(batch.status)" class="status-dot">●</span>
-          {{ batch.status || 'N/A' }}
-        </td>
-        <td>s/{{ batch.price || 'N/A' }}</td>
-      </tr>
-      </tbody>
-    </table>
+    <!-- Estado vacío -->
+    <div *ngIf="!isLoading && filteredBatches.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <i class="material-icons">inventory_2</i>
+      </div>
+      <h3>{{ searchTerm ? ('BATCH.NO_MATCHING_BATCHES' | translate) : ('BATCH.NO_BATCHES_YET' | translate) }}</h3>
+      <p>{{ searchTerm ? ('BATCH.TRY_DIFFERENT_SEARCH' | translate) : ('BATCH.START_MANAGING_BATCHES' | translate) }}</p>
+      <app-button
+        *ngIf="searchTerm"
+        label="{{ 'BATCH.CLEAR_SEARCH' | translate }}"
+        variant="primary"
+        (click)="clearSearch()">
+      </app-button>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-wrapper" *ngIf="!isLoading && filteredBatches.length > 0">
+      <table class="batch-table">
+        <thead>
+        <tr>
+          <th class="sortable" (click)="sortBy('code')">
+            <div class="th-content">
+              {{ 'BATCH.BATCH_CODE' | translate }}
+              <i class="material-icons sort-icon">swap_vert</i>
+            </div>
+          </th>
+          <th class="sortable" (click)="sortBy('client')">
+            <div class="th-content">
+              {{ 'BATCH.SUPPLIER' | translate }}
+              <i class="material-icons sort-icon">swap_vert</i>
+            </div>
+          </th>
+          <th>{{ 'BATCH.FABRIC_TYPE' | translate }}</th>
+          <th class="sortable" (click)="sortBy('date')">
+            <div class="th-content">
+              {{ 'BATCH.DATE' | translate }}
+              <i class="material-icons sort-icon">swap_vert</i>
+            </div>
+          </th>
+          <th>{{ 'BATCH.STATUS' | translate }}</th>
+          <th class="text-right">{{ 'BATCH.PRICE' | translate }}</th>
+          <th class="actions-column">{{ 'COMMON.ACTIONS' | translate }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let batch of filteredBatches; trackBy: trackByBatchId"
+            class="clickable-row"
+            [class.urgent]="isUrgentBatch(batch)"
+            (click)="viewBatchDetails(batch)">
+          <td class="code-cell">
+            <div class="batch-code">
+              <i class="material-icons batch-icon">qr_code</i>
+              <strong>{{ batch.code || 'N/A' }}</strong>
+            </div>
+          </td>
+          <td>
+            <div class="supplier-info">
+              <span class="supplier-name">{{ getSupplierCompanyName(batch.supplierId) }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="fabric-type">{{ batch.fabricType || 'N/A' }}</span>
+          </td>
+          <td>
+            <span class="date-text">{{ batch.date | date:'dd/MM/yy' }}</span>
+          </td>
+          <td>
+            <div class="status-container">
+                <span [ngClass]="getStatusClass(batch.status)" class="status-badge">
+                  <i class="material-icons status-icon">{{ getStatusIcon(batch.status) }}</i>
+                  {{ batch.status || 'N/A' }}
+                </span>
+            </div>
+          </td>
+          <td class="text-right">
+            <span class="price-text">s/{{ batch.price || 'N/A' }}</span>
+          </td>
+          <td class="actions-cell" (click)="$event.stopPropagation()">
+            <div class="action-buttons">
+              <button
+                *ngIf="canApproveOrReject(batch)"
+                class="action-btn approve-btn"
+                (click)="quickApprove(batch)"
+                [title]="'BATCH.QUICK_APPROVE' | translate">
+                <i class="material-icons">check_circle</i>
+              </button>
+              <button
+                *ngIf="canApproveOrReject(batch)"
+                class="action-btn reject-btn"
+                (click)="quickReject(batch)"
+                [title]="'BATCH.QUICK_REJECT' | translate">
+                <i class="material-icons">cancel</i>
+              </button>
+              <button
+                class="action-btn view-btn"
+                (click)="viewBatchDetails(batch)"
+                [title]="'BATCH.VIEW_DETAILS' | translate">
+                <i class="material-icons">visibility</i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Vista de detalle -->
@@ -66,68 +199,105 @@
         variant="back"
         (click)="backToTable()">
       </app-button>
-      <h2>{{ 'BATCH.BATCH_DETAIL' | translate }} {{ selectedBatch.code }} – {{ selectedBatch.client }}</h2>
+      <h2>
+        <i class="material-icons detail-icon">inventory_2</i>
+        {{ 'BATCH.BATCH_DETAIL' | translate }} {{ selectedBatch.code }} – {{ selectedBatch.client }}
+      </h2>
     </div>
 
     <div class="detail-content">
       <div class="detail-grid">
         <div class="detail-item">
-          <label>{{ 'BATCH.BATCH_CODE' | translate }}:</label>
+          <label>
+            <i class="material-icons">qr_code</i>
+            {{ 'BATCH.BATCH_CODE' | translate }}:
+          </label>
           <div class="detail-value">{{ selectedBatch.code }}</div>
         </div>
 
         <div class="detail-item">
-          <label>{{ 'BATCH.QUANTITY' | translate }}:</label>
+          <label>
+            <i class="material-icons">straighten</i>
+            {{ 'BATCH.QUANTITY' | translate }}:
+          </label>
           <div class="detail-value">{{ selectedBatch.quantity }}m</div>
         </div>
 
         <div class="detail-item">
-          <label>{{ 'BATCH.CLIENT' | translate }}:</label>
+          <label>
+            <i class="material-icons">person</i>
+            {{ 'BATCH.CLIENT' | translate }}:
+          </label>
           <div class="detail-value">{{ selectedBatch.client }}</div>
         </div>
 
         <div class="detail-item">
-          <label>{{ 'BATCH.PRICE' | translate }}:</label>
+          <label>
+            <i class="material-icons">attach_money</i>
+            {{ 'BATCH.PRICE' | translate }}:
+          </label>
           <div class="detail-value">s/{{ selectedBatch.price }}</div>
         </div>
 
         <div class="detail-item">
-          <label>{{ 'BATCH.FABRIC_TYPE' | translate }}:</label>
+          <label>
+            <i class="material-icons">category</i>
+            {{ 'BATCH.FABRIC_TYPE' | translate }}:
+          </label>
           <div class="detail-value">{{ selectedBatch.fabricType }}</div>
         </div>
 
         <div class="detail-item">
-          <label>{{ 'BATCH.OBSERVATIONS' | translate }}:</label>
+          <label>
+            <i class="material-icons">note</i>
+            {{ 'BATCH.OBSERVATIONS' | translate }}:
+          </label>
           <div class="detail-value">{{ selectedBatch.observations || ('BATCH.NO_OBSERVATIONS' | translate) }}</div>
         </div>
 
         <div class="detail-item">
-          <label>{{ 'BATCH.COLOR' | translate }}:</label>
+          <label>
+            <i class="material-icons">palette</i>
+            {{ 'BATCH.COLOR' | translate }}:
+          </label>
           <div class="detail-value">{{ selectedBatch.color }}</div>
         </div>
 
         <div class="detail-item">
-          <label>{{ 'BATCH.REGISTER_DATE' | translate }}:</label>
+          <label>
+            <i class="material-icons">calendar_today</i>
+            {{ 'BATCH.REGISTER_DATE' | translate }}:
+          </label>
           <div class="detail-value">{{ selectedBatch.date | date:'dd/MM/yyyy' }}</div>
         </div>
       </div>
 
-      <!-- Mostrar imagen si existe -->
+      <!-- Imagen del lote -->
       <div *ngIf="selectedBatch.imageUrl" class="batch-image-container">
-        <img [src]="selectedBatch.imageUrl" alt="{{ 'BATCH.BATCH_IMAGE' | translate }}" class="batch-image">
+        <div class="image-header">
+          <i class="material-icons">image</i>
+          <h3>{{ 'BATCH.BATCH_IMAGE' | translate }}</h3>
+        </div>
+        <img [src]="selectedBatch.imageUrl"
+             alt="{{ 'BATCH.BATCH_IMAGE' | translate }}"
+             class="batch-image"
+             (click)="openImageModal(selectedBatch.imageUrl)">
       </div>
 
-      <!-- Botones de acción solo si el lote está en estado enviado -->
+      <!-- Botones de acción -->
       <div *ngIf="canApproveOrReject(selectedBatch)" class="action-buttons">
         <app-button
           label="{{ 'BATCH.APPROVE' | translate }}"
           variant="primary"
+          icon="check_circle"
+          [loading]="isLoading"
           (click)="approveBatch()">
         </app-button>
 
         <app-button
           label="{{ 'BATCH.REJECT' | translate }}"
           variant="secondary"
+          icon="cancel"
           (click)="showRejectForm()">
         </app-button>
       </div>
@@ -143,46 +313,88 @@
         variant="back"
         (click)="view = 'detail'">
       </app-button>
-      <h2>{{ 'BATCH.REJECT_REASON' | translate }}</h2>
+      <h2>
+        <i class="material-icons reject-icon">report_problem</i>
+        {{ 'BATCH.REJECT_BATCH' | translate }}
+      </h2>
     </div>
 
     <div class="reject-content">
-      <div class="form-group">
-        <label>{{ 'BATCH.OBSERVATIONS' | translate }}:</label>
-        <app-input
-          type="textarea"
-          [(ngModel)]="rejectReason"
-          placeholder="{{ 'BATCH.ENTER_REASON' | translate }}"
-          [fullWidth]="true">
-        </app-input>
+      <div class="reject-warning">
+        <i class="material-icons">warning</i>
+        <p>{{ 'BATCH.REJECT_WARNING' | translate }}</p>
       </div>
 
-      <div class="form-group">
-        <label>{{ 'BATCH.EVIDENCE' | translate }}:</label>
-        <div class="upload-container">
-          <input
-            type="file"
-            id="rejectImage"
-            accept="image/*"
-            (change)="onFileChange($event)"
-            style="display: none">
-
-          <div class="image-preview" *ngIf="rejectImage">
-            <img [src]="rejectImage" alt="{{ 'BATCH.PREVIEW' | translate }}" class="preview-image">
+      <div class="form-section">
+        <div class="form-group">
+          <label>
+            <i class="material-icons">edit_note</i>
+            {{ 'BATCH.REJECT_REASON' | translate }}:
+            <span class="required">*</span>
+          </label>
+          <app-input
+            type="textarea"
+            [(ngModel)]="rejectReason"
+            placeholder="{{ 'BATCH.ENTER_REASON_PLACEHOLDER' | translate }}"
+            [fullWidth]="true">
+          </app-input>
+          <div class="char-counter">
+            {{ (rejectReason.length || 0) }}/500
           </div>
+        </div>
 
-          <div *ngIf="!rejectImage" class="upload-placeholder" (click)="triggerFileInput()">
-            <span class="camera-icon">📷</span>
+        <div class="form-group">
+          <label>
+            <i class="material-icons">photo_camera</i>
+            {{ 'BATCH.EVIDENCE' | translate }}:
+            <span class="optional">{{ 'COMMON.OPTIONAL' | translate }}</span>
+          </label>
+
+          <div class="upload-area"
+               [class.has-image]="rejectImage"
+               (click)="triggerFileInput()"
+               (dragover)="onDragOver($event)"
+               (dragleave)="onDragLeave($event)"
+               (drop)="onDrop($event)">
+
+            <input
+              type="file"
+              id="rejectImage"
+              accept="image/*"
+              (change)="onFileChange($event)"
+              style="display: none">
+
+            <div class="image-preview" *ngIf="rejectImage">
+              <img [src]="rejectImage" [alt]="'BATCH.PREVIEW' | translate" class="preview-image">
+              <div class="image-actions">
+                <button class="remove-image" (click)="removeImage($event)">
+                  <i class="material-icons">close</i>
+                </button>
+              </div>
+            </div>
+
+            <div *ngIf="!rejectImage" class="upload-placeholder">
+              <i class="material-icons upload-icon">cloud_upload</i>
+              <p class="upload-text">{{ 'BATCH.DRAG_DROP_IMAGE' | translate }}</p>
+              <p class="upload-subtext">{{ 'BATCH.OR_CLICK_SELECT' | translate }}</p>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="form-actions">
         <app-button
-          label="{{ 'COMMON.SEND' | translate }}"
+          label="{{ 'COMMON.CANCEL' | translate }}"
+          variant="text"
+          (click)="view = 'detail'">
+        </app-button>
+
+        <app-button
+          label="{{ 'BATCH.CONFIRM_REJECT' | translate }}"
           variant="primary"
+          icon="send"
           [loading]="isLoading"
-          [disabled]="!rejectReason.trim()"
+          [disabled]="!rejectReason || !rejectReason.trim()"
           (click)="submitReject()">
         </app-button>
       </div>

@@ -1,1 +1,258 @@
-<p>supplier-observation works!</p>
+<div class="observation-container">
+  <!-- Vista de tabla -->
+  <div *ngIf="view === 'table'">
+    <div class="table-header">
+      <div class="header-left">
+        <h2>
+          <i class="material-icons header-icon">visibility</i>
+          {{ 'OBSERVATION_SUPPLIER.MY_OBSERVATIONS' | translate }}
+          <span class="observation-count" *ngIf="!isLoading">({{ filteredObservations.length }})</span>
+        </h2>
+      </div>
+
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <i class="material-icons search-icon">search</i>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="{{ 'OBSERVATION_SUPPLIER.SEARCH_PLACEHOLDER' | translate }}"
+            [(ngModel)]="searchTerm"
+            (input)="filterObservations()"
+            (keyup.enter)="filterObservations()">
+          <button *ngIf="searchTerm" class="clear-search" (click)="clearSearch()">
+            <i class="material-icons">close</i>
+          </button>
+        </div>
+
+        <app-button
+          label="{{ 'COMMON.FILTER' | translate }}"
+          variant="secondary"
+          icon="tune"
+          (click)="toggleFilters()">
+        </app-button>
+
+        <app-button
+          label="{{ 'COMMON.REFRESH' | translate }}"
+          variant="text"
+          icon="refresh"
+          [loading]="isLoading"
+          (click)="loadObservations()">
+        </app-button>
+      </div>
+    </div>
+
+    <!-- Filtros rápidos -->
+    <div class="quick-filters" *ngIf="showQuickFilters">
+      <div class="filter-chips">
+        <button
+          class="filter-chip"
+          [class.active]="!statusFilter"
+          (click)="setStatusFilter(null)">
+          <i class="material-icons">select_all</i>
+          {{ 'OBSERVATION_SUPPLIER.ALL_STATUSES' | translate }}
+        </button>
+        <button
+          class="filter-chip"
+          [class.active]="statusFilter === 'Pendiente'"
+          (click)="setStatusFilter('Pendiente')">
+          <span class="status-dot status-pending">●</span>
+          {{ 'OBSERVATION_SUPPLIER.STATUS_PENDING' | translate }}
+        </button>
+        <button
+          class="filter-chip"
+          [class.active]="statusFilter === 'Visto'"
+          (click)="setStatusFilter('Visto')">
+          <span class="status-dot status-seen">●</span>
+          {{ 'OBSERVATION_SUPPLIER.STATUS_SEEN' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Estados de carga -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="skeleton-table">
+        <div class="skeleton-row" *ngFor="let item of [1,2,3,4,5]">
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado vacío -->
+    <div *ngIf="!isLoading && filteredObservations.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <i class="material-icons">visibility_off</i>
+      </div>
+      <h3>{{ searchTerm ? ('OBSERVATION_SUPPLIER.NO_MATCHING_OBSERVATIONS' | translate) : ('OBSERVATION_SUPPLIER.NO_OBSERVATIONS_YET' | translate) }}</h3>
+      <p>{{ searchTerm ? ('OBSERVATION_SUPPLIER.TRY_DIFFERENT_SEARCH' | translate) : ('OBSERVATION_SUPPLIER.NO_OBSERVATIONS_DESCRIPTION' | translate) }}</p>
+      <app-button
+        *ngIf="searchTerm"
+        label="{{ 'OBSERVATION_SUPPLIER.CLEAR_SEARCH' | translate }}"
+        variant="primary"
+        (click)="clearSearch()">
+      </app-button>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-wrapper" *ngIf="!isLoading && filteredObservations.length > 0">
+      <table class="observation-table">
+        <thead>
+        <tr>
+          <th class="sortable" (click)="sortBy('batchCode')">
+            <div class="th-content">
+              {{ 'OBSERVATION_SUPPLIER.BATCH_CODE' | translate }}
+              <i class="material-icons sort-icon">swap_vert</i>
+            </div>
+          </th>
+          <th>{{ 'OBSERVATION_SUPPLIER.REASON' | translate }}</th>
+          <th class="sortable clickable-status" (click)="sortBy('status')">
+            <div class="th-content">
+              {{ 'OBSERVATION_SUPPLIER.STATUS' | translate }}
+              <i class="material-icons sort-icon">swap_vert</i>
+              <small class="status-hint">{{ 'OBSERVATION_SUPPLIER.CLICK_TO_CHANGE' | translate }}</small>
+            </div>
+          </th>
+          <th class="sortable" (click)="sortBy('createdAt')">
+            <div class="th-content">
+              {{ 'OBSERVATION_SUPPLIER.CREATED_DATE' | translate }}
+              <i class="material-icons sort-icon">swap_vert</i>
+            </div>
+          </th>
+          <th class="actions-column">{{ 'COMMON.ACTIONS' | translate }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let observation of filteredObservations; trackBy: trackByObservationId"
+            class="clickable-row"
+            [class.recent]="isRecentObservation(observation)">
+          <td class="code-cell">
+            <div class="batch-code">
+              <i class="material-icons batch-icon">qr_code</i>
+              <strong>{{ observation.batchCode || 'N/A' }}</strong>
+            </div>
+          </td>
+          <td class="reason-cell">
+            <div class="reason-text">
+              {{ observation.reason || 'N/A' }}
+            </div>
+          </td>
+          <td class="status-cell" (click)="toggleObservationStatus(observation)" title="{{ 'OBSERVATION_SUPPLIER.CLICK_TO_TOGGLE' | translate }}">
+            <div class="status-container clickable-status">
+              <span [ngClass]="getStatusClass(observation.status)" class="status-badge clickable">
+                <i class="material-icons status-icon">{{ getStatusIcon(observation.status) }}</i>
+                {{ observation.status || 'N/A' }}
+                <i class="material-icons toggle-icon">sync</i>
+              </span>
+            </div>
+          </td>
+          <td class="date-cell">
+            <span class="date-text">{{ formatDate(observation.createdAt) }}</span>
+          </td>
+          <td class="actions-cell" (click)="$event.stopPropagation()">
+            <div class="action-buttons">
+              <button
+                class="action-btn view-btn"
+                (click)="viewObservationDetails(observation)"
+                [title]="'OBSERVATION_SUPPLIER.VIEW_DETAILS' | translate">
+                <i class="material-icons">visibility</i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Vista de detalle -->
+  <div *ngIf="view === 'detail' && selectedObservation" class="detail-view">
+    <div class="detail-header">
+      <app-button
+        label=""
+        icon="arrow_back"
+        variant="back"
+        (click)="backToTable()">
+      </app-button>
+      <h2>
+        <i class="material-icons detail-icon">visibility</i>
+        {{ 'OBSERVATION_SUPPLIER.OBSERVATION_DETAIL' | translate }} {{ selectedObservation.batchCode }}
+      </h2>
+    </div>
+
+    <div class="detail-content">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>
+            <i class="material-icons">qr_code</i>
+            {{ 'OBSERVATION_SUPPLIER.BATCH_CODE' | translate }}:
+          </label>
+          <div class="detail-value">{{ selectedObservation.batchCode }}</div>
+        </div>
+
+        <div class="detail-item full-width">
+          <label>
+            <i class="material-icons">note</i>
+            {{ 'OBSERVATION_SUPPLIER.REASON' | translate }}:
+          </label>
+          <div class="detail-value reason-detail">{{ selectedObservation.reason }}</div>
+        </div>
+
+        <div class="detail-item">
+          <label>
+            <i class="material-icons">info</i>
+            {{ 'OBSERVATION_SUPPLIER.STATUS' | translate }}:
+          </label>
+          <div class="detail-value">
+            <span [ngClass]="getStatusClass(selectedObservation.status)" class="status-badge large">
+              <i class="material-icons status-icon">{{ getStatusIcon(selectedObservation.status) }}</i>
+              {{ selectedObservation.status }}
+            </span>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <label>
+            <i class="material-icons">calendar_today</i>
+            {{ 'OBSERVATION_SUPPLIER.CREATED_DATE' | translate }}:
+          </label>
+          <div class="detail-value">{{ formatDate(selectedObservation.createdAt) }}</div>
+        </div>
+      </div>
+
+      <!-- Imagen de evidencia si existe -->
+      <div *ngIf="selectedObservation.imageUrl" class="evidence-image-container">
+        <div class="image-header">
+          <i class="material-icons">image</i>
+          <h3>{{ 'OBSERVATION_SUPPLIER.EVIDENCE_IMAGE' | translate }}</h3>
+        </div>
+        <img [src]="selectedObservation.imageUrl"
+             alt="{{ 'OBSERVATION_SUPPLIER.EVIDENCE_IMAGE' | translate }}"
+             class="evidence-image"
+             (click)="openImageModal(selectedObservation.imageUrl)">
+      </div>
+
+      <!-- Botón de acción para cambiar estado -->
+      <div class="action-buttons-detail">
+        <app-button
+          [label]="selectedObservation.status === 'Pendiente' ? ('OBSERVATION_SUPPLIER.MARK_AS_SEEN' | translate) : ('OBSERVATION_SUPPLIER.MARK_AS_PENDING' | translate)"
+          variant="primary"
+          [icon]="selectedObservation.status === 'Pendiente' ? 'visibility' : 'schedule'"
+          (click)="toggleObservationStatus(selectedObservation)">
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificación -->
+  <app-notification
+    [show]="notification.show"
+    [message]="notification.message"
+    [type]="notification.type"
+    [autoClose]="true"
+    (close)="notification.show = false">
+  </app-notification>
+</div>

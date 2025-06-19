@@ -44,7 +44,17 @@
         [fullWidth]="true">
       </app-theme-switcher>
     </div>
-
+    <div class="form-group">
+      <label>{{ 'CONFIGURATION.SUBSCRIPTION' | translate }}</label>
+      <div class="subscription-info">
+    <span class="plan-badge" [class]="'plan-' + configuration.subscriptionPlan">
+      {{ 'PLANS.' + (configuration.subscriptionPlan?.toUpperCase() || 'BASIC') | translate }}
+    </span>
+        <button class="manage-plan-btn" routerLink="/supplier/planes">
+          {{ 'CONFIGURATION.MANAGE_PLAN' | translate }}
+        </button>
+      </div>
+    </div>
     <!-- Botones de acción -->
     <div class="button-container">
       <app-button

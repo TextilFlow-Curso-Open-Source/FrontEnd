@@ -367,4 +367,21 @@ export class AuthService extends BaseService<User> {
     localStorage.setItem('current_user', JSON.stringify(user));
     this.sessionService.startSession(this);
   }
+  /**
+   * Actualiza los datos de un usuario específico
+   * @param userId ID del usuario a actualizar
+   * @param userData Datos actualizados del usuario
+   */
+  updateUser(userId: string, userData: any) {
+    return this.update(userId, userData); // Usa el método heredado de BaseService
+  }
+
+  /**
+   * Actualiza el usuario actual en memoria
+   * @param user Usuario actualizado
+   */
+  setCurrentUser(user: any): void {
+    localStorage.setItem('current_user', JSON.stringify(user));
+    console.log('✅ Usuario actual actualizado:', user);
+  }
 }

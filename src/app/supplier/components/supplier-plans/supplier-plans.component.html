@@ -1,1 +1,264 @@
-<p>supplier-plans works!</p>
+<div class="plans-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>{{ 'COMMON.LOADING' | translate }}</p>
+  </div>
+
+  <!-- Plans Content -->
+  <div *ngIf="!isLoading" class="plans-content">
+    <!-- Header -->
+    <div class="plans-header">
+      <h1>{{ 'PLANS.TITLE' | translate }}</h1>
+      <p>{{ 'PLANS.SUBTITLE' | translate }}</p>
+    </div>
+
+    <!-- Plans Grid -->
+    <div class="plans-grid">
+      <div *ngFor="let plan of plans"
+           class="plan-card"
+           [class.current-plan]="plan.isCurrentPlan"
+           [class.plan-basic]="plan.id === 'basic'"
+           [class.plan-corporate]="plan.id === 'corporate'">
+
+        <!-- Current Plan Badge -->
+        <div *ngIf="plan.isCurrentPlan" class="current-badge">
+          {{ 'PLANS.CURRENT' | translate }}
+        </div>
+
+        <!-- Plan Header -->
+        <div class="plan-header">
+          <h3>{{ plan.name | translate }}</h3>
+          <div class="plan-price">
+            <span class="currency">$</span>
+            <span class="amount">{{ plan.price }}</span>
+            <span class="period">{{ plan.period | translate }}</span>
+          </div>
+        </div>
+
+        <!-- Plan Features -->
+        <div class="plan-features">
+          <ul>
+            <li *ngFor="let feature of plan.features" class="feature-item">
+              <span class="feature-icon">✓</span>
+              <span class="feature-text">{{ feature.key | translate }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Plan Action -->
+        <div class="plan-action">
+          <button
+            class="plan-button"
+            [class.plan-button-basic]="plan.id === 'basic'"
+            [class.plan-button-corporate]="plan.id === 'corporate'"
+            [disabled]="plan.isCurrentPlan"
+            (click)="onPlanAction(plan.id)">
+            {{ plan.buttonText | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upgrade Confirmation Modal -->
+  <div *ngIf="showUpgradeModal" class="modal-overlay" (click)="cancelModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ 'PLANS.CONFIRM_UPGRADE' | translate }}</h3>
+        <button class="modal-close" (click)="cancelModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p>{{ 'PLANS.UPGRADE_DESCRIPTION' | translate }}</p>
+        <div class="upgrade-details">
+          <div class="price-summary">
+            <span>{{ 'PLANS.NEW_PRICE' | translate }}:</span>
+            <strong>${{ getTargetPlan()?.price }}/{{ 'PLANS.MONTH' | translate }}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <app-button
+          [label]="'COMMON.CANCEL' | translate"
+          variant="secondary"
+          (click)="cancelModal()">
+        </app-button>
+        <app-button
+          [label]="'PLANS.PROCEED_PAYMENT' | translate"
+          variant="primary"
+          (click)="confirmUpgrade()">
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Downgrade Confirmation Modal -->
+  <div *ngIf="showDowngradeModal" class="modal-overlay" (click)="cancelModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ 'PLANS.CONFIRM_DOWNGRADE' | translate }}</h3>
+        <button class="modal-close" (click)="cancelModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p>{{ 'PLANS.DOWNGRADE_WARNING' | translate }}</p>
+        <div class="warning-list">
+          <p><strong>{{ 'PLANS.YOU_WILL_LOSE' | translate }}:</strong></p>
+          <ul>
+            <li>{{ 'PLANS.FEATURE_PERSONALIZED_DASHBOARD' | translate }}</li>
+            <li>{{ 'PLANS.FEATURE_UNLIMITED_PHOTOS' | translate }}</li>
+            <li>{{ 'PLANS.FEATURE_QUALITY_PDF_REPORTS' | translate }}</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <app-button
+          [label]="'COMMON.CANCEL' | translate"
+          variant="secondary"
+          (click)="cancelModal()">
+        </app-button>
+        <app-button
+          [label]="'PLANS.CONFIRM_DOWNGRADE' | translate"
+          variant="primary"
+          (click)="confirmDowngrade()">
+        </app-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div *ngIf="showPaymentModal" class="modal-overlay">
+    <div class="modal-content payment-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ 'PLANS.PAYMENT_DETAILS' | translate }}</h3>
+        <button class="modal-close" (click)="cancelModal()">×</button>
+      </div>
+
+      <!-- Payment Success State -->
+      <div *ngIf="paymentSuccess" class="payment-success">
+        <div class="success-icon">✓</div>
+        <h4>{{ 'PLANS.PAYMENT_SUCCESS' | translate }}</h4>
+        <p>{{ 'PLANS.PLAN_ACTIVATED' | translate }}</p>
+      </div>
+
+      <!-- Payment Form -->
+      <form *ngIf="!paymentSuccess && !isProcessingPayment"
+            [formGroup]="paymentForm"
+            (ngSubmit)="processPayment()"
+            class="payment-form">
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+          <h4>{{ 'PLANS.ORDER_SUMMARY' | translate }}</h4>
+          <div class="summary-item">
+            <span>{{ 'PLANS.CORPORATE_PLAN' | translate }}</span>
+            <span><strong>${{ getTargetPlan()?.price }}/{{ 'PLANS.MONTH' | translate }}</strong></span>
+          </div>
+        </div>
+
+        <!-- Payment Details -->
+        <div class="payment-section">
+          <h4>{{ 'PLANS.PAYMENT_METHOD' | translate }}</h4>
+
+          <div class="form-row">
+            <app-input
+              [label]="'PLANS.CARD_NUMBER' | translate"
+              formControlName="cardNumber"
+              [required]="true"
+              placeholder="4111-1111-1111-1111">
+            </app-input>
+          </div>
+
+          <div class="form-row-group">
+            <app-input
+              [label]="'PLANS.EXPIRY_DATE' | translate"
+              formControlName="expiryDate"
+              [required]="true"
+              placeholder="MM/YY">
+            </app-input>
+            <app-input
+              [label]="'PLANS.CVV' | translate"
+              formControlName="cvv"
+              [required]="true"
+              placeholder="123">
+            </app-input>
+          </div>
+
+          <div class="form-row">
+            <app-input
+              [label]="'PLANS.CARD_HOLDER' | translate"
+              formControlName="cardHolder"
+              [required]="true">
+            </app-input>
+          </div>
+        </div>
+
+        <!-- Billing Information -->
+        <div class="billing-section">
+          <h4>{{ 'PLANS.BILLING_INFO' | translate }}</h4>
+
+          <div class="form-row">
+            <app-input
+              [label]="'PLANS.BILLING_ADDRESS' | translate"
+              formControlName="billingAddress"
+              [required]="true">
+            </app-input>
+          </div>
+
+          <div class="form-row-group">
+            <app-input
+              [label]="'PLANS.BILLING_CITY' | translate"
+              formControlName="billingCity"
+              [required]="true">
+            </app-input>
+            <app-input
+              [label]="'PLANS.BILLING_COUNTRY' | translate"
+              formControlName="billingCountry"
+              [required]="true">
+            </app-input>
+          </div>
+
+          <div class="form-row">
+            <app-input
+              [label]="'PLANS.BILLING_PHONE' | translate"
+              formControlName="billingPhone"
+              [required]="true">
+            </app-input>
+          </div>
+        </div>
+
+        <!-- Payment Actions -->
+        <div class="payment-actions">
+          <app-button
+            [label]="'COMMON.CANCEL' | translate"
+            variant="secondary"
+            type="button"
+            (click)="cancelModal()">
+          </app-button>
+          <app-button
+            [label]="'PLANS.COMPLETE_PAYMENT' | translate"
+            variant="primary"
+            type="button"
+            [disabled]="paymentForm.invalid">
+          </app-button>
+        </div>
+      </form>
+
+      <!-- Processing State -->
+      <div *ngIf="isProcessingPayment" class="payment-processing">
+        <div class="processing-spinner"></div>
+        <h4>{{ 'PLANS.PROCESSING_PAYMENT' | translate }}</h4>
+        <p>{{ 'PLANS.PLEASE_WAIT' | translate }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notifications -->
+  <app-notification
+    [show]="notification.show"
+    (showChange)="notification.show = $event"
+    [message]="notification.message"
+    [type]="notification.type"
+    [autoClose]="true"
+    [duration]="3000">
+  </app-notification>
+</div>
