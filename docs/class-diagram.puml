@@ -1,0 +1,401 @@
+@startuml FullAppClassDiagram
+skinparam layoutDirection TB
+skinparam linetype ortho
+skinparam classFontSize 14
+skinparam classAttributeFontSize 12
+skinparam classFontName Arial
+skinparam classAttributeFontName Arial
+skinparam packageStyle rectangle
+
+
+' ================= shared =================
+package shared {
+  package services {
+    abstract class BaseService<T> {
+      -http: HttpClient
+      -resourceEndpoint: string
+      -serverBaseUrl: string
+      -httpOptions: HttpHeaders
+
+      +create(resource: T): Observable<T>
+      +delete(id: any): Observable<any>
+      +update(id: any, resource: T): Observable<T>
+      +getAll(): Observable<T[]>
+      +getById(id: any): Observable<T>
+      #handleError(error: HttpErrorResponse): Observable<Error>
+      #resourcePath(): string
+    }
+    class ThemeService <<Service>> {
+      +theme$: Observable<ThemeMode>
+      +activeTheme$: Observable<ActiveTheme>
+      +setTheme(mode: ThemeMode, save: boolean)
+      +toggleTheme()
+      +getCurrentTheme(): ThemeMode
+      +getCurrentActiveTheme(): ActiveTheme
+      +getThemeForConfiguration(): ThemeMode
+      +syncFromConfiguration(configTheme: string): void
+      +getSystemPreference(): ActiveTheme
+      +getDebugInfo(): object
+    }
+  }
+  package components {
+
+      class AppButtonComponent <<Component>>
+      class SmartLogoComponent <<Component>>
+      class ThemeSwitcherComponent <<Component>>
+      class AppInputComponent <<Component>>
+      class AppNotificationComponent <<Component>>
+      class PageNotFoundComponent <<Component>>
+
+  }
+}
+
+' ================= AUTH =================
+package auth {
+  package models {
+    class User <<Entity>> {
+      -id: string
+      -name: string
+      -email: string
+      -password: string
+      -role: 'businessman' | 'supplier' | 'pending'
+      -country: string
+      -city: string
+      -address: string
+      -phone: string
+      +constructor(user: {...})
+    }
+  }
+  package services {
+    class AuthService <<Service>> {
+      +constructor(router: Router, sessionService: SessionService, injector: Injector)
+      +checkEmailExists(email: string)
+      +login(...)
+      +register(...)
+      +logout(navigate: boolean)
+      +setUserRole(role: string)
+      +getCurrentUser(): User
+      +isAuthenticated(): boolean
+      +saveSession(token: string, user: User): void
+    }
+    class SessionService <<Service>> {
+      +constructor()
+      +init(authService: AuthService): void
+      +startSession(authService: AuthService): void
+      +endSession(): void
+    }
+  }
+  package views {
+
+    class UserLoginComponent
+    class UserRegisterComponent
+    class UserRoleSelectorComponent
+    class ForgotPassWordComponent
+  }
+}
+
+' ================= BATCH =================
+package batch {
+  package models {
+    class Batch <<Entity>> {
+      -id: string
+      -code: string
+      -client: string
+      -businessmanId: string
+      -supplierId: string
+      -fabricType: string
+      -color: string
+      -quantity: number
+      -price: number
+      -observations?: string
+      -address?: string
+      -date: string
+      -status: BatchStatus
+      -createdAt?: string
+      -updatedAt?: string
+      -imageUrl?: string
+      +constructor(data: {...})
+    }
+    class BatchRequest <<Entity>> {
+      -id: string
+      -businessmanId: string
+      -supplierId: string
+      -batchType: string
+      -color: string
+      -quantity?: number
+      -address?: string
+      -comments?: string
+      -status: BatchRequestStatus
+      -createdAt: string
+      -updatedAt?: string
+      +constructor(data: {...})
+    }
+  }
+  package services {
+    class BatchService <<Service>> {
+      +constructor()
+      +getBySupplierId(supplierId: string)
+      +getByBusinessmanId(businessmanId: string)
+      +override update(id: string, resource: Partial<Batch>)
+    }
+  }
+  package components {
+    class BusinessmanBatchComponent <<Component>>
+    class SupplierBatchComponent <<Component>>
+    class SupplierRegisterBatchComponent <<Component>>
+  }
+}
+
+' ================= BUSINESSMAN =================
+package businessman {
+  package models {
+    class Businessman <<Entity>> extends auth.models.User {
+      -companyName: string
+      -ruc: string
+      -businessType: string
+      -industry: string
+      -employeeCount: number
+      -foundingYear: number
+      -website: string
+      -description: string
+      -logo: string
+      +constructor(businessman: {...})
+    }
+  }
+  package services {
+    class BusinessmanService <<Service>> {
+      +constructor(authService: AuthService)
+      +createProfile(userId: string)
+      +getAllBusinessmen()
+      +getProfileByEmail(email: string)
+      +getProfileById(id: string)
+      +getProfileByUserId(userId: string)
+      +updateProfile(id: string, profile: Businessman)
+    }
+  }
+  package components {
+    class BusinessmanHomeComponent <<Component>>
+    class BusinessmanPlansComponent <<Component>>
+    class BusinessmanRequestComponent <<Component>>
+  }
+  package layout {
+    class BusinessmanLayoutComponent <<Component>>
+  }
+}
+
+' ================= CONFIGURATION =================
+package configuration {
+  package models {
+    class Configuration <<Entity>> {
+      -id: string
+      -userId: string
+      -userType: 'businessman' | 'supplier'
+      -language: string
+      -batchCodeFormat: 'automatic' | 'manual'
+      -viewMode: 'light' | 'dark'
+      -createdAt?: string
+      -updatedAt?: string
+      +constructor(data: {...})
+    }
+  }
+  package services {
+    class ConfigurationService <<Service>> {
+      +constructor()
+      +getByUserId(userId: string)
+    }
+  }
+  package components {
+    class BusinessmanConfigurationComponent <<Component>>
+    class BusinessmanProfileConfigurationComponent <<Component>>
+    class SupplierConfigurationComponent <<Component>>
+    class SupplierProfileConfigurationComponent <<Component>>
+  }
+}
+
+' ================= OBSERVATION =================
+package observation {
+  package models {
+    class Observation <<Entity>> {
+      -id: string
+      -batchId: string
+      -batchCode: string
+      -businessmanId: string
+      -supplierId: string
+      -reason: string
+      -imageUrl?: string
+      -status: ObservationStatus
+      -createdAt: string
+      -updatedAt?: string
+      +constructor(data: {...})
+    }
+  }
+  package services {
+    class ObservationService <<Service>> {
+      +constructor()
+    }
+  }
+  package components {
+    class BusinessmanObservationComponent <<Component>>
+    class SupplierObservationComponent <<Component>>
+  }
+}
+
+' ================= REQUEST =================
+package request {
+  package models {
+    class BusinessSupplierRequest <<Entity>> {
+      -id: string
+      -businessmanId: string
+      -supplierId: string
+      -status: 'pending' | 'accepted' | 'rejected'
+      -message?: string
+      -batchType?: string
+      -color?: string
+      -quantity?: number
+      -address?: string
+      -createdAt?: string
+      -updatedAt?: string
+      +constructor(data: {...})
+    }
+  }
+  package services {
+    class SupplierRequestService <<Service>> {
+      +constructor()
+      +createRequest(...)
+      +getRequestsByBusinessman(...)
+      +getRequestsForSupplier(...)
+      +updateRequestStatus(...)
+      +checkExistingRequest(...)
+    }
+  }
+  package components {
+    class AddSupplierComponent <<Component>>
+    class BusinessRequestComponent <<Component>>
+  }
+}
+
+' ================= SUPPLIER =================
+package supplier {
+  package models {
+    class Supplier <<Entity>> extends auth.models.User {
+      -companyName: string
+      -ruc: string
+      -specialization: string
+      -productCategories: string[]
+      -yearsFounded: number
+      -warehouseLocation: string
+      -minimumOrderQuantity: number
+      -logo: string
+      -averageRating: number
+      -totalReviews: number
+      +constructor(supplier: {...})
+    }
+    class SupplierReview <<Entity>> {
+      -id: string
+      -supplierId: string
+      -businessmanId: string
+      -rating: number
+      -comment: string
+      -createdAt: string
+      -businessmanName?: string
+      +constructor(data: {...})
+    }
+  }
+ package services {
+     class SupplierService <<Service>> {
+       +constructor(authService: AuthService)
+       +createProfile(userId: string)
+       +getAllSuppliers()
+       +getProfileByEmail(email: string)
+       +getProfileById(id: string)
+       +getProfileByUserId(userId: string)
+       +updateProfile(id: string, profile: Supplier)
+       +updateSupplierRating(supplierId: string, averageRating: number, totalReviews: number)
+     }
+
+     class SupplierReviewService <<Service>> {
+       +constructor()
+       +addReview(...)
+       +getReviewsForSupplier(...)
+       +calculateAverageRating(...)
+       +hasBusinessmanReviewed(...)
+       +updateReview(...)
+     }
+   }
+  package components {
+    class SupplierHomeComponent <<Component>>
+    class SupplierPlansComponent <<Component>>
+    class SupplierRequestComponent <<Component>>
+  }
+  package layout {
+    class SupplierLayoutComponent <<Component>>
+  }
+
+}
+
+
+
+' ========== RELATIONSHIPS ==========
+' Inheritance
+businessman.models.Businessman -|> auth.models.User
+supplier.models.Supplier -|> auth.models.User
+
+' Service inheritance
+auth.services.AuthService --|> shared.services.BaseService
+batch.services.BatchService --|> shared.services.BaseService
+businessman.services.BusinessmanService --|> shared.services.BaseService
+configuration.services.ConfigurationService --|> shared.services.BaseService
+observation.services.ObservationService --|> shared.services.BaseService
+request.services.SupplierRequestService --|> shared.services.BaseService
+supplier.services.SupplierService --|> shared.services.BaseService
+supplier.services.SupplierReviewService --|> shared.services.BaseService
+
+' Component-Service relations
+auth.components.UserLoginComponent ..> auth.services.AuthService: injects
+auth.components.UserRegisterComponent ..> auth.services.AuthService: injects
+auth.components.UserRoleSelectorComponent ..> auth.services.AuthService: injects
+
+batch.components.BusinessmanBatchComponent ..> batch.services.BatchService: uses
+batch.components.SupplierBatchComponent ..> batch.services.BatchService: uses
+batch.components.SupplierRegisterBatchComponent ..> batch.services.BatchService: uses
+batch.components.BusinessmanBatchComponent ..> auth.services.AuthService: uses
+batch.components.SupplierBatchComponent ..> auth.services.AuthService: uses
+batch.components.BusinessmanBatchComponent ..> observation.services.ObservationService: uses
+
+businessman.components.BusinessmanHomeComponent ..> businessman.services.BusinessmanService: uses
+businessman.components.BusinessmanPlansComponent ..> businessman.services.BusinessmanService: uses
+businessman.components.BusinessmanRequestComponent ..> businessman.services.BusinessmanService: uses
+businessman.layout.BusinessmanLayoutComponent ..> auth.services.AuthService: uses
+
+configuration.components.BusinessmanConfigurationComponent ..> configuration.services.ConfigurationService: uses
+configuration.components.BusinessmanProfileConfigurationComponent ..> configuration.services.ConfigurationService: uses
+configuration.components.SupplierConfigurationComponent ..> configuration.services.ConfigurationService: uses
+configuration.components.SupplierProfileConfigurationComponent ..> configuration.services.ConfigurationService: uses
+configuration.components.BusinessmanConfigurationComponent ..> shared.services.ThemeService: uses
+configuration.components.SupplierConfigurationComponent ..> shared.services.ThemeService: uses
+configuration.components.BusinessmanProfileConfigurationComponent ..> shared.services.ThemeService: uses
+configuration.components.SupplierProfileConfigurationComponent ..> shared.services.ThemeService: uses
+
+observation.components.BusinessmanObservationComponent ..> observation.services.ObservationService: uses
+observation.components.SupplierObservationComponent ..> observation.services.ObservationService: uses
+
+request.components.AddSupplierComponent ..> request.services.SupplierRequestService: uses
+request.components.BusinessRequestComponent ..> request.services.SupplierRequestService: uses
+
+supplier.components.SupplierHomeComponent ..> supplier.services.SupplierService: uses
+supplier.components.SupplierPlansComponent ..> supplier.services.SupplierService: uses
+supplier.components.SupplierRequestComponent ..> supplier.services.SupplierService: uses
+supplier.components.SupplierRequestComponent ..> supplier.services.SupplierReviewService: uses
+supplier.layout.SupplierLayoutComponent ..> auth.services.AuthService: uses
+
+' AuthService helper dependencies
+auth.services.AuthService ..> auth.services.SessionService: uses
+auth.services.AuthService ..> injector: uses
+auth.services.AuthService ..> router: uses
+
+' Event-style interactions (as in Angular EventEmitter)
+request.components.AddSupplierComponent ..> request.components.BusinessRequestComponent: emits events
+supplier.services.SupplierReviewService ..> supplier.services.SupplierService: updates rating
+
+
+@enduml
