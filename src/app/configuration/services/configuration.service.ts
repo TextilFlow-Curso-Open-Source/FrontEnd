@@ -1,7 +1,7 @@
 // src/app/configuration/services/configuration.service.ts
 
 import { Injectable } from '@angular/core';
-import { BaseService } from '../../core/services/base.service.service';
+import { BaseService } from '../../core/services/base.service';
 import { Configuration } from '../models/configuration.entity';
 import {environment} from "../../../environments/environment";
 

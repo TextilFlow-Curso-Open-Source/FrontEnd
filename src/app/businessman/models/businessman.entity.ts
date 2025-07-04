@@ -2,15 +2,12 @@
 import { User } from '../../auth/models/user.entity';
 
 export class Businessman extends User {
-  // Solo datos específicos de Businessman
+  // SOLO datos que existen en el backend
   companyName: string;
   ruc: string;
   businessType: string;
-  industry: string;
-  employeeCount: number;
-  foundingYear: number;
-  website: string;
   description: string;
+  website: string;
   logo: string;
 
   constructor(businessman: {
@@ -23,28 +20,22 @@ export class Businessman extends User {
     city?: string,
     address?: string,
     phone?: string,
+    // Solo campos que existen en el backend
     companyName?: string,
     ruc?: string,
     businessType?: string,
-    industry?: string,
-    employeeCount?: number,
-    foundingYear?: number,
-    website?: string,
     description?: string,
+    website?: string,
     logo?: string
   }) {
-    // Llamamos al constructor de la clase padre (User)
     super(businessman);
 
-    // Inicializamos las propiedades específicas de Businessman
+    // Solo inicializar campos que existen en el backend
     this.companyName = businessman.companyName || '';
     this.ruc = businessman.ruc || '';
     this.businessType = businessman.businessType || '';
-    this.industry = businessman.industry || '';
-    this.employeeCount = businessman.employeeCount || 0;
-    this.foundingYear = businessman.foundingYear || new Date().getFullYear();
-    this.website = businessman.website || '';
     this.description = businessman.description || '';
+    this.website = businessman.website || '';
     this.logo = businessman.logo || '';
   }
 }

@@ -1,11 +1,10 @@
-// /src/app/auth/services/auth.service.ts
 import { Injectable, Injector } from '@angular/core';
-import { BaseService } from '../../core/services/base.service.service';
+import { BaseService} from '../../core/services/base.service';
 import { User } from '../models/user.entity';
 import { Router } from '@angular/router';
 import { SessionService } from './session.service';
 import { environment } from '../../../environments/environment';
-import { map } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -26,36 +25,35 @@ export class AuthService extends BaseService<User> {
   /**
    * Verifica si un email ya existe en el sistema
    * @param email Email a verificar
+   * @deprecated Esta validación ahora se hace en el backend
    */
-  checkEmailExists(email: string) {
-    return this.getAll().pipe(
-      map((users: User[]) => users.some(user => user.email === email))
+  checkEmailExists(email: string): Observable<boolean> {
+    // El backend maneja la validación, pero mantenemos el método para compatibilidad
+    return this.customRequest<any[]>('/users', 'GET').pipe(
+      map((users: any[]) => users.some(user => user.email === email))
     );
   }
 
   /**
-   * Inicia sesión y carga configuraciones del usuario automáticamente
+   * Inicia sesión con el backend real
    * @param credentials Credenciales de login
    */
   login(credentials: { email: string, password: string }): void {
-    this.getAll().subscribe({
-      next: (users) => {
-        const user = users.find(u => u.email === credentials.email && u.password === credentials.password);
+    const signInRequest = {
+      email: credentials.email,
+      password: credentials.password
+    };
 
-        if (user) {
-          const token = "fake-jwt-token-" + Date.now();
+    this.customRequest<any>('/authentication/sign-in', 'POST', signInRequest, false).subscribe({
+      next: (response: any) => {
+        // Guardar token real
+        this.saveSession(response.token, this.transformBackendUserToFrontend(response));
 
-          // Guardar sesión
-          this.saveSession(token, user);
-
-          // Cargar y aplicar configuraciones del usuario INMEDIATAMENTE
-          this.loadUserConfigurations(user.id!).then(() => {
-            // Redirigir según rol después de aplicar configuraciones
-            this.redirectBasedOnRole(user.role);
-          });
-        } else {
-          console.error('Credenciales incorrectas');
-        }
+        // Cargar y aplicar configuraciones del usuario
+        this.loadUserConfigurations(response.id.toString()).then(() => {
+          // Redirigir según rol después de aplicar configuraciones
+          this.redirectBasedOnRole(response.role);
+        });
       },
       error: (error) => {
         console.error('Error en login:', error);
@@ -63,8 +61,106 @@ export class AuthService extends BaseService<User> {
     });
   }
 
+
   /**
-   * Carga y aplica las configuraciones del usuario inmediatamente
+   * Registra un nuevo usuario con el backend real
+   * @param userData Datos del usuario a registrar
+   */
+  register(userData: any): void {
+    const signUpRequest = {
+      email: userData.email,
+      password: userData.password,
+      name: userData.name,
+      country: userData.country,
+      city: userData.city,
+      address: userData.address,
+      phone: userData.phone,
+      role: 'PENDING'
+    };
+
+    this.customRequest<any>('/authentication/sign-up', 'POST', signUpRequest, false).subscribe({
+      next: (response: any) => {
+        console.log('Usuario registrado exitosamente:', response);
+
+        // Hacer login automáticamente con las credenciales del registro
+        this.login({
+          email: userData.email,
+          password: userData.password
+        });
+      },
+      error: (error) => {
+        console.error('Error en registro:', error);
+      }
+    });
+  }
+
+  /**
+   * Actualiza el rol del usuario
+   * @param role Nuevo rol del usuario
+   */
+  setUserRole(role: 'businessman' | 'supplier'): void {
+    const currentUser = this.getCurrentUser();
+
+    if (!currentUser || !currentUser.id) {
+      console.error('No hay usuario actual o no tiene ID');
+      return;
+    }
+
+    const updateRoleRequest = { role: role.toUpperCase() };
+
+    this.customRequest<any>(`/users/${currentUser.id}/role`, 'PUT', updateRoleRequest).subscribe({
+      next: (response: any) => {
+        // Actualizar usuario en localStorage
+        const updatedUser = this.transformBackendUserToFrontend(response);
+        this.setCurrentUser(updatedUser);
+
+        // Crear perfil correspondiente
+        this.createProfileForRole(role, currentUser.id!);
+
+        // Redirigir según el rol
+        this.redirectBasedOnRole(role);
+      },
+      error: (error) => {
+        console.error('Error al actualizar rol:', error);
+      }
+    });
+  }
+
+  /**
+   * Transforma usuario del backend al formato del frontend
+   */
+  private transformBackendUserToFrontend(backendUser: any): User {
+    return new User({
+      id: backendUser.id?.toString() || '', // Convertir Long a string
+      name: backendUser.name || '',
+      email: backendUser.email || '',
+      role: backendUser.role?.toLowerCase() || 'pending',
+      country: backendUser.country || '',
+      city: backendUser.city || '',
+      address: backendUser.address || '',
+      phone: backendUser.phone || ''
+    });
+  }
+
+  /**
+   * Transforma usuario del frontend al formato del backend
+   */
+  private transformFrontendUserToBackend(frontendUser: User): any {
+    return {
+      id: frontendUser.id ? parseInt(frontendUser.id) : undefined,
+      name: frontendUser.name,
+      email: frontendUser.email,
+      password: frontendUser.password,
+      role: frontendUser.role?.toUpperCase(),
+      country: frontendUser.country,
+      city: frontendUser.city,
+      address: frontendUser.address,
+      phone: frontendUser.phone
+    };
+  }
+
+  /**
+   * Carga y aplica las configuraciones del usuario
    * @param userId ID del usuario
    */
   private async loadUserConfigurations(userId: string): Promise<void> {
@@ -124,47 +220,6 @@ export class AuthService extends BaseService<User> {
   }
 
   /**
-   * Registra un nuevo usuario y maneja todo automáticamente
-   * @param userData Datos del usuario a registrar
-   */
-  register(userData: any): void {
-    // Primero verificar si el email existe
-    this.checkEmailExists(userData.email).subscribe({
-      next: (exists) => {
-        if (exists) {
-          console.error('Este correo electrónico ya está registrado.');
-          return;
-        }
-
-        // Si no existe, crear usuario
-        const newUser = new User({
-          ...userData,
-          role: "pending"
-        });
-
-        this.create(newUser).subscribe({
-          next: (createdUser) => {
-            console.log('Usuario registrado correctamente:', createdUser);
-
-            // Guardar sesión inmediatamente con el usuario creado
-            const token = "fake-jwt-token-" + Date.now();
-            this.saveSession(token, createdUser);
-
-            // Redirigir según rol (será "pending")
-            this.redirectBasedOnRole(createdUser.role);
-          },
-          error: (error) => {
-            console.error('Error al registrar usuario:', error);
-          }
-        });
-      },
-      error: (error) => {
-        console.error('Error al verificar email:', error);
-      }
-    });
-  }
-
-  /**
    * Cierra la sesión del usuario
    * @param navigate Si debe navegar al login
    */
@@ -181,85 +236,7 @@ export class AuthService extends BaseService<User> {
   }
 
   /**
-   * Asigna rol al usuario actual y crea perfil automáticamente
-   * @param role Rol a asignar
-   */
-  setUserRole(role: 'businessman' | 'supplier'): void {
-    const currentUser = this.getCurrentUser();
-
-    console.log('Usuario actual para setUserRole:', currentUser);
-
-    if (!currentUser) {
-      console.error('No hay usuario actual');
-      return;
-    }
-
-    if (!currentUser.id) {
-      console.error('Usuario actual no tiene ID asignado');
-      return;
-    }
-
-    const updatedUser = new User({
-      ...currentUser,
-      role: role
-    });
-
-    // Actualizar rol en la tabla users
-    this.update(currentUser.id, updatedUser).subscribe({
-      next: (response) => {
-        console.log('Usuario actualizado:', response);
-        // Actualizar usuario en localStorage
-        localStorage.setItem('current_user', JSON.stringify(response));
-
-        // Crear/actualizar perfil correspondiente con el mismo ID
-        this.createProfileForRole(role, currentUser.id!);
-
-        // Redirigir según el rol
-        this.redirectBasedOnRole(role);
-      },
-      error: (error) => {
-        console.error('Error al actualizar el rol:', error);
-
-        // Si falla la actualización, actualizar localmente
-        localStorage.setItem('current_user', JSON.stringify(updatedUser));
-
-        // Intentar crear perfil de todos modos
-        this.createProfileForRole(role, currentUser.id!);
-
-        this.redirectBasedOnRole(role);
-      }
-    });
-  }
-
-  /**
-   * Recarga el usuario actual desde el servidor
-   */
-  private async reloadCurrentUser(): Promise<void> {
-    const currentUser = this.getCurrentUser();
-    if (!currentUser?.email) {
-      throw new Error('No se puede recargar: usuario sin email');
-    }
-
-    return new Promise((resolve, reject) => {
-      this.getAll().subscribe({
-        next: (users) => {
-          const foundUser = users.find(u => u.email === currentUser.email);
-          if (foundUser) {
-            localStorage.setItem('current_user', JSON.stringify(foundUser));
-            resolve();
-          } else {
-            reject(new Error('Usuario no encontrado en el servidor'));
-          }
-        },
-        error: (error) => {
-          reject(error);
-        }
-      });
-    });
-  }
-
-  /**
-   * Crea perfil según el rol usando Injector para evitar dependencia circular
+   * Crea perfil según el rol usando el backend real
    * @param role Rol del usuario
    * @param userId ID del usuario (string)
    */
@@ -267,45 +244,32 @@ export class AuthService extends BaseService<User> {
     console.log(`Creando perfil para rol: ${role}, userId: ${userId}`);
 
     try {
+      const createProfileRequest = {
+        // Datos mínimos para crear el perfil
+        // El backend se encarga de crear el perfil con datos por defecto
+      };
+
       if (role === 'businessman') {
-        import('../../businessman/services/businessman.service').then(module => {
-          const businessmanService = this.injector.get(module.BusinessmanService);
-          businessmanService.createProfile(userId).subscribe({
-            next: (profile: any) => {
-              console.log('Perfil businessman creado/actualizado:', profile);
-            },
-            error: (error: any) => {
-              console.error('Error creando perfil businessman:', error);
-              // En caso de error, aún así redirigir al usuario
-              this.redirectBasedOnRole(role);
-            }
-          });
-        }).catch(error => {
-          console.error('Error importando BusinessmanService:', error);
-          this.redirectBasedOnRole(role);
+        this.customRequest<any>(`/businessmen/${userId}`, 'POST', createProfileRequest).subscribe({
+          next: (profile: any) => {
+            console.log('Perfil businessman creado:', profile);
+          },
+          error: (error: any) => {
+            console.error('Error creando perfil businessman:', error);
+          }
         });
       } else if (role === 'supplier') {
-        import('../../supplier/services/supplier.service').then(module => {
-          const supplierService = this.injector.get(module.SupplierService);
-          supplierService.createProfile(userId).subscribe({
-            next: (profile: any) => {
-              console.log('Perfil supplier creado/actualizado:', profile);
-            },
-            error: (error: any) => {
-              console.error('Error creando perfil supplier:', error);
-              // En caso de error, aún así redirigir al usuario
-              this.redirectBasedOnRole(role);
-            }
-          });
-        }).catch(error => {
-          console.error('Error importando SupplierService:', error);
-          this.redirectBasedOnRole(role);
+        this.customRequest<any>(`/suppliers/${userId}`, 'POST', createProfileRequest).subscribe({
+          next: (profile: any) => {
+            console.log('Perfil supplier creado:', profile);
+          },
+          error: (error: any) => {
+            console.error('Error creando perfil supplier:', error);
+          }
         });
       }
     } catch (error) {
       console.error('Error al crear perfil:', error);
-      // En caso de cualquier error, redirigir al usuario
-      this.redirectBasedOnRole(role);
     }
   }
 
@@ -315,11 +279,13 @@ export class AuthService extends BaseService<User> {
    */
   redirectBasedOnRole(role: string): void {
     console.log('Redirigiendo según rol:', role);
-    if (role === 'businessman') {
+    const normalizedRole = role.toLowerCase();
+
+    if (normalizedRole === 'businessman') {
       this.router.navigate(['/businessman']);
-    } else if (role === 'supplier') {
+    } else if (normalizedRole === 'supplier') {
       this.router.navigate(['/supplier']);
-    } else if (role === 'pending') {
+    } else if (normalizedRole === 'pending') {
       this.router.navigate(['/select-role']);
     } else {
       this.router.navigate(['/login']);
@@ -354,7 +320,8 @@ export class AuthService extends BaseService<User> {
    * Verifica si el usuario está autenticado
    */
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('auth_token');
+    const token = localStorage.getItem('auth_token');
+    return !!token && !token.startsWith('fake-jwt-token-') && !token.startsWith('temp-jwt-token-');
   }
 
   /**
@@ -367,13 +334,17 @@ export class AuthService extends BaseService<User> {
     localStorage.setItem('current_user', JSON.stringify(user));
     this.sessionService.startSession(this);
   }
+
   /**
    * Actualiza los datos de un usuario específico
    * @param userId ID del usuario a actualizar
    * @param userData Datos actualizados del usuario
    */
-  updateUser(userId: string, userData: any) {
-    return this.update(userId, userData); // Usa el método heredado de BaseService
+  updateUser(userId: string, userData: any): Observable<any> {
+    const backendData = this.transformFrontendUserToBackend(userData);
+    return this.customRequest<any>(`/users/${userId}`, 'PUT', backendData).pipe(
+      map(response => this.transformBackendUserToFrontend(response))
+    );
   }
 
   /**
@@ -384,4 +355,18 @@ export class AuthService extends BaseService<User> {
     localStorage.setItem('current_user', JSON.stringify(user));
     console.log('✅ Usuario actual actualizado:', user);
   }
+
+  /**
+   * Obtiene el perfil completo del usuario actual
+   */
+  getCurrentUserProfile(): Observable<any> {
+    const currentUser = this.getCurrentUser();
+    if (!currentUser || !currentUser.id) {
+      throw new Error('No hay usuario actual');
+    }
+
+    return this.customRequest<any>(`/profiles/${currentUser.id}`, 'GET');
+  }
+
+
 }

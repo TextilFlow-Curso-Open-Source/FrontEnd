@@ -1,4 +1,4 @@
-<!-- supplier-profile-configuration.component.html - COMPLETO Y CORREGIDO -->
+<!-- supplier-profile-configuration.component.html - SINCRONIZADO CON BACKEND -->
 <div class="profile-container">
   <!-- Header -->
   <div class="profile-header">
@@ -9,10 +9,7 @@
         size="small"
         (click)="goBack()">
       </app-button>
-      <h1>
-        <span class="material-icons">store</span>
-        {{ (isEditMode ? 'SUPPLIER_PROFILE.EDIT_TITLE' : 'SUPPLIER_PROFILE.CREATE_TITLE') | translate }}
-      </h1>
+      <h1>{{ 'SUPPLIER_PROFILE.EDIT_TITLE' | translate }}</h1>
       <p class="header-subtitle">{{ 'SUPPLIER_PROFILE.SUBTITLE' | translate }}</p>
     </div>
   </div>
@@ -27,10 +24,10 @@
   <div *ngIf="!isLoading" class="profile-form-container">
     <form [formGroup]="form" (ngSubmit)="saveProfile()" class="profile-form">
 
-      <!-- Logo Upload Section -->
+      <!-- Logo/Image Section -->
       <div class="form-section">
         <h2 class="section-title">
-          <span class="material-icons">image</span>
+          <span class="material-icons">business</span>
           {{ 'SUPPLIER_PROFILE.COMPANY_LOGO' | translate }}
         </h2>
 
@@ -44,47 +41,104 @@
                 class="logo-image">
               <div *ngIf="!previewUrl" class="logo-placeholder">
                 <span class="material-icons">add_photo_alternate</span>
-                <span>{{ 'SUPPLIER_PROFILE.CLICK_TO_UPLOAD' | translate }}</span>
-              </div>
-              <div *ngIf="previewUrl" class="logo-overlay">
-                <span class="material-icons">edit</span>
-                <span>{{ 'SUPPLIER_PROFILE.CLICK_TO_CHANGE' | translate }}</span>
+                <span>{{ 'SUPPLIER_PROFILE.UPLOAD_LOGO' | translate }}</span>
               </div>
             </div>
 
-            <!-- Input file oculto -->
-            <input
-              type="file"
-              #fileInput
-              accept="image/*"
-              (change)="onFileSelected($event)"
-              style="display: none;">
+            <div class="logo-actions">
+              <input
+                type="file"
+                #fileInput
+                accept="image/*"
+                (change)="onFileSelected($event)"
+                style="display: none;">
 
-            <!-- Botón para eliminar imagen -->
-            <div *ngIf="previewUrl" class="logo-actions">
               <app-button
-                type="button"
+                *ngIf="previewUrl"
                 [label]="'SUPPLIER_PROFILE.REMOVE_IMAGE' | translate"
-                variant="primary"
+                variant="secondary"
                 size="small"
-                icon="delete"
                 (click)="removeImage()">
               </app-button>
             </div>
           </div>
 
           <div class="upload-instructions">
-            <p><strong>{{ 'SUPPLIER_PROFILE.UPLOAD_INSTRUCTIONS' | translate }}:</strong></p>
+            <p><strong>{{ 'SUPPLIER_PROFILE.RECOMMENDATIONS' | translate }}:</strong></p>
             <ul>
-              <li>{{ 'SUPPLIER_PROFILE.FORMAT_SUPPORT' | translate }}</li>
-              <li>{{ 'SUPPLIER_PROFILE.MAX_SIZE' | translate }}</li>
-              <li>{{ 'SUPPLIER_PROFILE.QUALITY_INFO' | translate }}</li>
+              <li>{{ 'SUPPLIER_PROFILE.FORMAT_INFO' | translate }}</li>
+              <li>{{ 'SUPPLIER_PROFILE.SIZE_INFO' | translate }}</li>
+              <li>{{ 'SUPPLIER_PROFILE.RESOLUTION_INFO' | translate }}</li>
             </ul>
           </div>
         </div>
       </div>
 
-      <!-- Personal Information -->
+      <!-- Company Information - SOLO CAMPOS QUE EXISTEN EN BACKEND -->
+      <div class="form-section">
+        <h2 class="section-title">
+          <span class="material-icons">domain</span>
+          {{ 'SUPPLIER_PROFILE.COMPANY_INFO' | translate }}
+        </h2>
+
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <app-input
+              type="text"
+              [label]="'SUPPLIER_PROFILE.COMPANY_NAME' | translate"
+              formControlName="companyName"
+              [placeholder]="'SUPPLIER_PROFILE.COMPANY_NAME_PLACEHOLDER' | translate"
+              [fullWidth]="true"
+              [required]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group">
+            <app-input
+              type="text"
+              [label]="'SUPPLIER_PROFILE.RUC' | translate"
+              formControlName="ruc"
+              [placeholder]="'SUPPLIER_PROFILE.RUC_PLACEHOLDER' | translate"
+              [fullWidth]="true"
+              [required]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group">
+            <app-input
+              type="select"
+              [label]="'SUPPLIER_PROFILE.SPECIALIZATION' | translate"
+              formControlName="specialization"
+              [placeholder]="'SUPPLIER_PROFILE.SELECT_SPECIALIZATION' | translate"
+              [options]="specializationOptions"
+              [fullWidth]="true"
+              [required]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group full-width">
+            <app-input
+              type="textarea"
+              [label]="'SUPPLIER_PROFILE.DESCRIPTION' | translate"
+              formControlName="description"
+              [placeholder]="'SUPPLIER_PROFILE.DESCRIPTION_PLACEHOLDER' | translate"
+              [fullWidth]="true">
+            </app-input>
+          </div>
+
+          <div class="form-group full-width">
+            <app-input
+              type="textarea"
+              [label]="'SUPPLIER_PROFILE.CERTIFICATIONS' | translate"
+              formControlName="certifications"
+              [placeholder]="'SUPPLIER_PROFILE.CERTIFICATIONS_PLACEHOLDER' | translate"
+              [fullWidth]="true">
+            </app-input>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Information (Editable) -->
       <div class="form-section">
         <h2 class="section-title">
           <span class="material-icons">person</span>
@@ -161,134 +215,7 @@
         </div>
       </div>
 
-      <!-- Company Information -->
-      <div class="form-section">
-        <h2 class="section-title">
-          <span class="material-icons">business</span>
-          {{ 'SUPPLIER_PROFILE.COMPANY_INFO' | translate }}
-        </h2>
-
-        <div class="form-grid">
-          <div class="form-group full-width">
-            <app-input
-              type="text"
-              [label]="'SUPPLIER_PROFILE.COMPANY_NAME' | translate"
-              formControlName="companyName"
-              [placeholder]="'SUPPLIER_PROFILE.COMPANY_NAME_PLACEHOLDER' | translate"
-              [fullWidth]="true"
-              [required]="true">
-            </app-input>
-          </div>
-
-          <div class="form-group">
-            <app-input
-              type="text"
-              [label]="'SUPPLIER_PROFILE.RUC' | translate"
-              formControlName="ruc"
-              [placeholder]="'SUPPLIER_PROFILE.RUC_PLACEHOLDER' | translate"
-              [fullWidth]="true"
-              [required]="true">
-            </app-input>
-          </div>
-
-          <div class="form-group">
-            <app-input
-              type="select"
-              [label]="'SUPPLIER_PROFILE.SPECIALIZATION' | translate"
-              formControlName="specialization"
-              [placeholder]="'SUPPLIER_PROFILE.SELECT_SPECIALIZATION' | translate"
-              [options]="specializationOptions"
-              [fullWidth]="true"
-              [required]="true">
-            </app-input>
-          </div>
-
-          <div class="form-group">
-            <app-input
-              type="number"
-              [label]="'SUPPLIER_PROFILE.YEARS_FOUNDED' | translate"
-              formControlName="yearsFounded"
-              [placeholder]="'SUPPLIER_PROFILE.YEARS_FOUNDED_PLACEHOLDER' | translate"
-              [fullWidth]="true"
-              [required]="true">
-            </app-input>
-          </div>
-
-          <div class="form-group">
-            <app-input
-              type="text"
-              [label]="'SUPPLIER_PROFILE.WAREHOUSE_LOCATION' | translate"
-              formControlName="warehouseLocation"
-              [placeholder]="'SUPPLIER_PROFILE.WAREHOUSE_LOCATION_PLACEHOLDER' | translate"
-              [fullWidth]="true"
-              [required]="true">
-            </app-input>
-          </div>
-
-          <div class="form-group">
-            <app-input
-              type="number"
-              [label]="'SUPPLIER_PROFILE.MINIMUM_ORDER_QUANTITY' | translate"
-              formControlName="minimumOrderQuantity"
-              [placeholder]="'SUPPLIER_PROFILE.MINIMUM_ORDER_PLACEHOLDER' | translate"
-              [fullWidth]="true"
-              [required]="true">
-            </app-input>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product Categories -->
-      <div class="form-section">
-        <h2 class="section-title">
-          <span class="material-icons">category</span>
-          {{ 'SUPPLIER_PROFILE.PRODUCT_CATEGORIES' | translate }}
-        </h2>
-
-        <p class="section-description">
-          {{ 'SUPPLIER_PROFILE.CATEGORIES_DESCRIPTION' | translate }}
-        </p>
-
-        <div class="categories-grid">
-          <div *ngFor="let category of categoryOptions"
-               class="category-item"
-               [class.selected]="isCategorySelected(category.value)"
-               (click)="toggleCategory(category.value)">
-            <span class="material-icons">
-              {{ isCategorySelected(category.value) ? 'check_circle' : 'radio_button_unchecked' }}
-            </span>
-            <span class="category-label">{{ category.label }}</span>
-          </div>
-        </div>
-
-        <div class="categories-info">
-          <span class="categories-count">
-            {{ 'SUPPLIER_PROFILE.SELECTED_CATEGORIES' | translate }}:
-            {{ selectedCategories.length }}/5
-          </span>
-          <span *ngIf="selectedCategories.length === 0" class="error-message">
-            {{ 'SUPPLIER_PROFILE.ERRORS.CATEGORIES_REQUIRED' | translate }}
-          </span>
-        </div>
-
-        <!-- Selected Categories Display -->
-        <div *ngIf="selectedCategories.length > 0" class="selected-categories">
-          <h4>{{ 'SUPPLIER_PROFILE.SELECTED_CATEGORIES_LIST' | translate }}:</h4>
-          <div class="selected-tags">
-            <span *ngFor="let categoryValue of selectedCategories"
-                  class="category-tag">
-              {{ getCategoryLabel(categoryValue) }}
-              <button type="button"
-                      class="remove-tag"
-                      (click)="toggleCategory(categoryValue)">
-                <span class="material-icons">close</span>
-              </button>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Form Actions -->
+      <!-- Action Buttons -->
       <div class="form-actions">
         <app-button
           type="button"
@@ -299,10 +226,10 @@
 
         <app-button
           type="button"
-          [label]="(isEditMode ? 'SUPPLIER_PROFILE.UPDATE_PROFILE' : 'SUPPLIER_PROFILE.CREATE_PROFILE') | translate"
+          [label]="'SUPPLIER_PROFILE.UPDATE_PROFILE' | translate"
           variant="primary"
           [loading]="isSaving"
-          [disabled]="form.invalid || selectedCategories.length === 0"
+          [disabled]="isSaving"
           icon="save"
           (click)="saveProfile()">
         </app-button>

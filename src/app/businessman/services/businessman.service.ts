@@ -1,10 +1,10 @@
-// /src/app/businessman/services/businessman.service.ts
 import { Injectable } from '@angular/core';
-import { BaseService } from '../../core/services/base.service.service';
+import { BaseService } from '../../core/services/base.service';
 import { Businessman } from '../models/businessman.entity';
 import { AuthService } from '../../auth/services/auth.service';
 import { environment } from '../../../environments/environment';
-import { map } from 'rxjs';
+import { map, Observable, retry, catchError, throwError } from 'rxjs';
+import { HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -16,65 +16,86 @@ export class BusinessmanService extends BaseService<Businessman> {
   }
 
   /**
-   * Crea un nuevo perfil de empresario usando el mismo ID del usuario
-   * @param userId ID del usuario (será el mismo ID para el businessman)
+   * Obtiene el perfil de empresario por ID de usuario
    */
-  createProfile(userId: string) {
-    const currentUser = this.authService.getCurrentUser();
+  getProfileByUserId(userId: string): Observable<Businessman> {
+    return this.customRequest<any>(`/businessmen/${userId}`, 'GET').pipe(
+      map(response => {
+        const currentUser = this.authService.getCurrentUser();
+        return this.transformBackendToFrontend(response, currentUser);
+      })
+    );
+  }
 
-    console.log('Usuario actual obtenido en BusinessmanService:', currentUser);
-    console.log('UserID esperado:', userId);
+  /**
+   * Actualiza el perfil de un empresario
+   */
+  updateProfile(userId: string, profile: Businessman): Observable<Businessman> {
+    const updateRequest = {
+      // Campos de empresa
+      companyName: profile.companyName,
+      ruc: profile.ruc,
+      businessType: profile.businessType,
+      description: profile.description,
+      website: profile.website,
 
-    if (!currentUser) {
-      console.error('No hay usuario autenticado en el sistema');
-      throw new Error('No hay usuario autenticado en el sistema');
-    }
+      // Datos personales
+      name: profile.name,
+      email: profile.email,
+      country: profile.country,
+      city: profile.city,
+      address: profile.address,
+      phone: profile.phone
+    };
 
-    if (currentUser.id !== userId) {
-      console.warn(`ID de usuario no coincide. Actual: ${currentUser.id}, Esperado: ${userId}`);
-      if (!currentUser.id) {
-        throw new Error('El usuario actual no tiene ID asignado');
-      }
-    }
+    return this.customRequest<any>(`/businessmen/${userId}`, 'PUT', updateRequest).pipe(
+      map(response => this.transformBackendToFrontend(response, null))
+    );
+  }
 
-    // Crear Businessman con herencia completa usando el MISMO ID
-    const newBusinessman = new Businessman({
-      id: currentUser.id,
-      name: currentUser.name,
-      email: currentUser.email,
-      password: currentUser.password,
+  /**
+   * Transforma respuesta del backend al formato del frontend
+   */
+  private transformBackendToFrontend(backendResponse: any, currentUser: any): Businessman {
+    const user = currentUser || this.authService.getCurrentUser();
+
+    return new Businessman({
+      // Datos personales: Priorizar backend, luego currentUser
+      id: user?.id || backendResponse.userId?.toString(),
+      name: backendResponse.name || user?.name || '',
+      email: backendResponse.email || user?.email || '',
       role: 'businessman',
-      country: currentUser.country,
-      city: currentUser.city,
-      address: currentUser.address,
-      phone: currentUser.phone,
-      companyName: "",
-      ruc: "",
-      businessType: "",
-      industry: "",
-      employeeCount: 0,
-      foundingYear: new Date().getFullYear(),
-      website: "",
-      description: "",
-      logo: ""
-    });
+      country: backendResponse.country || user?.country || '',
+      city: backendResponse.city || user?.city || '',
+      address: backendResponse.address || user?.address || '',
+      phone: backendResponse.phone || user?.phone || '',
 
-    console.log('Businessman a crear:', newBusinessman);
-    return this.create(newBusinessman);
+      // Datos de empresa: Solo campos que existen en el backend
+      companyName: backendResponse.companyName || '',
+      ruc: backendResponse.ruc || '',
+      businessType: backendResponse.businessType || '',
+      website: backendResponse.website || '',
+      description: backendResponse.description || '',
+      logo: backendResponse.logoUrl || ''
+    });
   }
 
   /**
    * Obtiene todos los empresarios
    */
-  getAllBusinessmen() {
-    return this.getAll();
+  getAllBusinessmen(): Observable<Businessman[]> {
+    return this.customRequest<any[]>(`/businessmen`, 'GET').pipe(
+      map(responses => responses.map(response =>
+        this.transformBackendToFrontend(response, null)
+      ))
+    );
   }
 
   /**
    * Obtiene el perfil de empresario por email
    */
-  getProfileByEmail(email: string) {
-    return this.getAll().pipe(
+  getProfileByEmail(email: string): Observable<Businessman | undefined> {
+    return this.getAllBusinessmen().pipe(
       map(businessmen => businessmen.find(b => b.email === email))
     );
   }
@@ -82,21 +103,50 @@ export class BusinessmanService extends BaseService<Businessman> {
   /**
    * Obtiene el perfil de empresario por ID
    */
-  getProfileById(id: string) {
-    return this.getById(id);
+  getProfileById(id: string): Observable<Businessman> {
+    return this.getProfileByUserId(id);
   }
 
   /**
-   * Obtiene el perfil de empresario por ID de usuario (alias para compatibilidad)
+   * Método específico para subir archivos (sin Content-Type JSON)
    */
-  getProfileByUserId(userId: string) {
-    return this.getProfileById(userId);
+  private uploadFile(endpoint: string, formData: FormData): Observable<any> {
+    const url = `${this.serverBaseUrl}${endpoint}`;
+
+    // Crear headers SOLO con Authorization (sin Content-Type)
+    let headers = new HttpHeaders();
+    const token = localStorage.getItem('auth_token');
+    if (token && !token.startsWith('fake-jwt-token-') && !token.startsWith('temp-jwt-token-')) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    // HttpClient con headers específicos para FormData
+    return this.http.post<any>(url, formData, { headers }).pipe(
+      retry(2),
+      catchError((error) => {
+        return throwError(() => new Error(`Upload error: ${error.status}`));
+      })
+    );
   }
 
   /**
-   * Actualiza el perfil de un empresario
+   * Sube logo del empresario
    */
-  updateProfile(id: string, profile: Businessman) {
-    return this.update(id, profile);
+  uploadLogo(userId: string, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const endpoint = `${environment.profileEndpointPath}/${userId}/images/logo`;
+
+    // Usar método específico para archivos
+    return this.uploadFile(endpoint, formData);
+  }
+
+  /**
+   * Elimina logo del empresario
+   */
+  deleteLogo(userId: string): Observable<any> {
+    const endpoint = `${environment.profileEndpointPath}/${userId}/images/logo`;
+    return this.customRequest<any>(endpoint, 'DELETE');
   }
 }
