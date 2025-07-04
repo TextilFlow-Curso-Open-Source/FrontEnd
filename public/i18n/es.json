@@ -437,6 +437,7 @@
     "BATCH_CODE": "Lote"
   },
   "BUSINESSMAN_PROFILE": {
+
     "GO_BACK": "← Volver",
     "EDIT_TITLE": "Editar Perfil Empresarial",
     "CREATE_TITLE": "Configurar Perfil Empresarial",
@@ -469,7 +470,9 @@
     "WEBSITE_PLACEHOLDER": "https://www.miempresa.com",
     "DESCRIPTION": "Descripción de la Empresa",
     "DESCRIPTION_PLACEHOLDER": "Breve descripción de su empresa, productos textiles y servicios...",
-
+    "COUNTRY_PLACEHOLDER": "Seleccione su país",
+    "ADDRESS_PLACEHOLDER": "Ingrese su dirección",
+    "PHONE_PLACEHOLDER": "Ingrese su teléfono",
     "PERSONAL_INFO": "Información Personal",
     "FULL_NAME": "Nombre Completo",
     "EMAIL": "Correo Electrónico",
@@ -535,6 +538,29 @@
     "CITY_PLACEHOLDER": "Seleccione una ciudad"
   },
   "SUPPLIER_PROFILE": {
+    "UPLOAD_LOGO": "Subir Logo",
+    "RECOMMENDATIONS": "Recomendaciones",
+    "FORMAT_INFO": "Formatos soportados: JPG, PNG, GIF",
+    "SIZE_INFO": "Tamaño máximo: 5MB",
+    "RESOLUTION_INFO": "Usa imágenes nítidas y bien iluminadas",
+    "DESCRIPTION": "Descripción",
+    "DESCRIPTION_PLACEHOLDER": "Breve descripción de tu empresa y servicios",
+    "CERTIFICATIONS": "Certificaciones",
+    "CERTIFICATIONS_PLACEHOLDER": "Lista tus certificaciones (ISO, orgánicas, etc.)",
+
+    "COMPANY_NAME_REQUIRED": "El nombre de la empresa es obligatorio",
+    "RUC_REQUIRED": "El RUC es obligatorio",
+    "SPECIALIZATION_REQUIRED": "La especialización es obligatoria",
+    "FULL_NAME_REQUIRED": "El nombre completo es obligatorio",
+    "EMAIL_REQUIRED": "El email es obligatorio",
+    "COUNTRY_REQUIRED": "El país es obligatorio",
+    "CITY_REQUIRED": "La ciudad es obligatoria",
+    "INVALID_RUC": "El RUC debe tener exactamente 11 dígitos",
+    "INVALID_EMAIL": "Ingresa un email válido",
+    "IMAGE_DELETED": "Imagen eliminada exitosamente",
+    "DELETE_ERROR": "Error al eliminar imagen",
+    "UPLOAD_ERROR": "Error al subir imagen",
+
     "TITLE": "Configuración del Perfil de Proveedor",
     "CREATE_TITLE": "Crear Perfil de Proveedor",
     "EDIT_TITLE": "Editar Perfil de Proveedor",
@@ -588,7 +614,8 @@
       "LINEN": "Lino",
       "BLENDS": "Mezclas",
       "TECHNICAL": "Textiles Técnicos",
-      "SUSTAINABLE": "Textiles Sostenibles"
+      "SUSTAINABLE": "Textiles Sostenibles",
+      "OTHER": "Otros"
     },
 
     "PRODUCT_CATEGORIES": "Categorías de Productos",

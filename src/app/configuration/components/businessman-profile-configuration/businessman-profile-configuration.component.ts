@@ -1,4 +1,4 @@
-// businessman-profile-configuration.component.ts - LIMPIO Y CORREGIDO
+// businessman-profile-configuration.component.ts - ARREGLADO
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -32,7 +32,7 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
   // Estados del componente
   isLoading: boolean = false;
   isSaving: boolean = false;
-  isEditMode: boolean = false;
+  // ELIMINADO: isEditMode (siempre es true)
 
   // Datos del usuario y businessman
   currentUser: any = null;
@@ -43,11 +43,8 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
   previewUrl: string = '';
   logoUrl: string = '';
 
-  // Listas para selects (compatible con app-input)
+  // Listas para selects
   businessTypes: Array<{label: string, value: any}> = [];
-  industries: Array<{label: string, value: any}> = [];
-  employeeRanges: Array<{label: string, value: any}> = [];
-  years: Array<{label: string, value: any}> = [];
 
   // API de países y ciudades
   countries: Array<{label: string, value: string}> = [];
@@ -126,17 +123,14 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
    */
   initForm() {
     this.form = this.fb.group({
-      // Campos de la empresa
+      // Campos de empresa
       companyName: ['', Validators.required],
       ruc: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
       businessType: ['', Validators.required],
-      industry: ['', Validators.required],
-      employeeCount: [''],
-      foundingYear: [new Date().getFullYear()],
       website: [''],
       description: [''],
 
-      // Campos personales - EDITABLES
+      // Campos personales
       fullName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       country: ['', Validators.required],
@@ -157,10 +151,9 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
   }
 
   /**
-   * Carga las listas traducidas compatible con app-input
+   * Carga las listas traducidas
    */
   private loadTranslatedLists() {
-    // Tipos de negocio con traducción directa
     this.businessTypes = [
       { value: 'MANUFACTURING', label: this.translate.instant('BUSINESSMAN_PROFILE.BUSINESS_TYPES.MANUFACTURING') },
       { value: 'TEXTILE_DISTRIBUTION', label: this.translate.instant('BUSINESSMAN_PROFILE.BUSINESS_TYPES.TEXTILE_DISTRIBUTION') },
@@ -172,41 +165,6 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
       { value: 'TECHNOLOGY', label: this.translate.instant('BUSINESSMAN_PROFILE.BUSINESS_TYPES.TECHNOLOGY') },
       { value: 'OTHER', label: this.translate.instant('BUSINESSMAN_PROFILE.BUSINESS_TYPES.OTHER') }
     ];
-
-    // Industrias específicas del sector textil
-    this.industries = [
-      { value: 'COTTON_FABRICS', label: this.translate.instant('BUSINESSMAN_PROFILE.INDUSTRIES.COTTON_FABRICS') },
-      { value: 'SYNTHETIC_FABRICS', label: this.translate.instant('BUSINESSMAN_PROFILE.INDUSTRIES.SYNTHETIC_FABRICS') },
-      { value: 'LUXURY_FABRICS', label: this.translate.instant('BUSINESSMAN_PROFILE.INDUSTRIES.LUXURY_FABRICS') },
-      { value: 'INDUSTRIAL_TEXTILES', label: this.translate.instant('BUSINESSMAN_PROFILE.INDUSTRIES.INDUSTRIAL_TEXTILES') },
-      { value: 'HOME_TEXTILES', label: this.translate.instant('BUSINESSMAN_PROFILE.INDUSTRIES.HOME_TEXTILES') },
-      { value: 'FASHION_FABRICS', label: this.translate.instant('BUSINESSMAN_PROFILE.INDUSTRIES.FASHION_FABRICS') },
-      { value: 'SPORTS_TEXTILES', label: this.translate.instant('BUSINESSMAN_PROFILE.INDUSTRIES.SPORTS_TEXTILES') },
-      { value: 'MEDICAL_TEXTILES', label: this.translate.instant('BUSINESSMAN_PROFILE.INDUSTRIES.MEDICAL_TEXTILES') },
-      { value: 'AUTOMOTIVE_TEXTILES', label: this.translate.instant('BUSINESSMAN_PROFILE.INDUSTRIES.AUTOMOTIVE_TEXTILES') },
-      { value: 'ECO_FRIENDLY_TEXTILES', label: this.translate.instant('BUSINESSMAN_PROFILE.INDUSTRIES.ECO_FRIENDLY_TEXTILES') },
-      { value: 'OTHER', label: this.translate.instant('BUSINESSMAN_PROFILE.INDUSTRIES.OTHER') }
-    ];
-
-    // Rangos de empleados traducidos
-    this.employeeRanges = [
-      { value: '1-10', label: this.translate.instant('BUSINESSMAN_PROFILE.EMPLOYEE_RANGES.RANGE_1_TO_10') },
-      { value: '11-50', label: this.translate.instant('BUSINESSMAN_PROFILE.EMPLOYEE_RANGES.RANGE_11_TO_50') },
-      { value: '51-200', label: this.translate.instant('BUSINESSMAN_PROFILE.EMPLOYEE_RANGES.RANGE_51_TO_200') },
-      { value: '201-500', label: this.translate.instant('BUSINESSMAN_PROFILE.EMPLOYEE_RANGES.RANGE_201_TO_500') },
-      { value: '501-1000', label: this.translate.instant('BUSINESSMAN_PROFILE.EMPLOYEE_RANGES.RANGE_501_TO_1000') },
-      { value: '1000+', label: this.translate.instant('BUSINESSMAN_PROFILE.EMPLOYEE_RANGES.RANGE_1000_PLUS') }
-    ];
-
-    // Generar años para select
-    const currentYear = new Date().getFullYear();
-    this.years = [];
-    for (let year = currentYear; year >= 1950; year--) {
-      this.years.push({
-        value: year,
-        label: year.toString()
-      });
-    }
   }
 
   /**
@@ -225,119 +183,61 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
       return;
     }
 
-    // Cargar perfil de businessman si existe
+    // El perfil SIEMPRE existe (se creó cuando seleccionó rol)
     this.loadBusinessmanProfile();
   }
 
   /**
-   * Carga el perfil de businessman
+   * Carga el perfil de businessman existente
    */
   loadBusinessmanProfile() {
     this.businessmanService.getProfileById(this.currentUser.id).subscribe({
       next: (profile) => {
-        if (profile) {
-          this.businessmanProfile = new Businessman(profile);
-          this.logoUrl = profile.logo || '';
-          this.previewUrl = this.logoUrl;
-          this.isEditMode = true;
+        // El perfil SIEMPRE existe, solo actualizamos datos
+        this.businessmanProfile = new Businessman(profile);
+        this.logoUrl = profile.logo || '';
+        this.previewUrl = this.logoUrl;
 
-          // Cargar datos del perfil al formulario
-          this.form.patchValue({
-            // Datos de la empresa
-            companyName: profile.companyName || '',
-            ruc: profile.ruc || '',
-            businessType: profile.businessType || '',
-            industry: profile.industry || '',
-            employeeCount: profile.employeeCount || '',
-            foundingYear: profile.foundingYear || new Date().getFullYear(),
-            website: profile.website || '',
-            description: profile.description || '',
+        // Llenar formulario con datos existentes
+        this.form.patchValue({
+          // Datos de empresa
+          companyName: profile.companyName || '',
+          ruc: profile.ruc || '',
+          businessType: profile.businessType || '',
+          website: profile.website || '',
+          description: profile.description || '',
 
-            // Datos personales del perfil o usuario actual
-            fullName: profile.name || this.currentUser?.name || '',
-            email: profile.email || this.currentUser?.email || '',
-            country: profile.country || this.currentUser?.country || '',
-            city: profile.city || this.currentUser?.city || '',
-            address: profile.address || this.currentUser?.address || '',
-            phone: profile.phone || this.currentUser?.phone || ''
-          });
+          // Datos personales
+          fullName: profile.name || this.currentUser?.name || '',
+          email: profile.email || this.currentUser?.email || '',
+          country: profile.country || this.currentUser?.country || '',
+          city: profile.city || this.currentUser?.city || '',
+          address: profile.address || this.currentUser?.address || '',
+          phone: profile.phone || this.currentUser?.phone || ''
+        });
 
-          // Cargar ciudades si hay país seleccionado
-          const country = profile.country || this.currentUser?.country;
-          if (country) {
-            this.loadCitiesByCountry(country);
-          }
-        } else {
-          // No existe perfil, crear uno nuevo con datos del usuario
-          this.businessmanProfile = new Businessman({
-            id: this.currentUser.id,
-            name: this.currentUser.name,
-            email: this.currentUser.email,
-            role: 'businessman',
-            country: this.currentUser.country,
-            city: this.currentUser.city,
-            address: this.currentUser.address,
-            phone: this.currentUser.phone,
-            foundingYear: new Date().getFullYear()
-          });
-          this.isEditMode = false;
-
-          // Cargar datos del usuario en el formulario
-          this.form.patchValue({
-            fullName: this.currentUser?.name || '',
-            email: this.currentUser?.email || '',
-            country: this.currentUser?.country || '',
-            city: this.currentUser?.city || '',
-            address: this.currentUser?.address || '',
-            phone: this.currentUser?.phone || ''
-          });
-
-          // Cargar ciudades si hay país
-          if (this.currentUser?.country) {
-            this.loadCitiesByCountry(this.currentUser.country);
-          }
+        // Cargar ciudades si hay país seleccionado
+        const country = profile.country || this.currentUser?.country;
+        if (country) {
+          this.loadCitiesByCountry(country);
         }
 
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error al cargar perfil:', error);
-        // Si no existe, crear uno nuevo
-        this.businessmanProfile = new Businessman({
-          id: this.currentUser.id,
-          name: this.currentUser.name,
-          email: this.currentUser.email,
-          role: 'businessman',
-          country: this.currentUser.country,
-          city: this.currentUser.city,
-          address: this.currentUser.address,
-          phone: this.currentUser.phone,
-          foundingYear: new Date().getFullYear()
-        });
-
-        // Cargar datos del usuario actual
-        this.form.patchValue({
-          fullName: this.currentUser?.name || '',
-          email: this.currentUser?.email || '',
-          country: this.currentUser?.country || '',
-          city: this.currentUser?.city || '',
-          address: this.currentUser?.address || '',
-          phone: this.currentUser?.phone || ''
-        });
-
-        // Cargar ciudades si hay país
-        if (this.currentUser?.country) {
-          this.loadCitiesByCountry(this.currentUser.country);
-        }
-
-        this.isEditMode = false;
+        this.showNotification(
+          this.translate.instant('BUSINESSMAN_PROFILE.PROFILE_ERROR'),
+          'error'
+        );
         this.isLoading = false;
+        this.router.navigate(['/businessman']);
       }
     });
   }
 
   /**
-   * Activa el input de archivo de forma controlada
+   * Activa el input de archivo
    */
   triggerFileInput() {
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
@@ -347,12 +247,12 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
   }
 
   /**
-   * Maneja la selección de archivo - CORREGIDO
+   * Maneja la selección de archivo
    */
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (!file) {
-      return; // Si no hay archivo, no hacer nada
+      return;
     }
 
     // Validar tipo de archivo
@@ -361,7 +261,6 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
         this.translate.instant('BUSINESSMAN_PROFILE.INVALID_IMAGE_TYPE'),
         'warning'
       );
-      // Limpiar el input
       event.target.value = '';
       return;
     }
@@ -372,7 +271,6 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
         this.translate.instant('BUSINESSMAN_PROFILE.IMAGE_TOO_LARGE'),
         'warning'
       );
-      // Limpiar el input
       event.target.value = '';
       return;
     }
@@ -386,7 +284,6 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
     };
     reader.readAsDataURL(file);
 
-    // Limpiar el input para permitir seleccionar el mismo archivo de nuevo
     event.target.value = '';
   }
 
@@ -394,28 +291,59 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
    * Elimina la imagen seleccionada
    */
   removeImage() {
+    // Limpiar preview local
     this.selectedFile = null;
     this.previewUrl = '';
-    this.logoUrl = '';
-    this.businessmanProfile.logo = '';
+
+    // Si hay una imagen existente en el backend, eliminarla
+    if (this.logoUrl) {
+      this.businessmanService.deleteLogo(this.currentUser.id).subscribe({
+        next: (response) => {
+          this.logoUrl = '';
+          this.businessmanProfile.logo = '';
+
+          this.showNotification(
+            this.translate.instant('BUSINESSMAN_PROFILE.IMAGE_DELETED'),
+            'success'
+          );
+        },
+        error: (error) => {
+          console.error('Error eliminando logo:', error);
+          // Limpiar localmente de todas formas
+          this.logoUrl = '';
+          this.businessmanProfile.logo = '';
+
+          this.showNotification(
+            this.translate.instant('BUSINESSMAN_PROFILE.DELETE_ERROR'),
+            'error'
+          );
+        }
+      });
+    }
   }
 
   /**
-   * Simula la subida de imagen
+   * Sube imagen al backend
    */
-  private async uploadImage(): Promise<string> {
+  private uploadImage(): Promise<string> {
     if (!this.selectedFile) {
-      return this.logoUrl;
+      return Promise.resolve(this.logoUrl);
     }
 
-    // Simular subida de imagen
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const formData = this.form.getRawValue();
-        const companyName = formData.companyName || 'Company';
-        const fakeUrl = `https://via.placeholder.com/300x300/a68b6b/ffffff?text=${encodeURIComponent(companyName)}`;
-        resolve(fakeUrl);
-      }, 1000);
+    return new Promise((resolve, reject) => {
+      this.businessmanService.uploadLogo(this.currentUser.id, this.selectedFile!).subscribe({
+        next: (response) => {
+          resolve(response.logoUrl || '');
+        },
+        error: (error) => {
+          console.error('Error subiendo imagen:', error);
+          this.showNotification(
+            this.translate.instant('BUSINESSMAN_PROFILE.UPLOAD_ERROR'),
+            'error'
+          );
+          resolve(this.logoUrl);
+        }
+      });
     });
   }
 
@@ -444,14 +372,6 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
     if (!formValues.businessType?.trim()) {
       this.showNotification(
         this.translate.instant('BUSINESSMAN_PROFILE.BUSINESS_TYPE_REQUIRED'),
-        'warning'
-      );
-      return false;
-    }
-
-    if (!formValues.industry?.trim()) {
-      this.showNotification(
-        this.translate.instant('BUSINESSMAN_PROFILE.INDUSTRY_REQUIRED'),
         'warning'
       );
       return false;
@@ -489,7 +409,7 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
       return false;
     }
 
-    // Validar RUC (formato básico para Perú)
+    // Validar RUC (formato para Perú)
     if (formValues.ruc && !/^\d{11}$/.test(formValues.ruc)) {
       this.showNotification(
         this.translate.instant('BUSINESSMAN_PROFILE.INVALID_RUC'),
@@ -533,33 +453,32 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
   }
 
   /**
-   * Guarda el perfil
-   */
-  /**
-   * Guarda el perfil - CORREGIDO para actualizar ambas tablas
+   * Guarda el perfil - SIMPLIFICADO (solo UPDATE)
    */
   async saveProfile() {
+    console.log('🔄 Iniciando saveProfile...');
+
     if (!this.form.valid || !this.validateForm() || this.isSaving) {
+      console.log('❌ Formulario inválido o ya guardando');
       this.form.markAllAsTouched();
       return;
     }
 
     this.isSaving = true;
+    console.log('📝 Actualizando perfil...');
 
     try {
       const formValues = this.form.getRawValue();
+      console.log('📋 Valores del formulario:', formValues);
 
-      // Actualizar el objeto businessman con los valores del formulario
+      // Actualizar datos del objeto
       this.businessmanProfile.companyName = formValues.companyName;
       this.businessmanProfile.ruc = formValues.ruc;
       this.businessmanProfile.businessType = formValues.businessType;
-      this.businessmanProfile.industry = formValues.industry;
-      this.businessmanProfile.employeeCount = formValues.employeeCount;
-      this.businessmanProfile.foundingYear = formValues.foundingYear;
       this.businessmanProfile.website = formValues.website;
       this.businessmanProfile.description = formValues.description;
 
-      // Actualizar datos personales EN EL BUSINESSMAN
+      // Actualizar datos personales
       this.businessmanProfile.name = formValues.fullName;
       this.businessmanProfile.email = formValues.email;
       this.businessmanProfile.country = formValues.country;
@@ -569,156 +488,37 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
 
       // Subir imagen si hay una seleccionada
       if (this.selectedFile) {
+        console.log('📤 Subiendo imagen...');
         this.businessmanProfile.logo = await this.uploadImage();
+        console.log('✅ Imagen subida, URL:', this.businessmanProfile.logo);
       }
 
-      if (this.isEditMode) {
-        // ===== ACTUALIZAR PERFIL EXISTENTE =====
+      console.log('📊 Perfil a actualizar:', this.businessmanProfile);
 
-        // 1. Actualizar tabla businessman
-        this.businessmanService.updateProfile(this.businessmanProfile.id!, this.businessmanProfile).subscribe({
-          next: (updatedProfile) => {
-            console.log('✅ Businessman profile updated:', updatedProfile);
+      // SOLO UPDATE (el perfil siempre existe)
+      this.businessmanService.updateProfile(this.businessmanProfile.id!, this.businessmanProfile).subscribe({
+        next: (updatedProfile) => {
+          console.log('✅ Perfil actualizado exitosamente:', updatedProfile);
+          this.showNotification(
+            this.translate.instant('BUSINESSMAN_PROFILE.PROFILE_UPDATED_SUCCESS'),
+            'success'
+          );
 
-            // 2. Preparar datos para actualizar tabla users
-            const updatedUserData = {
-              id: this.currentUser.id,
-              name: formValues.fullName,
-              email: formValues.email,
-              country: formValues.country,
-              city: formValues.city,
-              address: formValues.address,
-              phone: formValues.phone,
-              // Mantener datos existentes
-              password: this.currentUser.password,
-              role: this.currentUser.role
-            };
-
-            // 3. Actualizar tabla users
-            this.authService.updateUser(this.currentUser.id, updatedUserData).subscribe({
-              next: (updatedUser) => {
-                console.log('✅ User data updated:', updatedUser);
-
-                // 4. Actualizar usuario actual en el servicio
-                this.authService.setCurrentUser(updatedUser);
-
-                // 5. Mostrar éxito y limpiar
-                this.showNotification(
-                  this.translate.instant('BUSINESSMAN_PROFILE.PROFILE_UPDATED_SUCCESS'),
-                  'success'
-                );
-                this.businessmanProfile = new Businessman(updatedProfile);
-                this.logoUrl = updatedProfile.logo || '';
-                this.selectedFile = null;
-                this.isSaving = false;
-              },
-              error: (userError) => {
-                console.error('❌ Error updating user data:', userError);
-                this.showNotification(
-                  this.translate.instant('BUSINESSMAN_PROFILE.USER_UPDATE_ERROR'),
-                  'warning'
-                );
-                // Aunque falle la actualización del usuario, el businessman se actualizó
-                this.businessmanProfile = new Businessman(updatedProfile);
-                this.logoUrl = updatedProfile.logo || '';
-                this.selectedFile = null;
-                this.isSaving = false;
-              }
-            });
-          },
-          error: (error) => {
-            console.error('❌ Error updating businessman profile:', error);
-            this.showNotification(
-              this.translate.instant('BUSINESSMAN_PROFILE.PROFILE_ERROR'),
-              'error'
-            );
-            this.isSaving = false;
-          }
-        });
-
-      } else {
-        // ===== CREAR NUEVO PERFIL =====
-
-        this.businessmanService.createProfile(this.currentUser.id).subscribe({
-          next: (newProfile) => {
-            const completeProfile = new Businessman({
-              ...newProfile,
-              ...this.businessmanProfile
-            });
-
-            // 1. Completar perfil businessman
-            this.businessmanService.updateProfile(newProfile.id!, completeProfile).subscribe({
-              next: (updatedProfile) => {
-                console.log('✅ New businessman profile created:', updatedProfile);
-
-                // 2. Preparar datos para actualizar tabla users
-                const updatedUserData = {
-                  id: this.currentUser.id,
-                  name: formValues.fullName,
-                  email: formValues.email,
-                  country: formValues.country,
-                  city: formValues.city,
-                  address: formValues.address,
-                  phone: formValues.phone,
-                  // Mantener datos existentes
-                  password: this.currentUser.password,
-                  role: this.currentUser.role
-                };
-
-                // 3. Actualizar tabla users
-                this.authService.updateUser(this.currentUser.id, updatedUserData).subscribe({
-                  next: (updatedUser) => {
-                    console.log('✅ User data updated:', updatedUser);
-
-                    // 4. Actualizar usuario actual en el servicio
-                    this.authService.setCurrentUser(updatedUser);
-
-                    // 5. Mostrar éxito y limpiar
-                    this.showNotification(
-                      this.translate.instant('BUSINESSMAN_PROFILE.PROFILE_CREATED_SUCCESS'),
-                      'success'
-                    );
-                    this.businessmanProfile = new Businessman(updatedProfile);
-                    this.logoUrl = updatedProfile.logo || '';
-                    this.selectedFile = null;
-                    this.isEditMode = true;
-                    this.isSaving = false;
-                  },
-                  error: (userError) => {
-                    console.error('❌ Error updating user data:', userError);
-                    this.showNotification(
-                      this.translate.instant('BUSINESSMAN_PROFILE.USER_UPDATE_ERROR'),
-                      'warning'
-                    );
-                    // Aunque falle la actualización del usuario, el businessman se creó
-                    this.businessmanProfile = new Businessman(updatedProfile);
-                    this.logoUrl = updatedProfile.logo || '';
-                    this.selectedFile = null;
-                    this.isEditMode = true;
-                    this.isSaving = false;
-                  }
-                });
-              },
-              error: (error) => {
-                console.error('❌ Error completing businessman profile:', error);
-                this.showNotification(
-                  this.translate.instant('BUSINESSMAN_PROFILE.PROFILE_ERROR'),
-                  'error'
-                );
-                this.isSaving = false;
-              }
-            });
-          },
-          error: (error) => {
-            console.error('❌ Error creating businessman profile:', error);
-            this.showNotification(
-              this.translate.instant('BUSINESSMAN_PROFILE.PROFILE_ERROR'),
-              'error'
-            );
-            this.isSaving = false;
-          }
-        });
-      }
+          // Actualizar datos locales
+          this.businessmanProfile = new Businessman(updatedProfile);
+          this.logoUrl = updatedProfile.logo || '';
+          this.selectedFile = null;
+          this.isSaving = false;
+        },
+        error: (error) => {
+          console.error('❌ Error updating profile:', error);
+          this.showNotification(
+            this.translate.instant('BUSINESSMAN_PROFILE.PROFILE_ERROR'),
+            'error'
+          );
+          this.isSaving = false;
+        }
+      });
     } catch (error) {
       console.error('❌ Error processing profile:', error);
       this.showNotification(

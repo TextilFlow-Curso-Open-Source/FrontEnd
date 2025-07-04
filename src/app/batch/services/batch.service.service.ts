@@ -1,7 +1,7 @@
 // src/app/batch/services/batch.service.service.ts
 
 import { Injectable } from '@angular/core';
-import { BaseService } from '../../core/services/base.service.service';
+import { BaseService } from '../../core/services/base.service';
 import { Batch } from '../models/batch.entity';
 import { catchError, retry } from 'rxjs';
 import {environment} from '../../../environments/environment';
