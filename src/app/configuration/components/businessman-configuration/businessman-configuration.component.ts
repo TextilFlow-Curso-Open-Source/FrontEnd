@@ -1,4 +1,5 @@
 // src/app/configuration/components/businessman-configuration/businessman-configuration.component.ts
+// CAMBIOS ESPECÍFICOS PARA CONECTAR CON EL BACKEND REAL
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -7,7 +8,6 @@ import { ConfigurationService } from '../../services/configuration.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { Configuration } from '../../models/configuration.entity';
-import { AppInputComponent } from '../../../core/components/app-input/app-input.component';
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
 import { ThemeSwitcherComponent } from '../../../core/components/theme-switcher/theme-switcher.component';
@@ -21,7 +21,6 @@ import { RouterModule } from '@angular/router';
   imports: [
     CommonModule,
     FormsModule,
-    AppInputComponent,
     AppButtonComponent,
     AppNotificationComponent,
     ThemeSwitcherComponent,
@@ -38,16 +37,20 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
   // Configuración
   configuration: Configuration | null = null;
 
-  // Opciones para los selectores
+  // CAMBIO 1: Actualizar opciones según backend
   languageOptions = [
     { label: 'Español', value: 'es' },
     { label: 'English', value: 'en' }
   ];
 
-  batchCodeOptions = [
-    { label: 'Automático', value: 'automatic' },
-    { label: 'Manual', value: 'manual' }
+  // CAMBIO 2: Agregar opciones de suscripción para mostrar
+  subscriptionOptions = [
+    { label: 'Básico', value: 'basic' },
+    { label: 'Corporativo', value: 'corporate' }
   ];
+
+  // ELIMINAR: batchCodeOptions ya no se usa
+  // batchCodeOptions = [...]
 
   // Estado de carga
   isLoading: boolean = false;
@@ -71,18 +74,6 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
     this.translateService.addLangs(['es', 'en']);
     this.translateService.setDefaultLang('es');
     this.translateService.use('es');
-
-    // Suscribirse a traducciones
-    this.subscriptions.add(
-      this.translateService.get(['CONFIGURATION.AUTOMATIC', 'CONFIGURATION.MANUAL']).subscribe(
-        (translations) => {
-          console.log('Traducciones cargadas:', translations);
-        },
-        (error) => {
-          console.error('Error al cargar traducciones:', error);
-        }
-      )
-    );
   }
 
   ngOnInit(): void {
@@ -92,11 +83,20 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
       this.loadConfiguration();
     }
 
+    // CAMBIO: Suscribirse a cambios de tema del ThemeService
+    this.subscriptions.add(
+      this.themeService.theme$.subscribe((newTheme) => {
+        if (this.configuration && this.configuration.viewMode !== newTheme) {
+          this.configuration.viewMode = newTheme;
+          this.savePreferencesQuietly();
+        }
+      })
+    );
+
     // Cargar idioma guardado
     const savedLanguage = localStorage.getItem('userLanguage');
     if (savedLanguage && this.translateService.getLangs().includes(savedLanguage)) {
       this.translateService.use(savedLanguage);
-      this.updateTranslatedOptions();
     }
   }
 
@@ -111,64 +111,45 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
 
     if (this.configuration) {
       this.configuration.language = langCode;
+      // CAMBIO 3: Guardar automáticamente al cambiar idioma
+      this.savePreferencesOnly();
     }
-
-    this.updateTranslatedOptions();
   }
 
-  // Actualizar opciones con traducciones
-  updateTranslatedOptions(): void {
-    const automatic = this.translateService.instant('CONFIGURATION.AUTOMATIC');
-    const manual = this.translateService.instant('CONFIGURATION.MANUAL');
+  // ELIMINAR: updateTranslatedOptions() ya no se necesita
+  // updateTranslatedOptions(): void { ... }
 
-    this.batchCodeOptions = [
-      { label: automatic !== 'CONFIGURATION.AUTOMATIC' ? automatic : 'Automático', value: 'automatic' },
-      { label: manual !== 'CONFIGURATION.MANUAL' ? manual : 'Manual', value: 'manual' }
-    ];
-  }
-
+  // CAMBIO 4: Actualizar loadConfiguration para usar nuevo servicio
   loadConfiguration(): void {
     this.isLoading = true;
 
-    this.configurationService.getByUserId(this.currentUserId).subscribe({
-      next: (configs) => {
-        if (Array.isArray(configs) && configs.length > 0) {
-          this.configuration = configs[0];
-          this.applyConfigurationSettings();
-        } else if (!Array.isArray(configs)) {
-          this.configuration = configs;
-          this.applyConfigurationSettings();
-        } else {
-          // Crear configuración por defecto
-          this.configuration = new Configuration({
-            userId: this.currentUserId,
-            userType: 'businessman',
-            language: 'es',
-            batchCodeFormat: 'automatic',
-            viewMode: 'auto', // Cambiado a 'auto' por defecto
-            createdAt: new Date().toISOString(),
-            subscriptionPlan: 'basic',           // ← AGREGAR
-            subscriptionStartDate: new Date().toISOString(),
-          });
-          this.saveConfiguration();
-        }
+    // Usar el nuevo método directo
+    const userId = parseInt(this.currentUserId, 10);
+
+    this.configurationService.getConfigurationByUserId(userId).subscribe({
+      next: (config) => {
+        this.configuration = config;
+        this.applyConfigurationSettings();
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error al cargar configuración:', error);
-        this.showNotification(this.translateService.instant('CONFIGURATION.ERROR_LOAD'), 'error');
+        this.showNotification(
+          this.translateService.instant('CONFIGURATION.ERROR_LOAD'),
+          'error'
+        );
         this.isLoading = false;
 
-        // Configuración por defecto en caso de error
+        // CAMBIO 5: Configuración por defecto sin batchCodeFormat
         this.configuration = new Configuration({
           userId: this.currentUserId,
           userType: 'businessman',
           language: 'es',
-          batchCodeFormat: 'automatic',
           viewMode: 'auto',
-          createdAt: new Date().toISOString(),
-          subscriptionPlan: 'basic',
-          subscriptionStartDate: new Date().toISOString()
+          subscriptionPlan: 'basic'
+          // ELIMINAR: batchCodeFormat: 'automatic',
+          // ELIMINAR: createdAt: new Date().toISOString(),
+          // ELIMINAR: subscriptionStartDate: new Date().toISOString()
         });
       }
     });
@@ -180,7 +161,7 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
 
     // Aplicar idioma
     if (this.configuration.language) {
-      this.changeLanguage(this.configuration.language);
+      this.changeLanguageWithoutSave(this.configuration.language);
     }
 
     // Aplicar tema
@@ -189,6 +170,13 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
     }
   }
 
+  // CAMBIO 6: Método para cambiar idioma sin guardar (evitar loop)
+  private changeLanguageWithoutSave(langCode: string): void {
+    this.translateService.use(langCode);
+    localStorage.setItem('userLanguage', langCode);
+  }
+
+  // CAMBIO 7: Actualizar saveConfiguration para usar nuevo backend
   saveConfiguration(): void {
     if (!this.configuration) return;
 
@@ -196,37 +184,95 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
 
     // Sincronizar el tema actual con la configuración
     this.configuration.viewMode = this.themeService.getThemeForConfiguration();
-    this.configuration.updatedAt = new Date().toISOString();
 
     if (this.configuration.id) {
-      // Actualizar configuración existente
-      this.configurationService.update(this.configuration.id, this.configuration).subscribe({
-        next: () => {
-          this.showNotification(this.translateService.instant('CONFIGURATION.SUCCESS_SAVE'), 'success');
+      // Usar el nuevo método de actualización múltiple
+      const configId = parseInt(this.configuration.id, 10);
+
+      this.configurationService.updateMultiplePreferences(configId, {
+        language: this.configuration.language,
+        viewMode: this.configuration.viewMode,
+        subscriptionPlan: this.configuration.subscriptionPlan
+      }).subscribe({
+        next: (updatedConfig) => {
+          this.configuration = updatedConfig;
+          this.showNotification(
+            this.translateService.instant('CONFIGURATION.SUCCESS_SAVE'),
+            'success'
+          );
           this.isLoading = false;
         },
         error: (error) => {
           console.error('Error al guardar configuración:', error);
-          this.showNotification(this.translateService.instant('CONFIGURATION.ERROR_SAVE'), 'error');
+          this.showNotification(
+            this.translateService.instant('CONFIGURATION.ERROR_SAVE'),
+            'error'
+          );
           this.isLoading = false;
         }
       });
     } else {
-      // Crear nueva configuración
-      this.configurationService.create(this.configuration).subscribe({
-        next: (config) => {
-          this.configuration = config;
-          this.showNotification(this.translateService.instant('CONFIGURATION.SUCCESS_SAVE'), 'success');
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error al crear configuración:', error);
-          this.showNotification(this.translateService.instant('CONFIGURATION.ERROR_SAVE'), 'error');
-          this.isLoading = false;
-        }
-      });
+      // CAMBIO 8: Ya no crear configuraciones, solo mostrar error
+      console.warn('⚠️ Configuración sin ID - el backend debería crearla automáticamente');
+      this.showNotification('Error: Configuración no encontrada', 'error');
+      this.isLoading = false;
     }
   }
+
+  // CAMBIO 9: Método para guardar preferencias sin mostrar notificación
+  private savePreferencesQuietly(): void {
+    if (!this.configuration || this.isLoading || !this.configuration.id) return;
+
+    const configId = parseInt(this.configuration.id, 10);
+
+    this.configurationService.updateUserPreferences(
+      configId,
+      this.configuration.language,
+      this.configuration.viewMode
+    ).subscribe({
+      next: (updatedConfig) => {
+        // Actualizar solo los datos necesarios sin mostrar notificación
+        this.configuration!.subscriptionPlan = updatedConfig.subscriptionPlan;
+        this.configuration!.updatedAt = updatedConfig.updatedAt;
+      },
+      error: (error) => {
+        console.error('Error al actualizar preferencias:', error);
+      }
+    });
+  }
+
+  // CAMBIO 10: Método para guardar preferencias con notificación
+  private savePreferencesOnly(): void {
+    if (!this.configuration || this.isLoading) return;
+
+    this.isLoading = true;
+    const configId = parseInt(this.configuration.id!, 10);
+
+    this.configurationService.updateUserPreferences(
+      configId,
+      this.configuration.language,
+      this.configuration.viewMode
+    ).subscribe({
+      next: (updatedConfig) => {
+        this.configuration = updatedConfig;
+        this.showNotification(
+          this.translateService.instant('CONFIGURATION.SUCCESS_SAVE'),
+          'success'
+        );
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error al actualizar preferencias:', error);
+        this.showNotification(
+          this.translateService.instant('CONFIGURATION.ERROR_SAVE'),
+          'error'
+        );
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // ELIMINAR: onThemeChange() ya no se necesita
 
   cancel(): void {
     this.loadConfiguration();
@@ -238,5 +284,10 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
       message,
       type
     };
+
+    // Auto-ocultar después de 3 segundos
+    setTimeout(() => {
+      this.notification.show = false;
+    }, 3000);
   }
 }

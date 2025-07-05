@@ -1,4 +1,5 @@
 <!-- src/app/configuration/components/businessman-configuration/businessman-configuration.component.html -->
+<!-- ACTUALIZADO: Eliminado batchCodeFormat -->
 
 <div class="configuration-container">
   <div *ngIf="isLoading" class="loading-indicator">
@@ -23,18 +24,8 @@
       </div>
     </div>
 
-    <!-- Configuración de formato de código de lote -->
-    <div class="form-group">
-      <app-input
-        [label]="'CONFIGURATION.BATCH_CODE' | translate"
-        type="select"
-        [options]="batchCodeOptions"
-        [(ngModel)]="configuration.batchCodeFormat"
-        [fullWidth]="true">
-      </app-input>
-    </div>
 
-    <!-- Theme Switcher - Reemplaza el select anterior -->
+    <!-- Theme Switcher - Se conecta automáticamente via ThemeService -->
     <div class="form-group">
       <label>{{ 'CONFIGURATION.VIEW_MODE' | translate }}</label>
       <app-theme-switcher
@@ -45,12 +36,13 @@
       </app-theme-switcher>
     </div>
 
+    <!-- Información de suscripción (solo lectura) -->
     <div class="form-group">
       <label>{{ 'CONFIGURATION.SUBSCRIPTION' | translate }}</label>
       <div class="subscription-info">
-    <span class="plan-badge" [class]="'plan-' + configuration.subscriptionPlan">
-      {{ 'PLANS.' + (configuration.subscriptionPlan?.toUpperCase() || 'BASIC') | translate }}
-    </span>
+        <span class="plan-badge" [class]="'plan-' + configuration.subscriptionPlan">
+          {{ 'PLANS.' + (configuration.subscriptionPlan?.toUpperCase() || 'BASIC') | translate }}
+        </span>
         <button class="manage-plan-btn" routerLink="/businessman/planes">
           {{ 'CONFIGURATION.MANAGE_PLAN' | translate }}
         </button>
