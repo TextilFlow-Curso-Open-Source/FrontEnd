@@ -74,7 +74,7 @@ export class BusinessmanObservationComponent implements OnInit {
   loadObservations(): void {
     this.isLoading = true;
 
-    this.observationService.getAll().subscribe({
+    this.observationService.getByBusinessmanId(this.currentUserId).subscribe({
       next: (observations: Observation[]) => {
         console.log("Todas las observaciones:", observations);
         console.log("ID de usuario actual:", this.currentUserId);

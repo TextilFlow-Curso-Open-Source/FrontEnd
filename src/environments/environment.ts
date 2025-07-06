@@ -11,14 +11,13 @@ export const environment = {
   supplierEndpointPath: '/suppliers',
   profileEndpointPath: '/profiles',
   businessSupplierRequests: '/business-supplier-requests',
-
+  observationEndpointPath: '/observations',
   // Endpoints para imágenes de perfil - SIN placeholder
   profileImagesEndpointPath: '/profiles',
 
   // Resto igual...
   batchesEndpointPath: '/batches',
   supplierReviewEndpointPath: '/supplierReviews',
-  observationEndpointPath: '/observation',
   configurationEndpointPath: '/configuration',
   apiVersion: 'v1',
   tokenPrefix: 'Bearer ',
