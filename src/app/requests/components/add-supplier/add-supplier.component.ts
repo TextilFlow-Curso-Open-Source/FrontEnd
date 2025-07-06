@@ -134,7 +134,8 @@ export class AddSupplierComponent implements OnInit {
 
     this.requestService.getRequestsByBusinessman(this.currentUserId).subscribe({
       next: (requests: any[]) => {
-        const acceptedRequests = requests.filter(req => req.status === 'accepted');
+        const acceptedRequests = requests.filter(req => req.status.toUpperCase() === 'ACCEPTED');
+
 
         this.supplierService.getAllSuppliers().subscribe({
           next: (suppliers: any[]) => {
