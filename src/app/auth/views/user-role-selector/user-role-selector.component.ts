@@ -22,17 +22,25 @@ export class UserRoleSelectorComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // Verificar si el usuario está autenticado
-    if (!this.authService.isAuthenticated()) {
-      this.authService.redirectBasedOnRole(''); // Redirigir a login
+    const user = this.authService.getCurrentUser();
+
+    // Verificar si hay un usuario válido
+    if (!user) {
+      this.authService.logout();
       return;
     }
 
-    // Si ya tiene un rol válido, redirigir
-    const role = this.authService.getCurrentUserRole();
-    if (role === 'businessman' || role === 'supplier') {
-      this.authService.redirectBasedOnRole(role);
+    if (user.role === 'pending') {
+
+      return;
     }
+
+    if (user.role === 'businessman' || user.role === 'supplier') {
+      this.authService.redirectBasedOnRole(user.role);
+      return;
+    }
+
+    this.authService.logout();
   }
 
   selectRole(role: 'businessman' | 'supplier'): void {

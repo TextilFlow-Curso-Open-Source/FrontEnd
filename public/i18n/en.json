@@ -468,7 +468,9 @@
     "WEBSITE_PLACEHOLDER": "https://www.mycompany.com",
     "DESCRIPTION": "Company Description",
     "DESCRIPTION_PLACEHOLDER": "Brief description of your company, textile products and services...",
-
+    "COUNTRY_PLACEHOLDER": "Select a country",
+    "ADDRESS_PLACEHOLDER": "Enter your address",
+    "PHONE_PLACEHOLDER": "Enter your phone",
     "PERSONAL_INFO": "Personal Information",
     "FULL_NAME": "Full Name",
     "EMAIL": "Email",
@@ -534,6 +536,30 @@
     "CITY_PLACEHOLDER": "Select a city"
   },
   "SUPPLIER_PROFILE": {
+
+    "UPLOAD_LOGO": "Upload Logo",
+    "RECOMMENDATIONS": "Recommendations",
+    "FORMAT_INFO": "Supported formats: JPG, PNG, GIF",
+    "SIZE_INFO": "Maximum size: 5MB",
+    "RESOLUTION_INFO": "Use sharp and well-lit images",
+    "DESCRIPTION": "Description",
+    "DESCRIPTION_PLACEHOLDER": "Brief description of your company and services",
+    "CERTIFICATIONS": "Certifications",
+    "CERTIFICATIONS_PLACEHOLDER": "List your certifications (ISO, organic, etc.)",
+
+    "COMPANY_NAME_REQUIRED": "Company name is required",
+    "RUC_REQUIRED": "Tax ID/RUC is required",
+    "SPECIALIZATION_REQUIRED": "Specialization is required",
+    "FULL_NAME_REQUIRED": "Full name is required",
+    "EMAIL_REQUIRED": "Email is required",
+    "COUNTRY_REQUIRED": "Country is required",
+    "CITY_REQUIRED": "City is required",
+    "INVALID_RUC": "Tax ID must have exactly 11 digits",
+    "INVALID_EMAIL": "Enter a valid email address",
+    "IMAGE_DELETED": "Image deleted successfully",
+    "DELETE_ERROR": "Error deleting image",
+    "UPLOAD_ERROR": "Error uploading image",
+
     "TITLE": "Supplier Profile Configuration",
     "CREATE_TITLE": "Create Supplier Profile",
     "EDIT_TITLE": "Edit Supplier Profile",
@@ -587,7 +613,8 @@
       "LINEN": "Linen",
       "BLENDS": "Blends",
       "TECHNICAL": "Technical Textiles",
-      "SUSTAINABLE": "Sustainable Textiles"
+      "SUSTAINABLE": "Sustainable Textiles",
+      "Other": "Otros"
     },
 
     "PRODUCT_CATEGORIES": "Product Categories",

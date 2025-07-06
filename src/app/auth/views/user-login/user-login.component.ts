@@ -172,41 +172,18 @@ export class UserLoginComponent implements OnInit, OnDestroy {
    * Intercepta el login del AuthService para manejar éxito y errores
    */
   private interceptAuthServiceLogin(): void {
-    // Guardar referencia original del método redirectBasedOnRole
-    const originalRedirect = this.authService.redirectBasedOnRole.bind(this.authService);
+    const credentials = this.loginForm.value;
 
-    // Sobrescribir temporalmente para interceptar éxito
-    this.authService.redirectBasedOnRole = (role: string) => {
-      this.handleLoginSuccess();
-      // Restaurar método original después de un delay
-      setTimeout(() => {
-        this.authService.redirectBasedOnRole = originalRedirect;
-        originalRedirect(role);
-      }, 1500);
-    };
+    // Usar directamente el AuthService
+    this.authService.login(credentials);
 
-    // Obtener usuarios para verificar credenciales
-    this.authService.getAll().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (users) => {
-        const credentials = this.loginForm.value;
-        const user = users.find(u =>
-          u.email === credentials.email &&
-          u.password === credentials.password
-        );
-
-        if (user) {
-          // Credenciales correctas - el AuthService manejará el éxito
-          this.authService.login(credentials);
-        } else {
-          // Credenciales incorrectas
-          this.handleLoginError('credentials', 'Email o contraseña incorrectos.');
-        }
-      },
-      error: (error) => {
-        // Error de conexión o del servidor
-        this.handleLoginError('network', 'Error de conexión. Verifica tu internet.');
+    // Timeout de seguridad
+    setTimeout(() => {
+      if (this.isLoading) {
+        this.isLoading = false;
+        this.errorMessage = 'Credenciales incorrectas. Intenta nuevamente.';
       }
-    });
+    }, 5000);
   }
 
   /**

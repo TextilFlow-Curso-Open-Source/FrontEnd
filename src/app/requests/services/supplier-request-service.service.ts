@@ -1,6 +1,6 @@
 // /src/app/businessman/services/supplier-request-service.service.ts
 import { Injectable } from '@angular/core';
-import { BaseService } from '../../core/services/base.service.service';
+import { BaseService } from '../../core/services/base.service';
 import { BusinessSupplierRequest} from '../model/business-supplier-request.entity';
 import {environment} from '../../../environments/environment';
 

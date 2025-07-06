@@ -133,18 +133,16 @@ export class BusinessmanPlansComponent implements OnInit {
     });
   }
 
+  // ARREGLO 1: Usar el nuevo método getConfigurationByUserId
   loadCurrentPlan(): void {
     this.isLoading = true;
 
-    this.configurationService.getByUserId(this.currentUserId).subscribe({
-      next: (configs) => {
-        if (Array.isArray(configs) && configs.length > 0) {
-          this.configuration = configs[0];
-        } else if (!Array.isArray(configs)) {
-          this.configuration = configs;
-        }
+    const userId = parseInt(this.currentUserId, 10);
 
-        this.currentPlan = this.configuration?.subscriptionPlan || 'basic';
+    this.configurationService.getConfigurationByUserId(userId).subscribe({
+      next: (config) => {
+        this.configuration = config;
+        this.currentPlan = (this.configuration?.subscriptionPlan as 'basic' | 'corporate') || 'basic';
         this.updatePlansDisplay();
         this.isLoading = false;
       },
@@ -260,56 +258,33 @@ export class BusinessmanPlansComponent implements OnInit {
     });
   }
 
+  // ARREGLO 2: Actualizar para usar el nuevo backend
   private async changePlan(newPlan: 'basic' | 'corporate'): Promise<void> {
-    if (!this.configuration) {
-      // Crear configuración si no existe
-      this.configuration = new Configuration({
-        userId: this.currentUserId,
-        userType: 'supplier', // O 'businessman' según corresponda
-        language: 'es',
-        batchCodeFormat: 'automatic',
-        viewMode: 'auto',
-        subscriptionPlan: newPlan,
-        subscriptionStartDate: new Date().toISOString(),
-        createdAt: new Date().toISOString()
-      });
-
-      this.configurationService.create(this.configuration).subscribe({
-        next: (config) => {
-          this.configuration = config;
-          this.currentPlan = newPlan;
-          this.updatePlansDisplay();
-          this.showNotification(
-            this.translateService.instant('PLANS.PLAN_CHANGED_SUCCESS'),
-            'success'
-          );
-        },
-        error: (error) => {
-          console.error('Error al crear configuración:', error);
-          this.showNotification(this.translateService.instant('PLANS.PLAN_CHANGE_ERROR'), 'error');
-        }
-      });
-    } else {
-      // Actualizar configuración existente
-      this.configuration.subscriptionPlan = newPlan;
-      this.configuration.subscriptionStartDate = new Date().toISOString();
-      this.configuration.updatedAt = new Date().toISOString();
-
-      this.configurationService.update(this.configuration.id!, this.configuration).subscribe({
-        next: () => {
-          this.currentPlan = newPlan;
-          this.updatePlansDisplay();
-          this.showNotification(
-            this.translateService.instant('PLANS.PLAN_CHANGED_SUCCESS'),
-            'success'
-          );
-        },
-        error: (error) => {
-          console.error('Error al actualizar configuración:', error);
-          this.showNotification(this.translateService.instant('PLANS.PLAN_CHANGE_ERROR'), 'error');
-        }
-      });
+    if (!this.configuration || !this.configuration.id) {
+      // ERROR: No debería llegar aquí porque el backend crea automáticamente la configuración
+      console.error('No se encontró configuración válida');
+      this.showNotification(this.translateService.instant('PLANS.PLAN_CHANGE_ERROR'), 'error');
+      return;
     }
+
+    const configId = parseInt(this.configuration.id, 10);
+
+    // ARREGLO 3: Usar updateSubscriptionPlan en lugar de update
+    this.configurationService.updateSubscriptionPlan(configId, newPlan).subscribe({
+      next: (updatedConfig) => {
+        this.configuration = updatedConfig;
+        this.currentPlan = newPlan;
+        this.updatePlansDisplay();
+        this.showNotification(
+          this.translateService.instant('PLANS.PLAN_CHANGED_SUCCESS'),
+          'success'
+        );
+      },
+      error: (error) => {
+        console.error('Error al actualizar configuración:', error);
+        this.showNotification(this.translateService.instant('PLANS.PLAN_CHANGE_ERROR'), 'error');
+      }
+    });
   }
 
   showNotification(message: string, type: 'success' | 'error' | 'warning' | 'info'): void {
@@ -318,6 +293,11 @@ export class BusinessmanPlansComponent implements OnInit {
       message,
       type
     };
+
+    // Auto-ocultar después de 3 segundos
+    setTimeout(() => {
+      this.notification.show = false;
+    }, 3000);
   }
 
   // Método helper para obtener el plan que se está comprando
@@ -330,4 +310,3 @@ export class BusinessmanPlansComponent implements OnInit {
     return `$${price.toFixed(2)}`;
   }
 }
-

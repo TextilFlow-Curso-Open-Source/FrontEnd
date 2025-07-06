@@ -1,6 +1,6 @@
 // /src/app/core/services/supplier-review.service.ts
 import { Injectable } from '@angular/core';
-import { BaseService} from '../../core/services/base.service.service';
+import { BaseService} from '../../core/services/base.service';
 import { SupplierReview} from '../models/supplier-review.entity';
 import {environment} from '../../../environments/environment';
 

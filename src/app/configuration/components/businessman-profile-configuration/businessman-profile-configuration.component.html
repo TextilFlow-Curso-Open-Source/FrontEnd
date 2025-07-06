@@ -1,4 +1,4 @@
-<!-- businessman-profile-configuration.component.html - UPLOAD CORREGIDO -->
+<!-- businessman-profile-configuration.component.html - COMPLETO Y SINCRONIZADO -->
 <div class="profile-container">
   <!-- Header -->
   <div class="profile-header">
@@ -9,7 +9,7 @@
         size="small"
         (click)="goBack()">
       </app-button>
-      <h1>{{ (isEditMode ? 'BUSINESSMAN_PROFILE.EDIT_TITLE' : 'BUSINESSMAN_PROFILE.CREATE_TITLE') | translate }}</h1>
+      <h1>{{ 'BUSINESSMAN_PROFILE.EDIT_TITLE' | translate }}</h1>
       <p class="header-subtitle">{{ 'BUSINESSMAN_PROFILE.SUBTITLE' | translate }}</p>
     </div>
   </div>
@@ -46,7 +46,6 @@
             </div>
 
             <div class="logo-actions">
-              <!-- Input file oculto -->
               <input
                 type="file"
                 #fileInput
@@ -54,6 +53,13 @@
                 (change)="onFileSelected($event)"
                 style="display: none;">
 
+              <app-button
+                *ngIf="previewUrl"
+                [label]="'BUSINESSMAN_PROFILE.REMOVE_IMAGE' | translate"
+                variant="secondary"
+                size="small"
+                (click)="removeImage()">
+              </app-button>
             </div>
           </div>
 
@@ -68,7 +74,7 @@
         </div>
       </div>
 
-      <!-- Company Information -->
+      <!-- Company Information - SOLO CAMPOS QUE EXISTEN EN BACKEND -->
       <div class="form-section">
         <h2 class="section-title">
           <span class="material-icons">domain</span>
@@ -110,40 +116,6 @@
             </app-input>
           </div>
 
-          <div class="form-group">
-            <app-input
-              type="select"
-              [label]="'BUSINESSMAN_PROFILE.INDUSTRY' | translate"
-              formControlName="industry"
-              [placeholder]="'BUSINESSMAN_PROFILE.SELECT_INDUSTRY' | translate"
-              [options]="industries"
-              [fullWidth]="true"
-              [required]="true">
-            </app-input>
-          </div>
-
-          <div class="form-group">
-            <app-input
-              type="select"
-              [label]="'BUSINESSMAN_PROFILE.EMPLOYEE_COUNT' | translate"
-              formControlName="employeeCount"
-              [placeholder]="'BUSINESSMAN_PROFILE.SELECT_RANGE' | translate"
-              [options]="employeeRanges"
-              [fullWidth]="true">
-            </app-input>
-          </div>
-
-          <div class="form-group">
-            <app-input
-              type="select"
-              [label]="'BUSINESSMAN_PROFILE.FOUNDING_YEAR' | translate"
-              formControlName="foundingYear"
-              [placeholder]="'BUSINESSMAN_PROFILE.SELECT_YEAR' | translate"
-              [options]="years"
-              [fullWidth]="true">
-            </app-input>
-          </div>
-
           <div class="form-group full-width">
             <app-input
               type="url"
@@ -166,7 +138,7 @@
         </div>
       </div>
 
-      <!-- User Information (Now Editable) -->
+      <!-- User Information (Editable) -->
       <div class="form-section">
         <h2 class="section-title">
           <span class="material-icons">person</span>
@@ -254,9 +226,10 @@
 
         <app-button
           type="button"
-          [label]="(isEditMode ? 'BUSINESSMAN_PROFILE.UPDATE_PROFILE' : 'BUSINESSMAN_PROFILE.CREATE_PROFILE') | translate"
+          [label]="'BUSINESSMAN_PROFILE.UPDATE_PROFILE' | translate"
           variant="primary"
           [loading]="isSaving"
+          [disabled]="isSaving"
           icon="save"
           (click)="saveProfile()">
         </app-button>

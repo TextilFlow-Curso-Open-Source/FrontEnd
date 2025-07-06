@@ -1,10 +1,10 @@
-// /src/app/supplier/services/supplier.service.ts
 import { Injectable } from '@angular/core';
-import { BaseService } from '../../core/services/base.service.service';
+import { BaseService } from '../../core/services/base.service';
 import { Supplier } from '../models/supplier.entity';
 import { AuthService } from '../../auth/services/auth.service';
 import { environment } from '../../../environments/environment';
-import { map } from 'rxjs';
+import { map, Observable, retry, catchError, throwError } from 'rxjs';
+import { HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -16,66 +16,91 @@ export class SupplierService extends BaseService<Supplier> {
   }
 
   /**
-   * Crea un nuevo perfil de proveedor usando el mismo ID del usuario
-   * @param userId ID del usuario (será el mismo ID para el supplier)
+   * ELIMINADO: createProfile() - Ya no se usa
+   * El perfil se crea automáticamente en AuthService cuando se selecciona rol
    */
-  createProfile(userId: string) {
-    const currentUser = this.authService.getCurrentUser();
 
-    console.log('Usuario actual obtenido en SupplierService:', currentUser);
-    console.log('UserID esperado:', userId);
+  /**
+   * Obtiene el perfil de proveedor por ID de usuario
+   */
+  getProfileByUserId(userId: string): Observable<Supplier> {
+    return this.customRequest<any>(`/suppliers/${userId}`, 'GET').pipe(
+      map(response => {
+        const currentUser = this.authService.getCurrentUser();
+        return this.transformBackendToFrontend(response, currentUser);
+      })
+    );
+  }
 
-    if (!currentUser) {
-      console.error('No hay usuario autenticado en el sistema');
-      throw new Error('No hay usuario autenticado en el sistema');
-    }
+  /**
+   * Actualiza el perfil de un proveedor
+   */
+  updateProfile(userId: string, profile: Supplier): Observable<Supplier> {
+    const updateRequest = {
+      // Campos de empresa
+      companyName: profile.companyName,
+      ruc: profile.ruc,
+      specialization: profile.specialization,
+      description: profile.description,
+      certifications: profile.certifications,
 
-    if (currentUser.id !== userId) {
-      console.warn(`ID de usuario no coincide. Actual: ${currentUser.id}, Esperado: ${userId}`);
-      if (!currentUser.id) {
-        throw new Error('El usuario actual no tiene ID asignado');
-      }
-    }
+      // Datos personales
+      name: profile.name,
+      email: profile.email,
+      country: profile.country,
+      city: profile.city,
+      address: profile.address,
+      phone: profile.phone
+    };
 
-    // Crear Supplier con herencia completa usando el MISMO ID
-    const newSupplier = new Supplier({
-      id: currentUser.id,
-      name: currentUser.name,
-      email: currentUser.email,
-      password: currentUser.password,
+    return this.customRequest<any>(`/suppliers/${userId}`, 'PUT', updateRequest).pipe(
+      map(response => this.transformBackendToFrontend(response, null))
+    );
+  }
+
+  /**
+   * Transforma respuesta del backend al formato del frontend
+   */
+  private transformBackendToFrontend(backendResponse: any, currentUser: any): Supplier {
+    const user = currentUser || this.authService.getCurrentUser();
+
+    return new Supplier({
+      // Datos personales: Priorizar backend, luego currentUser
+      id: user?.id || backendResponse.userId?.toString(),
+      name: backendResponse.name || user?.name || '',
+      email: backendResponse.email || user?.email || '',
       role: 'supplier',
-      country: currentUser.country,
-      city: currentUser.city,
-      address: currentUser.address,
-      phone: currentUser.phone,
-      companyName: "",
-      ruc: "",
-      specialization: "",
-      productCategories: [],
-      yearsFounded: new Date().getFullYear(),
-      warehouseLocation: "",
-      minimumOrderQuantity: 0,
-      logo: "",
-      averageRating: 0,
-      totalReviews: 0
-    });
+      country: backendResponse.country || user?.country || '',
+      city: backendResponse.city || user?.city || '',
+      address: backendResponse.address || user?.address || '',
+      phone: backendResponse.phone || user?.phone || '',
 
-    console.log('Supplier a crear:', newSupplier);
-    return this.create(newSupplier);
+      // Datos de empresa: Solo campos que existen en el backend
+      companyName: backendResponse.companyName || '',
+      ruc: backendResponse.ruc || '',
+      specialization: backendResponse.specialization || '',
+      description: backendResponse.description || '',
+      logo: backendResponse.logoUrl || '',
+      certifications: backendResponse.certifications || ''
+    });
   }
 
   /**
    * Obtiene todos los proveedores
    */
-  getAllSuppliers() {
-    return this.getAll();
+  getAllSuppliers(): Observable<Supplier[]> {
+    return this.customRequest<any[]>(`/suppliers`, 'GET').pipe(
+      map(responses => responses.map(response =>
+        this.transformBackendToFrontend(response, null)
+      ))
+    );
   }
 
   /**
    * Obtiene el perfil de proveedor por email
    */
-  getProfileByEmail(email: string) {
-    return this.getAll().pipe(
+  getProfileByEmail(email: string): Observable<Supplier | undefined> {
+    return this.getAllSuppliers().pipe(
       map(suppliers => suppliers.find(s => s.email === email))
     );
   }
@@ -83,35 +108,50 @@ export class SupplierService extends BaseService<Supplier> {
   /**
    * Obtiene el perfil de proveedor por ID
    */
-  getProfileById(id: string) {
-    return this.getById(id);
+  getProfileById(id: string): Observable<Supplier> {
+    return this.getProfileByUserId(id);
   }
 
   /**
-   * Obtiene el perfil de proveedor por ID de usuario (alias para compatibilidad)
+   * Método específico para subir archivos (sin Content-Type JSON)
    */
-  getProfileByUserId(userId: string) {
-    return this.getProfileById(userId);
-  }
+  private uploadFile(endpoint: string, formData: FormData): Observable<any> {
+    const url = `${this.serverBaseUrl}${endpoint}`;
 
-  /**
-   * Actualiza el perfil de un proveedor
-   */
-  updateProfile(id: string, profile: Supplier) {
-    return this.update(id, profile);
-  }
+    // Crear headers SOLO con Authorization (sin Content-Type)
+    let headers = new HttpHeaders();
+    const token = localStorage.getItem('auth_token');
+    if (token && !token.startsWith('fake-jwt-token-') && !token.startsWith('temp-jwt-token-')) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
 
-  /**
-   * Actualiza el rating promedio de un proveedor
-   */
-  updateSupplierRating(supplierId: string, averageRating: number, totalReviews: number) {
-    return this.getById(supplierId).pipe(
-      map(supplier => {
-        // Aquí podrías implementar la lógica de actualización del rating
-        supplier.averageRating = averageRating;
-        supplier.totalReviews = totalReviews;
-        return supplier;
+    // HttpClient con headers específicos para FormData
+    return this.http.post<any>(url, formData, { headers }).pipe(
+      retry(2),
+      catchError((error) => {
+        return throwError(() => new Error(`Upload error: ${error.status}`));
       })
     );
+  }
+
+  /**
+   * Sube logo del proveedor
+   */
+  uploadLogo(userId: string, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const endpoint = `${environment.profileEndpointPath}/${userId}/images/logo`;
+
+    // Usar método específico para archivos
+    return this.uploadFile(endpoint, formData);
+  }
+
+  /**
+   * Elimina logo del proveedor
+   */
+  deleteLogo(userId: string): Observable<any> {
+    const endpoint = `${environment.profileEndpointPath}/${userId}/images/logo`;
+    return this.customRequest<any>(endpoint, 'DELETE');
   }
 }
