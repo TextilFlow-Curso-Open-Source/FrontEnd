@@ -44,7 +44,7 @@ interface Plan {
 export class SupplierPlansComponent implements OnInit {
   currentUserId: string = '';
   configuration: Configuration | null = null;
-  currentPlan: 'basic' | 'corporate' = 'basic';
+  currentPlan: string = 'basic';
 
   // Estados del componente
   isLoading = false;

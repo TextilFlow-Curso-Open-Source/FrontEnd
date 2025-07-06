@@ -1,4 +1,3 @@
-// /src/app/auth/services/session.service.ts
 import { Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 
@@ -6,7 +5,8 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class SessionService {
-  private readonly INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutos en milisegundos
+  // Tiempo más largo: 8 horas
+  private readonly INACTIVITY_TIMEOUT = 8 * 60 * 60 * 1000; // 8 horas
   private timeoutId: any;
 
   constructor() {
@@ -20,13 +20,12 @@ export class SessionService {
       window.addEventListener(event, () => this.resetInactivityTimer(authService));
     });
 
-    // Configurar evento para cierre del navegador
-    window.addEventListener('beforeunload', () => {
-      // Al cerrar el navegador, eliminamos el token
-      if (authService.isAuthenticated()) {
-        authService.logout(false); // false para no navegar al login
-      }
-    });
+    // ❌ COMENTADO: No cerrar sesión al recargar página
+    // window.addEventListener('beforeunload', () => {
+    //   if (authService.isAuthenticated()) {
+    //     authService.logout(false);
+    //   }
+    // });
 
     // Si el usuario ya está autenticado, iniciar el temporizador
     if (authService.isAuthenticated()) {
@@ -47,15 +46,11 @@ export class SessionService {
     }, this.INACTIVITY_TIMEOUT);
   }
 
-  // Método para iniciar la sesión (llamar cuando el usuario inicia sesión)
   startSession(authService: AuthService) {
     this.resetInactivityTimer(authService);
-
-    // Guardamos la hora de inicio de sesión
     sessionStorage.setItem('session_start', Date.now().toString());
   }
 
-  // Método para finalizar la sesión (llamar cuando el usuario cierra sesión)
   endSession() {
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);

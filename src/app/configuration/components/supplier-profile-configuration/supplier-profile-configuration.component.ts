@@ -1,10 +1,8 @@
-// supplier-profile-configuration.component.ts - FINAL VERSION SIGUIENDO BUSINESSMAN EXACTAMENTE
-
-import { Component, OnInit, OnDestroy } from '@angular/core';
+// supplier-profile-configuration.component.ts - ARREGLADO
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Subject, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
@@ -27,15 +25,15 @@ import { AppNotificationComponent } from '../../../core/components/app-notificat
     AppNotificationComponent
   ],
   templateUrl: './supplier-profile-configuration.component.html',
-  styleUrl: './supplier-profile-configuration.component.css'
+  styleUrls: ['./supplier-profile-configuration.component.css']
 })
-export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy {
+export class SupplierProfileConfigurationComponent implements OnInit {
   form!: FormGroup;
 
   // Estados del componente
   isLoading: boolean = false;
   isSaving: boolean = false;
-  isEditMode: boolean = false;
+  // ELIMINADO: isEditMode (siempre es true)
 
   // Datos del usuario y supplier
   currentUser: any = null;
@@ -46,17 +44,13 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
   previewUrl: string = '';
   logoUrl: string = '';
 
-  // Listas para selects (compatible con app-input)
+  // Listas para selects
   specializationOptions: Array<{label: string, value: any}> = [];
-  categoryOptions: Array<{label: string, value: any}> = [];
 
   // API de países y ciudades
   countries: Array<{label: string, value: string}> = [];
   cities: Array<{label: string, value: string}> = [];
   loadingCities = false;
-
-  // Categorías seleccionadas
-  selectedCategories: string[] = [];
 
   // Notificación
   notification = {
@@ -64,8 +58,6 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
     message: '',
     type: 'success' as 'success' | 'error' | 'warning' | 'info'
   };
-
-  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
@@ -81,11 +73,6 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
     this.loadTranslatedLists();
     this.initForm();
     this.loadUserData();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   /**
@@ -133,19 +120,18 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
   }
 
   /**
-   * Inicializa el formulario reactivo - IGUAL QUE BUSINESSMAN
+   * Inicializa el formulario reactivo
    */
   initForm() {
     this.form = this.fb.group({
-      // Datos de la empresa
+      // Campos de empresa
       companyName: ['', Validators.required],
       ruc: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
       specialization: ['', Validators.required],
-      yearsFounded: [new Date().getFullYear()],
-      warehouseLocation: ['', Validators.required],
-      minimumOrderQuantity: [1, [Validators.required, Validators.min(1)]],
+      description: [''],
+      certifications: [''],
 
-      // Datos personales - EDITABLES
+      // Campos personales
       fullName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       country: ['', Validators.required],
@@ -166,43 +152,24 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
   }
 
   /**
-   * Carga las listas traducidas compatible con app-input
+   * Carga las listas traducidas
    */
   private loadTranslatedLists() {
-    // Especializaciones con traducción directa
     this.specializationOptions = [
-      { value: 'cotton', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.COTTON') },
-      { value: 'polyester', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.POLYESTER') },
-      { value: 'wool', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.WOOL') },
-      { value: 'silk', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.SILK') },
-      { value: 'linen', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.LINEN') },
-      { value: 'blends', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.BLENDS') },
-      { value: 'technical', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.TECHNICAL') },
-      { value: 'sustainable', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.SUSTAINABLE') }
+      { value: 'COTTON', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.COTTON') },
+      { value: 'POLYESTER', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.POLYESTER') },
+      { value: 'WOOL', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.WOOL') },
+      { value: 'SILK', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.SILK') },
+      { value: 'LINEN', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.LINEN') },
+      { value: 'BLENDS', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.BLENDS') },
+      { value: 'TECHNICAL', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.TECHNICAL') },
+      { value: 'SUSTAINABLE', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.SUSTAINABLE') },
+      { value: 'OTHER', label: this.translate.instant('SUPPLIER_PROFILE.SPECIALIZATIONS.OTHER') }
     ];
-
-    // Categorías de productos
-    this.categoryOptions = [
-      { value: 'basic_fabrics', label: this.translate.instant('SUPPLIER_PROFILE.CATEGORIES.BASIC_FABRICS') },
-      { value: 'premium_fabrics', label: this.translate.instant('SUPPLIER_PROFILE.CATEGORIES.PREMIUM_FABRICS') },
-      { value: 'sports_fabrics', label: this.translate.instant('SUPPLIER_PROFILE.CATEGORIES.SPORTS_FABRICS') },
-      { value: 'home_fabrics', label: this.translate.instant('SUPPLIER_PROFILE.CATEGORIES.HOME_FABRICS') },
-      { value: 'industrial_fabrics', label: this.translate.instant('SUPPLIER_PROFILE.CATEGORIES.INDUSTRIAL_FABRICS') },
-      { value: 'textile_accessories', label: this.translate.instant('SUPPLIER_PROFILE.CATEGORIES.TEXTILE_ACCESSORIES') },
-      { value: 'threads_fibers', label: this.translate.instant('SUPPLIER_PROFILE.CATEGORIES.THREADS_FIBERS') },
-      { value: 'printed_fabrics', label: this.translate.instant('SUPPLIER_PROFILE.CATEGORIES.PRINTED_FABRICS') }
-    ];
-
-    // Escuchar cambios de idioma
-    this.translate.onLangChange
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.loadTranslatedLists();
-      });
   }
 
   /**
-   * Carga los datos del usuario actual - IGUAL QUE BUSINESSMAN
+   * Carga los datos del usuario actual
    */
   loadUserData() {
     this.isLoading = true;
@@ -217,118 +184,61 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
       return;
     }
 
-    // Cargar perfil de supplier si existe
+    // El perfil SIEMPRE existe (se creó cuando seleccionó rol)
     this.loadSupplierProfile();
   }
 
   /**
-   * Carga el perfil de supplier - EXACTAMENTE IGUAL QUE BUSINESSMAN
+   * Carga el perfil de supplier existente
    */
   loadSupplierProfile() {
     this.supplierService.getProfileById(this.currentUser.id).subscribe({
       next: (profile) => {
-        if (profile) {
-          this.supplierProfile = new Supplier(profile);
-          this.logoUrl = profile.logo || '';
-          this.previewUrl = this.logoUrl;
-          this.selectedCategories = profile.productCategories || [];
-          this.isEditMode = true;
+        // El perfil SIEMPRE existe, solo actualizamos datos
+        this.supplierProfile = new Supplier(profile);
+        this.logoUrl = profile.logo || '';
+        this.previewUrl = this.logoUrl;
 
-          // Cargar datos del perfil al formulario
-          this.form.patchValue({
-            // Datos de la empresa
-            companyName: profile.companyName || '',
-            ruc: profile.ruc || '',
-            specialization: profile.specialization || '',
-            yearsFounded: profile.yearsFounded || new Date().getFullYear(),
-            warehouseLocation: profile.warehouseLocation || '',
-            minimumOrderQuantity: profile.minimumOrderQuantity || 1,
+        // Llenar formulario con datos existentes
+        this.form.patchValue({
+          // Datos de empresa
+          companyName: profile.companyName || '',
+          ruc: profile.ruc || '',
+          specialization: profile.specialization || '',
+          description: profile.description || '',
+          certifications: profile.certifications || '',
 
-            // Datos personales del perfil o usuario actual
-            fullName: profile.name || this.currentUser?.name || '',
-            email: profile.email || this.currentUser?.email || '',
-            country: profile.country || this.currentUser?.country || '',
-            city: profile.city || this.currentUser?.city || '',
-            address: profile.address || this.currentUser?.address || '',
-            phone: profile.phone || this.currentUser?.phone || ''
-          });
+          // Datos personales
+          fullName: profile.name || this.currentUser?.name || '',
+          email: profile.email || this.currentUser?.email || '',
+          country: profile.country || this.currentUser?.country || '',
+          city: profile.city || this.currentUser?.city || '',
+          address: profile.address || this.currentUser?.address || '',
+          phone: profile.phone || this.currentUser?.phone || ''
+        });
 
-          // Cargar ciudades si hay país seleccionado
-          const country = profile.country || this.currentUser?.country;
-          if (country) {
-            this.loadCitiesByCountry(country);
-          }
-        } else {
-          // No existe perfil, crear uno nuevo con datos del usuario
-          this.supplierProfile = new Supplier({
-            id: this.currentUser.id,
-            name: this.currentUser.name,
-            email: this.currentUser.email,
-            role: 'supplier',
-            country: this.currentUser.country,
-            city: this.currentUser.city,
-            address: this.currentUser.address,
-            phone: this.currentUser.phone,
-            yearsFounded: new Date().getFullYear()
-          });
-          this.isEditMode = false;
-
-          // Cargar datos del usuario en el formulario
-          this.form.patchValue({
-            fullName: this.currentUser?.name || '',
-            email: this.currentUser?.email || '',
-            country: this.currentUser?.country || '',
-            city: this.currentUser?.city || '',
-            address: this.currentUser?.address || '',
-            phone: this.currentUser?.phone || ''
-          });
-
-          // Cargar ciudades si hay país
-          if (this.currentUser?.country) {
-            this.loadCitiesByCountry(this.currentUser.country);
-          }
+        // Cargar ciudades si hay país seleccionado
+        const country = profile.country || this.currentUser?.country;
+        if (country) {
+          this.loadCitiesByCountry(country);
         }
 
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error al cargar perfil:', error);
-        // Si no existe, crear uno nuevo
-        this.supplierProfile = new Supplier({
-          id: this.currentUser.id,
-          name: this.currentUser.name,
-          email: this.currentUser.email,
-          role: 'supplier',
-          country: this.currentUser.country,
-          city: this.currentUser.city,
-          address: this.currentUser.address,
-          phone: this.currentUser.phone,
-          yearsFounded: new Date().getFullYear()
-        });
-
-        // Cargar datos del usuario actual
-        this.form.patchValue({
-          fullName: this.currentUser?.name || '',
-          email: this.currentUser?.email || '',
-          country: this.currentUser?.country || '',
-          city: this.currentUser?.city || '',
-          address: this.currentUser?.address || '',
-          phone: this.currentUser?.phone || ''
-        });
-
-        // Cargar ciudades si hay país
-        if (this.currentUser?.country) {
-          this.loadCitiesByCountry(this.currentUser.country);
-        }
-
-        this.isEditMode = false;
+        this.showNotification(
+          this.translate.instant('SUPPLIER_PROFILE.PROFILE_ERROR'),
+          'error'
+        );
         this.isLoading = false;
+        this.router.navigate(['/supplier']);
       }
     });
   }
 
   /**
-   * Activa el input de archivo de forma controlada
+   * Activa el input de archivo
    */
   triggerFileInput() {
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
@@ -338,12 +248,12 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
   }
 
   /**
-   * Maneja la selección de archivo - IGUAL QUE BUSINESSMAN
+   * Maneja la selección de archivo
    */
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (!file) {
-      return; // Si no hay archivo, no hacer nada
+      return;
     }
 
     // Validar tipo de archivo
@@ -352,7 +262,6 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
         this.translate.instant('SUPPLIER_PROFILE.INVALID_IMAGE_TYPE'),
         'warning'
       );
-      // Limpiar el input
       event.target.value = '';
       return;
     }
@@ -363,7 +272,6 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
         this.translate.instant('SUPPLIER_PROFILE.IMAGE_TOO_LARGE'),
         'warning'
       );
-      // Limpiar el input
       event.target.value = '';
       return;
     }
@@ -377,7 +285,6 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
     };
     reader.readAsDataURL(file);
 
-    // Limpiar el input para permitir seleccionar el mismo archivo de nuevo
     event.target.value = '';
   }
 
@@ -385,79 +292,64 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
    * Elimina la imagen seleccionada
    */
   removeImage() {
+    // Limpiar preview local
     this.selectedFile = null;
     this.previewUrl = '';
-    this.logoUrl = '';
-    this.supplierProfile.logo = '';
+
+    // Si hay una imagen existente en el backend, eliminarla
+    if (this.logoUrl) {
+      this.supplierService.deleteLogo(this.currentUser.id).subscribe({
+        next: (response) => {
+          this.logoUrl = '';
+          this.supplierProfile.logo = '';
+
+          this.showNotification(
+            this.translate.instant('SUPPLIER_PROFILE.IMAGE_DELETED'),
+            'success'
+          );
+        },
+        error: (error) => {
+          console.error('Error eliminando logo:', error);
+          // Limpiar localmente de todas formas
+          this.logoUrl = '';
+          this.supplierProfile.logo = '';
+
+          this.showNotification(
+            this.translate.instant('SUPPLIER_PROFILE.DELETE_ERROR'),
+            'error'
+          );
+        }
+      });
+    }
   }
 
   /**
-   * Simula la subida de imagen
+   * Sube imagen al backend
    */
-  private async uploadImage(): Promise<string> {
+  private uploadImage(): Promise<string> {
     if (!this.selectedFile) {
-      return this.logoUrl;
+      return Promise.resolve(this.logoUrl);
     }
 
-    // Simular subida de imagen
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const formData = this.form.getRawValue();
-        const companyName = formData.companyName || 'Company';
-        const fakeUrl = `https://via.placeholder.com/300x300/a68b6b/ffffff?text=${encodeURIComponent(companyName)}`;
-        resolve(fakeUrl);
-      }, 1000);
+    return new Promise((resolve, reject) => {
+      this.supplierService.uploadLogo(this.currentUser.id, this.selectedFile!).subscribe({
+        next: (response) => {
+          resolve(response.logoUrl || '');
+        },
+        error: (error) => {
+          console.error('Error subiendo imagen:', error);
+          this.showNotification(
+            this.translate.instant('SUPPLIER_PROFILE.UPLOAD_ERROR'),
+            'error'
+          );
+          resolve(this.logoUrl);
+        }
+      });
     });
   }
 
   /**
-   * Maneja el toggle de categorías
-   */
-  toggleCategory(categoryKey: string): void {
-    const index = this.selectedCategories.indexOf(categoryKey);
-
-    if (index > -1) {
-      // Remover categoría
-      this.selectedCategories.splice(index, 1);
-    } else {
-      // Agregar categoría (máximo 5)
-      if (this.selectedCategories.length < 5) {
-        this.selectedCategories.push(categoryKey);
-      } else {
-        this.showNotification(
-          this.translate.instant('SUPPLIER_PROFILE.MAX_CATEGORIES'),
-          'warning'
-        );
-        return;
-      }
-    }
-  }
-
-  /**
-   * Verifica si una categoría está seleccionada
-   */
-  isCategorySelected(categoryKey: string): boolean {
-    return this.selectedCategories.includes(categoryKey);
-  }
-
-  /**
-   * Obtiene el label traducido de una especialización por su value
-   */
-  getSpecializationLabel(value: string): string {
-    const option = this.specializationOptions.find(opt => opt.value === value);
-    return option ? option.label : value;
-  }
-
-  /**
-   * Obtiene el label traducido de una categoría por su value
-   */
-  getCategoryLabel(value: string): string {
-    const option = this.categoryOptions.find(opt => opt.value === value);
-    return option ? option.label : value;
-  }
-
-  /**
-   * Valida el formulario - IGUAL QUE BUSINESSMAN
+   * Valida el formulario
    */
   private validateForm(): boolean {
     const formValues = this.form.getRawValue();
@@ -518,15 +410,7 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
       return false;
     }
 
-    if (this.selectedCategories.length === 0) {
-      this.showNotification(
-        this.translate.instant('SUPPLIER_PROFILE.CATEGORIES_REQUIRED'),
-        'warning'
-      );
-      return false;
-    }
-
-    // Validar RUC (formato básico para Perú)
+    // Validar RUC (formato para Perú)
     if (formValues.ruc && !/^\d{11}$/.test(formValues.ruc)) {
       this.showNotification(
         this.translate.instant('SUPPLIER_PROFILE.INVALID_RUC'),
@@ -549,10 +433,10 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
   }
 
   /**
-   * Guarda el perfil - EXACTAMENTE IGUAL QUE BUSINESSMAN PARA ACTUALIZAR AMBAS TABLAS
+   * Guarda el perfil - SIMPLIFICADO (solo UPDATE)
    */
   async saveProfile() {
-    if (!this.form.valid || !this.validateForm() || this.isSaving) {
+    if (!this.validateForm() || this.isSaving) {
       this.form.markAllAsTouched();
       return;
     }
@@ -562,16 +446,14 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
     try {
       const formValues = this.form.getRawValue();
 
-      // Actualizar el objeto supplier con los valores del formulario
+      // Actualizar datos del objeto
       this.supplierProfile.companyName = formValues.companyName;
       this.supplierProfile.ruc = formValues.ruc;
       this.supplierProfile.specialization = formValues.specialization;
-      this.supplierProfile.productCategories = [...this.selectedCategories];
-      this.supplierProfile.yearsFounded = formValues.yearsFounded;
-      this.supplierProfile.warehouseLocation = formValues.warehouseLocation;
-      this.supplierProfile.minimumOrderQuantity = formValues.minimumOrderQuantity;
+      this.supplierProfile.description = formValues.description;
+      this.supplierProfile.certifications = formValues.certifications;
 
-      // Actualizar datos personales EN EL SUPPLIER
+      // Actualizar datos personales
       this.supplierProfile.name = formValues.fullName;
       this.supplierProfile.email = formValues.email;
       this.supplierProfile.country = formValues.country;
@@ -584,155 +466,31 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
         this.supplierProfile.logo = await this.uploadImage();
       }
 
-      if (this.isEditMode) {
-        // ===== ACTUALIZAR PERFIL EXISTENTE =====
+      // SOLO UPDATE (el perfil siempre existe)
+      this.supplierService.updateProfile(this.supplierProfile.id!, this.supplierProfile).subscribe({
+        next: (updatedProfile) => {
+          this.showNotification(
+            this.translate.instant('SUPPLIER_PROFILE.PROFILE_UPDATED_SUCCESS'),
+            'success'
+          );
 
-        // 1. Actualizar tabla supplier
-        this.supplierService.updateProfile(this.supplierProfile.id!, this.supplierProfile).subscribe({
-          next: (updatedProfile) => {
-            console.log('✅ Supplier profile updated:', updatedProfile);
-
-            // 2. Preparar datos para actualizar tabla users
-            const updatedUserData = {
-              id: this.currentUser.id,
-              name: formValues.fullName,
-              email: formValues.email,
-              country: formValues.country,
-              city: formValues.city,
-              address: formValues.address,
-              phone: formValues.phone,
-              // Mantener datos existentes
-              password: this.currentUser.password,
-              role: this.currentUser.role
-            };
-
-            // 3. Actualizar tabla users
-            this.authService.updateUser(this.currentUser.id, updatedUserData).subscribe({
-              next: (updatedUser) => {
-                console.log('✅ User data updated:', updatedUser);
-
-                // 4. Actualizar usuario actual en el servicio
-                this.authService.setCurrentUser(updatedUser);
-
-                // 5. Mostrar éxito y limpiar
-                this.showNotification(
-                  this.translate.instant('SUPPLIER_PROFILE.PROFILE_UPDATED_SUCCESS'),
-                  'success'
-                );
-                this.supplierProfile = new Supplier(updatedProfile);
-                this.logoUrl = updatedProfile.logo || '';
-                this.selectedFile = null;
-                this.isSaving = false;
-              },
-              error: (userError) => {
-                console.error('❌ Error updating user data:', userError);
-                this.showNotification(
-                  this.translate.instant('SUPPLIER_PROFILE.USER_UPDATE_ERROR'),
-                  'warning'
-                );
-                // Aunque falle la actualización del usuario, el supplier se actualizó
-                this.supplierProfile = new Supplier(updatedProfile);
-                this.logoUrl = updatedProfile.logo || '';
-                this.selectedFile = null;
-                this.isSaving = false;
-              }
-            });
-          },
-          error: (error) => {
-            console.error('❌ Error updating supplier profile:', error);
-            this.showNotification(
-              this.translate.instant('SUPPLIER_PROFILE.PROFILE_ERROR'),
-              'error'
-            );
-            this.isSaving = false;
-          }
-        });
-
-      } else {
-        // ===== CREAR NUEVO PERFIL =====
-
-        this.supplierService.createProfile(this.currentUser.id).subscribe({
-          next: (newProfile) => {
-            const completeProfile = new Supplier({
-              ...newProfile,
-              ...this.supplierProfile
-            });
-
-            // 1. Completar perfil supplier
-            this.supplierService.updateProfile(newProfile.id!, completeProfile).subscribe({
-              next: (updatedProfile) => {
-                console.log('✅ New supplier profile created:', updatedProfile);
-
-                // 2. Preparar datos para actualizar tabla users
-                const updatedUserData = {
-                  id: this.currentUser.id,
-                  name: formValues.fullName,
-                  email: formValues.email,
-                  country: formValues.country,
-                  city: formValues.city,
-                  address: formValues.address,
-                  phone: formValues.phone,
-                  // Mantener datos existentes
-                  password: this.currentUser.password,
-                  role: this.currentUser.role
-                };
-
-                // 3. Actualizar tabla users
-                this.authService.updateUser(this.currentUser.id, updatedUserData).subscribe({
-                  next: (updatedUser) => {
-                    console.log('✅ User data updated:', updatedUser);
-
-                    // 4. Actualizar usuario actual en el servicio
-                    this.authService.setCurrentUser(updatedUser);
-
-                    // 5. Mostrar éxito y limpiar
-                    this.showNotification(
-                      this.translate.instant('SUPPLIER_PROFILE.PROFILE_CREATED_SUCCESS'),
-                      'success'
-                    );
-                    this.supplierProfile = new Supplier(updatedProfile);
-                    this.logoUrl = updatedProfile.logo || '';
-                    this.selectedFile = null;
-                    this.isEditMode = true;
-                    this.isSaving = false;
-                  },
-                  error: (userError) => {
-                    console.error('❌ Error updating user data:', userError);
-                    this.showNotification(
-                      this.translate.instant('SUPPLIER_PROFILE.USER_UPDATE_ERROR'),
-                      'warning'
-                    );
-                    // Aunque falle la actualización del usuario, el supplier se creó
-                    this.supplierProfile = new Supplier(updatedProfile);
-                    this.logoUrl = updatedProfile.logo || '';
-                    this.selectedFile = null;
-                    this.isEditMode = true;
-                    this.isSaving = false;
-                  }
-                });
-              },
-              error: (error) => {
-                console.error('❌ Error completing supplier profile:', error);
-                this.showNotification(
-                  this.translate.instant('SUPPLIER_PROFILE.PROFILE_ERROR'),
-                  'error'
-                );
-                this.isSaving = false;
-              }
-            });
-          },
-          error: (error) => {
-            console.error('❌ Error creating supplier profile:', error);
-            this.showNotification(
-              this.translate.instant('SUPPLIER_PROFILE.PROFILE_ERROR'),
-              'error'
-            );
-            this.isSaving = false;
-          }
-        });
-      }
+          // Actualizar datos locales
+          this.supplierProfile = new Supplier(updatedProfile);
+          this.logoUrl = updatedProfile.logo || '';
+          this.selectedFile = null;
+          this.isSaving = false;
+        },
+        error: (error) => {
+          console.error('Error updating profile:', error);
+          this.showNotification(
+            this.translate.instant('SUPPLIER_PROFILE.PROFILE_ERROR'),
+            'error'
+          );
+          this.isSaving = false;
+        }
+      });
     } catch (error) {
-      console.error('❌ Error processing profile:', error);
+      console.error('Error processing profile:', error);
       this.showNotification(
         this.translate.instant('SUPPLIER_PROFILE.PROFILE_ERROR'),
         'error'
@@ -765,18 +523,4 @@ export class SupplierProfileConfigurationComponent implements OnInit, OnDestroy 
   closeNotification() {
     this.notification.show = false;
   }
-
-  // Getters para validación del formulario
-  get fullName() { return this.form.get('fullName'); }
-  get email() { return this.form.get('email'); }
-  get country() { return this.form.get('country'); }
-  get city() { return this.form.get('city'); }
-  get address() { return this.form.get('address'); }
-  get phone() { return this.form.get('phone'); }
-  get companyName() { return this.form.get('companyName'); }
-  get ruc() { return this.form.get('ruc'); }
-  get specialization() { return this.form.get('specialization'); }
-  get yearsFounded() { return this.form.get('yearsFounded'); }
-  get warehouseLocation() { return this.form.get('warehouseLocation'); }
-  get minimumOrderQuantity() { return this.form.get('minimumOrderQuantity'); }
 }
