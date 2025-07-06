@@ -69,7 +69,7 @@ export class SupplierObservationComponent implements OnInit {
   loadObservations(): void {
     this.isLoading = true;
 
-    this.observationService.getAll().subscribe({
+    this.observationService.getBySupplierId(this.currentSupplierId).subscribe({
       next: (observations: Observation[]) => {
         console.log("Todas las observaciones:", observations);
         console.log("ID de proveedor actual:", this.currentSupplierId);
