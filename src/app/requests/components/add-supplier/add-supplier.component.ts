@@ -132,75 +132,72 @@ export class AddSupplierComponent implements OnInit {
   loadData() {
     this.isLoading = true;
 
-    this.requestService.getRequestsByBusinessman(this.currentUserId, (requests: any[]) => {
-      const acceptedRequests = requests.filter(req => req.status === 'accepted');
+    this.requestService.getRequestsByBusinessman(this.currentUserId).subscribe({
+      next: (requests: any[]) => {
+        const acceptedRequests = requests.filter(req => req.status === 'accepted');
 
-      this.supplierService.getAllSuppliers().subscribe({
-        next: (suppliers: any[]) => {
-          this.suppliers = suppliers;
+        this.supplierService.getAllSuppliers().subscribe({
+          next: (suppliers: any[]) => {
+            this.suppliers = suppliers;
 
-          // ARREGLO: Los datos YA SON un Supplier completo, solo procesar ratings
-          const supplierPromises = this.suppliers.map(supplier => {
-            return new Promise<void>((resolve) => {
-              // Los datos ya contienen companyName directamente en el supplier
-              // Ya no necesitamos cargar un "profile" separado porque supplier YA ES el profile completo
+            const supplierPromises = this.suppliers.map(supplier => {
+              return new Promise<void>((resolve) => {
+                if (!supplier.profile) {
+                  supplier.profile = {
+                    companyName: supplier.companyName || this.generateCompanyName(supplier),
+                    specialization: supplier.specialization,
+                    productCategories: supplier.productCategories,
+                    warehouseLocation: supplier.warehouseLocation,
+                    minimumOrderQuantity: supplier.minimumOrderQuantity,
+                    logo: supplier.logo
+                  };
+                }
 
-              // Si el supplier no tiene profile, usar el supplier mismo como profile
-              if (!supplier.profile) {
-                supplier.profile = {
-                  companyName: supplier.companyName || this.generateCompanyName(supplier),
-                  specialization: supplier.specialization,
-                  productCategories: supplier.productCategories,
-                  warehouseLocation: supplier.warehouseLocation,
-                  minimumOrderQuantity: supplier.minimumOrderQuantity,
-                  logo: supplier.logo
-                };
-              }
-
-              // Usar el averageRating que ya viene en los datos, o calcular si no existe
-              if (supplier.averageRating !== undefined && supplier.totalReviews !== undefined) {
-                // Ya tenemos los datos, no necesitamos calcular
-                resolve();
-              } else {
-                // Solo calcular si no están en los datos
-                this.reviewService.calculateAverageRating(supplier.id, (avgRating: number, totalReviews: number) => {
-                  supplier.averageRating = avgRating;
-                  supplier.totalReviews = totalReviews;
+                if (supplier.averageRating !== undefined && supplier.totalReviews !== undefined) {
                   resolve();
-                });
-              }
-            });
-          });
-
-          // Esperar a que se procesen todos los proveedores
-          Promise.all(supplierPromises).then(() => {
-            // Separar los proveedores conectados de los disponibles
-            this.connectedSuppliers = [];
-            this.availableSuppliers = [];
-
-            acceptedRequests.forEach(request => {
-              const connectedSupplier = this.suppliers.find(s => s.id === request.supplierId);
-              if (connectedSupplier) {
-                connectedSupplier.request = request;
-                this.connectedSuppliers.push(connectedSupplier);
-              }
+                } else {
+                  this.reviewService.calculateAverageRating(supplier.id, (avgRating: number, totalReviews: number) => {
+                    supplier.averageRating = avgRating;
+                    supplier.totalReviews = totalReviews;
+                    resolve();
+                  });
+                }
+              });
             });
 
-            this.availableSuppliers = this.suppliers.filter(supplier =>
-              !this.connectedSuppliers.some(connectedSupplier => connectedSupplier.id === supplier.id)
-            );
+            Promise.all(supplierPromises).then(() => {
+              this.connectedSuppliers = [];
+              this.availableSuppliers = [];
 
-            this.updateDisplayedSuppliers();
+              acceptedRequests.forEach(request => {
+                const connectedSupplier = this.suppliers.find(s => s.id === request.supplierId);
+                if (connectedSupplier) {
+                  connectedSupplier.request = request;
+                  this.connectedSuppliers.push(connectedSupplier);
+                }
+              });
+
+              this.availableSuppliers = this.suppliers.filter(supplier =>
+                !this.connectedSuppliers.some(connectedSupplier => connectedSupplier.id === supplier.id)
+              );
+
+              this.updateDisplayedSuppliers();
+              this.isLoading = false;
+            });
+          },
+          error: (error) => {
+            console.error('Error al cargar proveedores:', error);
             this.isLoading = false;
-          });
-        },
-        error: (error) => {
-          console.error('Error al cargar proveedores:', error);
-          this.isLoading = false;
-        }
-      });
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error al obtener solicitudes del empresario:', error);
+        this.isLoading = false;
+      }
     });
   }
+
 
   /**
    * Genera un nombre de empresa descriptivo cuando no existe companyName

@@ -10,13 +10,13 @@ export const environment = {
   businessmanEndpointPath: '/businessmen',
   supplierEndpointPath: '/suppliers',
   profileEndpointPath: '/profiles',
+  businessSupplierRequests: '/business-supplier-requests',
 
   // Endpoints para imágenes de perfil - SIN placeholder
   profileImagesEndpointPath: '/profiles',
 
   // Resto igual...
   batchesEndpointPath: '/batches',
-  businessSupplierRequests: '/businessSupplierRequests',
   supplierReviewEndpointPath: '/supplierReviews',
   observationEndpointPath: '/observation',
   configurationEndpointPath: '/configuration',
