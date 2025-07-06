@@ -125,129 +125,149 @@
     </div>
   </div>
 
-  <!-- Payment Modal -->
+
+  <!-- Payment Modal - ESTRUCTURA ARREGLADA -->
   <div *ngIf="showPaymentModal" class="modal-overlay">
     <div class="modal-content payment-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>{{ 'PLANS.PAYMENT_DETAILS' | translate }}</h3>
+        <h3>{{ 'PLANS.COMPLETE_PAYMENT' | translate }}</h3>
         <button class="modal-close" (click)="cancelModal()">×</button>
       </div>
 
-      <!-- Payment Success State -->
-      <div *ngIf="paymentSuccess" class="payment-success">
-        <div class="success-icon">✓</div>
-        <h4>{{ 'PLANS.PAYMENT_SUCCESS' | translate }}</h4>
-        <p>{{ 'PLANS.PLAN_ACTIVATED' | translate }}</p>
-      </div>
+      <!-- CONTENEDOR CON POSICIÓN RELATIVA PARA SUPERPONER ESTADOS -->
+      <div class="payment-container">
 
-      <!-- Payment Form -->
-      <form *ngIf="!paymentSuccess && !isProcessingPayment"
-            [formGroup]="paymentForm"
-            (ngSubmit)="processPayment()"
-            class="payment-form">
+        <!-- FORMULARIO - SIEMPRE EN EL DOM, OCULTO CON CSS CUANDO SEA NECESARIO -->
+        <form [formGroup]="paymentForm"
+              class="payment-form"
+              [class.form-hidden]="paymentSuccess || isProcessingPayment">
 
-        <!-- Order Summary -->
-        <div class="order-summary">
-          <h4>{{ 'PLANS.ORDER_SUMMARY' | translate }}</h4>
-          <div class="summary-item">
-            <span>{{ 'PLANS.CORPORATE_PLAN' | translate }}</span>
-            <span><strong>${{ getTargetPlan()?.price }}/{{ 'PLANS.MONTH' | translate }}</strong></span>
+          <!-- Order Summary -->
+          <div class="order-summary">
+            <div class="summary-header">
+              <h4>{{ 'PLANS.ORDER_SUMMARY' | translate }}</h4>
+            </div>
+            <div class="summary-content">
+              <div class="summary-item">
+                <span class="item-name">{{ 'PLANS.CORPORATE_PLAN' | translate }}</span>
+                <span class="item-price">${{ getTargetPlan()?.price }}</span>
+              </div>
+              <div class="summary-period">{{ 'PLANS.PER_MONTH' | translate }}</div>
+            </div>
           </div>
+
+          <!-- Payment Section -->
+          <div class="form-section">
+            <h4 class="section-title">{{ 'PLANS.PAYMENT_METHOD' | translate }}</h4>
+
+            <!-- Stripe Card Element -->
+            <div class="form-group">
+              <label class="form-label">{{ 'PLANS.CARD_DETAILS' | translate }}</label>
+              <div id="card-element" class="card-element">
+                <!-- Stripe monta aquí su elemento -->
+              </div>
+              <div id="card-errors" class="card-errors" role="alert"></div>
+            </div>
+
+            <!-- Card Holder -->
+            <div class="form-group">
+              <label class="form-label">{{ 'PLANS.CARD_HOLDER' | translate }} *</label>
+              <input
+                type="text"
+                class="form-input"
+                formControlName="cardHolder"
+                placeholder="John Doe"
+                autocomplete="cc-name"
+                [disabled]="isProcessingPayment">
+            </div>
+          </div>
+
+          <!-- Billing Section -->
+          <div class="form-section">
+            <h4 class="section-title">{{ 'PLANS.BILLING_INFO' | translate }}</h4>
+
+            <div class="form-group">
+              <label class="form-label">{{ 'PLANS.BILLING_ADDRESS' | translate }} *</label>
+              <input
+                type="text"
+                class="form-input"
+                formControlName="billingAddress"
+                placeholder="123 Main Street"
+                autocomplete="street-address"
+                [disabled]="isProcessingPayment">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">{{ 'PLANS.BILLING_CITY' | translate }} *</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  formControlName="billingCity"
+                  placeholder="New York"
+                  autocomplete="address-level2"
+                  [disabled]="isProcessingPayment">
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'PLANS.BILLING_COUNTRY' | translate }} *</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  formControlName="billingCountry"
+                  placeholder="US"
+                  autocomplete="country"
+                  [disabled]="isProcessingPayment">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">{{ 'PLANS.BILLING_PHONE' | translate }} *</label>
+              <input
+                type="tel"
+                class="form-input"
+                formControlName="billingPhone"
+                placeholder="+1 (555) 123-4567"
+                autocomplete="tel"
+                [disabled]="isProcessingPayment">
+            </div>
+          </div>
+
+          <!-- Security Badge -->
+          <div class="security-badge">
+            <div class="security-icon">🔒</div>
+            <div class="security-text">
+              <span class="security-title">{{ 'PLANS.SECURE_PAYMENT' | translate }}</span>
+              <span class="security-subtitle">{{ 'PLANS.ENCRYPTED_PROTECTED' | translate }}</span>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button
+              type="button"
+              [disabled]="isProcessingPayment || !stripeElementReady || !paymentForm.valid"
+              (click)="processPayment()"
+              class="btn btn-primary btn-payment">
+              {{ 'PLANS.PAY_NOW' | translate }} ${{ getTargetPlan()?.price }}
+            </button>
+          </div>
+        </form>
+
+        <!-- ESTADO DE PROCESAMIENTO - SUPERPUESTO -->
+        <div *ngIf="isProcessingPayment && !paymentSuccess" class="payment-overlay payment-processing">
+          <div class="processing-spinner"></div>
+          <h4>{{ 'PLANS.PROCESSING_PAYMENT' | translate }}</h4>
+          <p>{{ 'PLANS.PLEASE_WAIT' | translate }}</p>
+          <p class="processing-note">{{ 'PLANS.DO_NOT_CLOSE' | translate }}</p>
         </div>
 
-        <!-- Payment Details -->
-        <div class="payment-section">
-          <h4>{{ 'PLANS.PAYMENT_METHOD' | translate }}</h4>
-
-          <div class="form-row">
-            <app-input
-              [label]="'PLANS.CARD_NUMBER' | translate"
-              formControlName="cardNumber"
-              [required]="true"
-              placeholder="4111-1111-1111-1111">
-            </app-input>
-          </div>
-
-          <div class="form-row-group">
-            <app-input
-              [label]="'PLANS.EXPIRY_DATE' | translate"
-              formControlName="expiryDate"
-              [required]="true"
-              placeholder="MM/YY">
-            </app-input>
-            <app-input
-              [label]="'PLANS.CVV' | translate"
-              formControlName="cvv"
-              [required]="true"
-              placeholder="123">
-            </app-input>
-          </div>
-
-          <div class="form-row">
-            <app-input
-              [label]="'PLANS.CARD_HOLDER' | translate"
-              formControlName="cardHolder"
-              [required]="true">
-            </app-input>
-          </div>
+        <!-- ESTADO DE ÉXITO - SUPERPUESTO -->
+        <div *ngIf="paymentSuccess" class="payment-overlay payment-success">
+          <div class="success-icon">✓</div>
+          <h4>{{ 'PLANS.PAYMENT_SUCCESS' | translate }}</h4>
+          <p>{{ 'PLANS.PLAN_ACTIVATED' | translate }}</p>
         </div>
 
-        <!-- Billing Information -->
-        <div class="billing-section">
-          <h4>{{ 'PLANS.BILLING_INFO' | translate }}</h4>
-
-          <div class="form-row">
-            <app-input
-              [label]="'PLANS.BILLING_ADDRESS' | translate"
-              formControlName="billingAddress"
-              [required]="true">
-            </app-input>
-          </div>
-
-          <div class="form-row-group">
-            <app-input
-              [label]="'PLANS.BILLING_CITY' | translate"
-              formControlName="billingCity"
-              [required]="true">
-            </app-input>
-            <app-input
-              [label]="'PLANS.BILLING_COUNTRY' | translate"
-              formControlName="billingCountry"
-              [required]="true">
-            </app-input>
-          </div>
-
-          <div class="form-row">
-            <app-input
-              [label]="'PLANS.BILLING_PHONE' | translate"
-              formControlName="billingPhone"
-              [required]="true">
-            </app-input>
-          </div>
-        </div>
-
-        <!-- Payment Actions -->
-        <div class="payment-actions">
-          <app-button
-            [label]="'COMMON.CANCEL' | translate"
-            variant="secondary"
-            type="button"
-            (click)="cancelModal()">
-          </app-button>
-          <app-button
-            [label]="'PLANS.COMPLETE_PAYMENT' | translate"
-            variant="primary"
-            type="button"
-            [disabled]="paymentForm.invalid">
-          </app-button>
-        </div>
-      </form>
-
-      <!-- Processing State -->
-      <div *ngIf="isProcessingPayment" class="payment-processing">
-        <div class="processing-spinner"></div>
-        <h4>{{ 'PLANS.PROCESSING_PAYMENT' | translate }}</h4>
-        <p>{{ 'PLANS.PLEASE_WAIT' | translate }}</p>
       </div>
     </div>
   </div>
