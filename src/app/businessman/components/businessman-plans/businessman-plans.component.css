@@ -951,3 +951,290 @@
     font-size: 1.2rem;
   }
 }
+
+
+/* ===== SELECTED PLAN BADGE ===== */
+.selected-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #866C52;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===== PLAN BUTTON SELECTED STATE ===== */
+.plan-button-selected {
+  background: #10b981 !important;
+  color: white !important;
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.plan-button-selected:hover {
+  background: #059669 !important;
+  transform: scale(1.02) translateY(-1px);
+}
+
+/* ===== RESPONSIVE PARA EL BANNER ===== */
+@media (max-width: 768px) {
+  .bg-gradient-to-r {
+    margin: 0 -20px 32px -20px;
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .bg-gradient-to-r {
+    padding: 24px 16px;
+  }
+
+  .bg-gradient-to-r h2 {
+    font-size: 1.5rem;
+  }
+
+  .bg-gradient-to-r p {
+    font-size: 0.9rem;
+  }
+}
+
+/* AGREGAR ESTE CSS AL FINAL DE TU businessman-plans.component.css */
+
+/* ===== WELCOME BANNER ===== */
+.welcome-banner {
+
+  color: #745a47;
+  padding: 48px 32px;
+  border-radius: 16px;
+  margin-bottom: 48px;
+  box-shadow: 0 10px 25px rgb(37, 40, 43);
+  text-align: center;
+}
+
+.welcome-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.welcome-icon {
+  margin-bottom: 24px;
+}
+
+.welcome-icon svg {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  padding: 16px;
+}
+
+.welcome-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: white;
+}
+
+.welcome-description {
+  font-size: 1.1rem;
+  margin: 0 0 32px 0;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+}
+
+/* ===== SELECTED PLAN INFO ===== */
+.selected-plan-info {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 0 auto 32px auto;
+  max-width: 400px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.selected-plan-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 12px 0;
+}
+
+.selected-plan-details {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.selected-plan-name {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: white;
+}
+
+.selected-plan-price {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+}
+
+/* ===== PROCEED PAYMENT BUTTON ===== */
+.proceed-payment-btn {
+  background: #745a47;
+  color: #25282b;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.proceed-payment-btn:hover {
+  background: #25282b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.proceed-payment-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.welcome-note {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-style: italic;
+}
+
+/* ===== SELECTED BADGE MEJORADO ===== */
+.selected-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #10b981;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* ===== PLAN BUTTON STATES MEJORADOS ===== */
+.plan-button-selected {
+  background: #10b981 !important;
+  color: white !important;
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  border: 2px solid #10b981 !important;
+}
+
+.plan-button-selected:hover {
+  background: #059669 !important;
+  transform: scale(1.02) translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* ===== PLAN CARDS HIGHLIGHTING ===== */
+.plan-card[class*="plan-basic"] {
+  transition: all 0.3s ease;
+}
+
+.plan-card[class*="plan-corporate"] {
+  transition: all 0.3s ease;
+}
+
+/* Highlight del plan seleccionado */
+.plans-grid .plan-card:has(.plan-button-selected) {
+  border-color: #10b981;
+  border-width: 2px;
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.15);
+  transform: translateY(-2px);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .welcome-banner {
+    margin: 0 -20px 32px -20px;
+    border-radius: 0;
+    padding: 32px 24px;
+  }
+
+  .welcome-title {
+    font-size: 1.75rem;
+  }
+
+  .welcome-description {
+    font-size: 1rem;
+  }
+
+  .selected-plan-info {
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .selected-plan-details {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .proceed-payment-btn {
+    padding: 14px 28px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-banner {
+    padding: 24px 16px;
+  }
+
+  .welcome-title {
+    font-size: 1.5rem;
+  }
+
+  .welcome-description {
+    font-size: 0.9rem;
+  }
+
+  .welcome-icon svg {
+    width: 48px;
+    height: 48px;
+    padding: 12px;
+  }
+
+  .selected-plan-info {
+    padding: 16px;
+  }
+
+  .selected-plan-name {
+    font-size: 1.2rem;
+  }
+
+  .selected-plan-price {
+    font-size: 1.6rem;
+  }
+
+  .proceed-payment-btn {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+    gap: 8px;
+  }
+}
