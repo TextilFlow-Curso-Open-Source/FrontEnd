@@ -4,12 +4,14 @@ import { Routes } from '@angular/router';
 import { UserLoginComponent } from './auth/views/user-login/user-login.component';
 import { UserRegisterComponent } from './auth/views/user-register/user-register.component';
 import { UserRoleSelectorComponent } from './auth/views/user-role-selector/user-role-selector.component';
+import { ForgotPasswordComponent } from './auth/views/forgot-password/forgot-password.component';
 
+// *** NUEVO: Import del Subscription Guard ***
+import { SubscriptionGuard } from './core/guards/subscription.guard';
 
 // Lazy loading para los layouts y componentes
 const BusinessmanLayoutComponent = () => import('./businessman/layout/businessman-layout/businessman-layout.component').then(m => m.BusinessmanLayoutComponent);
 const SupplierLayoutComponent = () => import('./supplier/layout/supplier-layout/supplier-layout.component').then(m => m.SupplierLayoutComponent);
-import { ForgotPasswordComponent } from './auth/views/forgot-password/forgot-password.component';
 
 // Componentes de Businessman (lazy loaded)
 const BusinessmanHomeComponent = () => import('./businessman/components/businessman-home/businessman-home.component').then(m => m.BusinessmanHomeComponent);
@@ -53,6 +55,7 @@ export const routes: Routes = [
     path: 'select-role',
     component: UserRoleSelectorComponent
   },
+
   // Ruta de registro
   {
     path: 'register',
@@ -63,88 +66,104 @@ export const routes: Routes = [
     path: 'forgot-password',
     component: ForgotPasswordComponent
   },
-  // Rutas para Businessman
+
+  // *** UPDATED: Rutas para Businessman con SubscriptionGuard ***
   {
     path: 'businessman',
     loadComponent: BusinessmanLayoutComponent,
     children: [
       {
         path: '',
-        redirectTo: 'inicio',
+        redirectTo: 'planes',  // ← CHANGED: Redirect to plans instead of inicio
         pathMatch: 'full'
-      },
-      {
-        path: 'inicio',
-        loadComponent: BusinessmanHomeComponent
-      },
-      {
-        path: 'lotes',
-        loadComponent: BusinessmanBatchComponent
-      },
-      {
-        path: 'observaciones',
-        loadComponent: BusinessmanObservationComponent
       },
       {
         path: 'planes',
         loadComponent: BusinessmanPlansComponent
+        // ← NO GUARD: /planes always accessible for payment
+      },
+      {
+        path: 'inicio',
+        loadComponent: BusinessmanHomeComponent,
+        canActivate: [SubscriptionGuard]  // ← NEW: Guard applied
+      },
+      {
+        path: 'lotes',
+        loadComponent: BusinessmanBatchComponent,
+        canActivate: [SubscriptionGuard]  // ← NEW: Guard applied
+      },
+      {
+        path: 'observaciones',
+        loadComponent: BusinessmanObservationComponent,
+        canActivate: [SubscriptionGuard]  // ← NEW: Guard applied
       },
       {
         path: 'buscar-distribuidor',
-        loadComponent: AddSupplierComponent
+        loadComponent: AddSupplierComponent,
+        canActivate: [SubscriptionGuard]  // ← NEW: Guard applied
       },
       {
         path: 'configuracion',
-        loadComponent: ConfiguracionComponent
+        loadComponent: ConfiguracionComponent,
+        canActivate: [SubscriptionGuard]  // ← NEW: Guard applied
       },
       {
         path: 'perfil',
-        loadComponent: PerfilComponent
+        loadComponent: PerfilComponent,
+        canActivate: [SubscriptionGuard]  // ← NEW: Guard applied
       }
     ]
   },
 
-  // Rutas para Supplier
+  // *** UPDATED: Rutas para Supplier con SubscriptionGuard ***
   {
     path: 'supplier',
     loadComponent: SupplierLayoutComponent,
     children: [
       {
         path: '',
-        redirectTo: 'inicio',
+        redirectTo: 'planes',  // ← CHANGED: Redirect to plans instead of inicio
         pathMatch: 'full'
-      },
-      {
-        path: 'inicio',
-        loadComponent: SupplierHomeComponent
-      },
-      {
-        path: 'mis-lotes',
-        loadComponent: SupplierBatchComponent
-      },
-      {
-        path: 'registrar-lotes',
-        loadComponent: SupplierRegisterBatchComponent
-      },
-      {
-        path: 'observaciones',
-        loadComponent: SupplierObservationComponent
-      },
-      {
-        path: 'solicitudes-recibidas',
-        loadComponent: BusinessRequestsComponent
       },
       {
         path: 'planes',
         loadComponent: SupplierPlansComponent
+        // ← NO GUARD: /planes always accessible for payment
+      },
+      {
+        path: 'inicio',
+        loadComponent: SupplierHomeComponent,
+        canActivate: [SubscriptionGuard]  // ← NEW: Guard applied
+      },
+      {
+        path: 'mis-lotes',
+        loadComponent: SupplierBatchComponent,
+        canActivate: [SubscriptionGuard]  // ← NEW: Guard applied
+      },
+      {
+        path: 'registrar-lotes',
+        loadComponent: SupplierRegisterBatchComponent,
+        canActivate: [SubscriptionGuard]  // ← NEW: Guard applied
+      },
+      {
+        path: 'observaciones',
+        loadComponent: SupplierObservationComponent,
+        canActivate: [SubscriptionGuard]  // ← NEW: Guard applied
+      },
+      {
+        path: 'solicitudes-recibidas',
+        loadComponent: BusinessRequestsComponent,
+        canActivate: [SubscriptionGuard]  // ← NEW: Guard applied
       },
       {
         path: 'configuracion',
-        loadComponent: SupplierConfigComponent
+        loadComponent: SupplierConfigComponent,
+        canActivate: [SubscriptionGuard]  // ← NEW: Guard applied
       },
       {
         path: 'perfil',
-        loadComponent: SupplierPerfilComponent
+        loadComponent: SupplierPerfilComponent,
+        canActivate: [SubscriptionGuard]  // ← NEW: Guard applied
       }
     ]
   },

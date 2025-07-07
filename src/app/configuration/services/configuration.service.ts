@@ -155,6 +155,7 @@ export class ConfigurationService extends BaseService<Configuration> {
       language: backendData.language || 'es',
       viewMode: backendData.viewMode || 'auto',
       subscriptionPlan: backendData.subscriptionPlan || 'basic',
+      subscriptionStatus: backendData.subscriptionStatus || 'pending',  // *** NUEVO CAMPO ***
       subscriptionStartDate: backendData.subscriptionStartDate,
       createdAt: backendData.createdAt,
       updatedAt: backendData.updatedAt
@@ -225,4 +226,100 @@ export class ConfigurationService extends BaseService<Configuration> {
     const configId = parseInt(id, 10);
     return this.updateConfiguration(configId, configuration);
   }
+  // ==================== MÉTODOS PARA SUBSCRIPTION STATUS ====================
+
+  /**
+   * Verifica si el usuario requiere pago (subscription status = pending)
+   */
+  public requiresPayment(userId: number): Observable<boolean> {
+    return this.getConfigurationByUserId(userId).pipe(
+      map(config => {
+        if (!config) return true; // Si no hay config, necesita pagar
+        return config.subscriptionStatus === 'pending';
+      }),
+      catchError(() => {
+        // En caso de error, asumir que necesita pago por seguridad
+        return [true];
+      })
+    );
+  }
+
+  /**
+   * Activa la suscripción después de un pago exitoso
+   * Actualiza tanto el plan como el status a 'active'
+   */
+  /**
+   * MÉTODO CORREGIDO: Activa la suscripción después de un pago exitoso
+   * Actualiza tanto el plan como el status a 'active'
+   */
+  public activateSubscription(configId: number, subscriptionPlan: string): Observable<Configuration> {
+    console.log('🔄 Activating subscription:', { configId, subscriptionPlan });
+
+    // Primero obtener la configuración actual usando el configId como userId
+    // En tu sistema, parece que configId y userId son el mismo valor
+    return this.getConfigurationByUserId(configId).pipe(
+      switchMap(currentConfig => {
+        if (!currentConfig) {
+          return throwError(() => new Error('Configuration not found for user ID: ' + configId));
+        }
+
+        console.log('📋 Configuración actual antes de activar:', currentConfig);
+
+        // Preparar body con todos los campos requeridos + status active
+        const requestBody = {
+          language: currentConfig.language || 'es',          // Mantener actual o default
+          viewMode: currentConfig.viewMode || 'auto',        // Mantener actual o default
+          subscriptionPlan: subscriptionPlan,                // Nuevo plan
+          subscriptionStatus: 'active'                       // *** ACTIVAR SUSCRIPCIÓN ***
+        };
+
+        console.log('📤 Activating subscription with body:', requestBody);
+        console.log('📤 URL:', `${this.resourcePath()}/${currentConfig.id}`);
+
+        return this.http.put<any>(`${this.resourcePath()}/${currentConfig.id}`, requestBody, this.httpOptions);
+      }),
+      map(response => {
+        console.log('✅ Subscription activated successfully:', response);
+        console.log('   Final subscriptionPlan:', response.subscriptionPlan);
+        console.log('   Final subscriptionStatus:', response.subscriptionStatus);
+        return this.transformBackendToFrontend(response);
+      }),
+      catchError((error) => {
+        console.error('❌ Error activating subscription:');
+        console.error('   Status:', error.status);
+        console.error('   Message:', error.message);
+        console.error('   Error:', error);
+        return this.handleError(error);
+      })
+    );
+  }
+
+  /**
+   * Obtiene el status de suscripción de un usuario
+   */
+  public getSubscriptionStatus(userId: number): Observable<string> {
+    return this.getConfigurationByUserId(userId).pipe(
+      map(config => config?.subscriptionStatus || 'pending'),
+      catchError(() => ['pending']) // Default a pending en caso de error
+    );
+  }
+
+  /**
+   * Verifica si el usuario tiene suscripción activa
+   */
+  public hasActiveSubscription(userId: number): Observable<boolean> {
+    return this.getConfigurationByUserId(userId).pipe(
+      map(config => {
+        if (!config) return false;
+        return config.subscriptionStatus === 'active';
+      }),
+      catchError(() => [false])
+    );
+  }
+
+
+
+
+
+
 }
