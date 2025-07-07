@@ -81,13 +81,18 @@ export class SupplierBatchComponent implements OnInit {
   }
 
   loadBatches(): void {
+    console.log('Current User ID:', this.currentUserId);
     this.batchService.getAll().subscribe(batches => {
-      // Filtrar lotes del proveedor actual y excluir los de estado PENDIENTE
-      const supplierBatches = batches.filter(b =>
-        b.supplierId === this.currentUserId &&
-        b.status !== STATUS.PENDIENTE
-      );
-
+      console.log('All batches from backend:', batches);
+      
+      // Filtrar lotes del proveedor actual (TEMPORALMENTE INCLUIR PENDIENTES)
+      const supplierBatches = batches.filter(b => {
+        console.log(`Batch ${b.id}: supplierId=${b.supplierId} (${typeof b.supplierId}), currentUserId=${this.currentUserId} (${typeof this.currentUserId}), status=${b.status}`);
+        return b.supplierId === this.currentUserId;
+        // COMENTADO: && b.status !== STATUS.PENDIENTE;
+      });
+      
+      console.log('Filtered supplier batches:', supplierBatches);
       this.dataSource = new MatTableDataSource(supplierBatches);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
@@ -107,7 +112,7 @@ export class SupplierBatchComponent implements OnInit {
       status: updatedStatus
     };
 
-    this.batchService.update(batch.id!, updatedBatch).subscribe(() => {
+    this.batchService.updateBatch(batch.id!, updatedBatch).subscribe(() => {
       this.loadBatches();
     });
   }
@@ -157,7 +162,7 @@ export class SupplierBatchComponent implements OnInit {
       businessmanId: this.selectedBatch.businessmanId // Preservar el businessmanId
     };
 
-    this.batchService.update(updatedBatch.id!, updatedBatch).subscribe({
+    this.batchService.updateBatch(updatedBatch.id!, updatedBatch).subscribe({
       next: () => {
         this.showEditSuccess = true;
         this.loadBatches();

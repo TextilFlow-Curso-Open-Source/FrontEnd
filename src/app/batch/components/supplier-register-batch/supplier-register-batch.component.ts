@@ -98,13 +98,23 @@ export class SupplierRegisterBatchComponent implements OnInit {
 
   loadPendingBatches(): void {
     this.isLoading = true;
+    console.log('SupplierRegisterBatch - Current User ID:', this.currentUserId);
 
     // Usar getBySupplierId en lugar de getBatchesBySupplier que no existe
     this.batchService.getBySupplierId(this.currentUserId).subscribe({
       next: (batches: Batch[]) => {
-        // Filtrar solo los lotes en estado pendiente o por enviar
-        this.pendingBatches = batches.filter(batch =>
-          batch.status === STATUS.PENDIENTE || batch.status === STATUS.POR_ENVIAR);
+        console.log('SupplierRegisterBatch - All batches for supplier:', batches);
+        // TEMPORALMENTE: Mostrar TODOS los batches sin filtrar
+        console.log('STATUS.PENDIENTE:', STATUS.PENDIENTE);
+        console.log('STATUS.POR_ENVIAR:', STATUS.POR_ENVIAR);
+        this.pendingBatches = batches; // SIN FILTRO
+
+        // Log individual de cada batch
+        batches.forEach(batch => {
+          console.log(`Batch ${batch.id}: status='${batch.status}', supplierId='${batch.supplierId}'`);
+          console.log('Status comparison:', batch.status === STATUS.PENDIENTE, batch.status === STATUS.POR_ENVIAR);
+        });
+        console.log('SupplierRegisterBatch - Filtered pending batches:', this.pendingBatches);
         this.isLoading = false;
       },
       error: (error) => {
@@ -260,38 +270,25 @@ export class SupplierRegisterBatchComponent implements OnInit {
   updateBatch(newStatus: BatchStatus, imageData?: string): void {
     if (!this.selectedBatch) return;
 
-    // Obtener el lote completo antes de actualizarlo
-    this.batchService.getById(this.selectedBatch.id as string).subscribe({
-      next: (originalBatch: Batch) => {
-        // Combinar el lote original con los campos a actualizar
-        const updatedBatch: Batch = {
-          ...originalBatch,
-          status: newStatus,
-          observations: this.form.get('additionalComments')?.value || originalBatch.observations
-        };
+    // Solo enviar los campos que se pueden actualizar
+    const updatedBatch: Partial<Batch> = {
+      status: newStatus,
+      observations: this.form.get('additionalComments')?.value || this.selectedBatch.observations
+    };
 
-        // Si hay imagen comprimida, incluirla
-        if (imageData) {
-          updatedBatch.imageUrl = imageData;
-        }
+    if (imageData) {
+      updatedBatch.imageUrl = imageData;
+    }
 
-        // Actualizar el lote completo
-        this.batchService.update(this.selectedBatch?.id as string, updatedBatch).subscribe({
-          next: () => {
-            this.showNotification(`Lote actualizado y marcado como ${newStatus} correctamente`, 'success');
-            this.loadPendingBatches();
-            this.setActiveTab('pending');
-            this.isLoading = false;
-          },
-          error: (error) => {
-            console.error('Error al actualizar el lote:', error);
-            this.showNotification('Error al actualizar el lote', 'error');
-            this.isLoading = false;
-          }
-        });
+    this.batchService.updateBatch(this.selectedBatch.id as string, updatedBatch).subscribe({
+      next: () => {
+        this.showNotification(`Lote actualizado y marcado como ${newStatus} correctamente`, 'success');
+        this.loadPendingBatches();
+        this.setActiveTab('pending');
+        this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error al obtener el lote original:', error);
+        console.error('Error al actualizar el lote:', error);
         this.showNotification('Error al actualizar el lote', 'error');
         this.isLoading = false;
       }
