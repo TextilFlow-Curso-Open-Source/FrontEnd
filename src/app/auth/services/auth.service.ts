@@ -277,14 +277,19 @@ export class AuthService extends BaseService<User> {
    * Redirige basado en el rol del usuario
    * @param role Rol del usuario
    */
+  /**
+   * Redirige basado en el rol del usuario
+   * *** UPDATED: Siempre redirige a /planes para obligar pago ***
+   * @param role Rol del usuario
+   */
   redirectBasedOnRole(role: string): void {
     console.log('Redirigiendo según rol:', role);
     const normalizedRole = role.toLowerCase();
 
     if (normalizedRole === 'businessman') {
-      this.router.navigate(['/businessman']);
+      this.router.navigate(['/businessman/planes']);    // ← CHANGED: Direct to plans
     } else if (normalizedRole === 'supplier') {
-      this.router.navigate(['/supplier']);
+      this.router.navigate(['/supplier/planes']);       // ← CHANGED: Direct to plans
     } else if (normalizedRole === 'pending') {
       this.router.navigate(['/select-role']);
     } else {

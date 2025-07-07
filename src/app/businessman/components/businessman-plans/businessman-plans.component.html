@@ -1,4 +1,49 @@
+
+
 <div class="plans-container">
+  <!-- *** BANNER DE BIENVENIDA *** -->
+  <div *ngIf="showPlanSelectionBanner" class="welcome-banner">
+    <div class="welcome-content">
+      <div class="welcome-icon">
+        <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+
+      <h2 class="welcome-title">¡Bienvenido a TextilFlow!</h2>
+      <p class="welcome-description">
+        Para comenzar a gestionar tus procesos textiles, selecciona el plan que mejor se adapte a tus necesidades y actívalo.
+      </p>
+
+      <!-- Información del plan seleccionado -->
+      <div class="selected-plan-info">
+        <p class="selected-plan-label">Plan seleccionado:</p>
+        <div class="selected-plan-details">
+          <span class="selected-plan-name">
+            {{ selectedPlanForPayment === 'basic' ? 'Básico' : 'Corporativo' }}
+          </span>
+          <span class="selected-plan-price">
+            ${{ selectedPlanForPayment === 'basic' ? '9.99' : '49.99' }}/mes
+          </span>
+        </div>
+      </div>
+
+      <!-- Botón de proceder al pago -->
+      <button (click)="proceedToPayment()" class="proceed-payment-btn">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+        </svg>
+        <span>Proceder al Pago</span>
+      </button>
+
+      <p class="welcome-note">
+        Puedes cambiar de plan en cualquier momento desde tu configuración
+      </p>
+    </div>
+  </div>
+
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-state">
     <div class="spinner"></div>
@@ -22,8 +67,13 @@
            [class.plan-corporate]="plan.id === 'corporate'">
 
         <!-- Current Plan Badge -->
-        <div *ngIf="plan.isCurrentPlan" class="current-badge">
+        <div *ngIf="plan.isCurrentPlan && !showPlanSelectionBanner" class="current-badge">
           {{ 'PLANS.CURRENT' | translate }}
+        </div>
+
+        <!-- Selected Plan Badge -->
+        <div *ngIf="showPlanSelectionBanner && plan.id === selectedPlanForPayment" class="selected-badge">
+          SELECCIONADO
         </div>
 
         <!-- Plan Header -->
@@ -52,9 +102,24 @@
             class="plan-button"
             [class.plan-button-basic]="plan.id === 'basic'"
             [class.plan-button-corporate]="plan.id === 'corporate'"
-            [disabled]="plan.isCurrentPlan"
+            [class.plan-button-selected]="showPlanSelectionBanner && plan.id === selectedPlanForPayment"
+            [disabled]="plan.isCurrentPlan && !showPlanSelectionBanner"
             (click)="onPlanAction(plan.id)">
-            {{ plan.buttonText | translate }}
+
+            <!-- Texto dinámico según el contexto -->
+            <span *ngIf="showPlanSelectionBanner">
+              {{ plan.id === selectedPlanForPayment ? 'SELECCIONADO' : 'SELECCIONAR ESTE PLAN' }}
+            </span>
+            <span *ngIf="!showPlanSelectionBanner">
+              {{ plan.buttonText | translate }}
+            </span>
+
+            <!-- Icono de check para plan seleccionado -->
+            <svg *ngIf="showPlanSelectionBanner && plan.id === selectedPlanForPayment"
+                 style="width: 12px; height: 12px; margin-left: 6px; display: inline;"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
           </button>
         </div>
       </div>
@@ -129,125 +194,148 @@
   <div *ngIf="showPaymentModal" class="modal-overlay">
     <div class="modal-content payment-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>{{ 'PLANS.PAYMENT_DETAILS' | translate }}</h3>
+        <h3>{{ 'PLANS.COMPLETE_PAYMENT' | translate }}</h3>
         <button class="modal-close" (click)="cancelModal()">×</button>
       </div>
 
-      <!-- Payment Success State -->
-      <div *ngIf="paymentSuccess" class="payment-success">
-        <div class="success-icon">✓</div>
-        <h4>{{ 'PLANS.PAYMENT_SUCCESS' | translate }}</h4>
-        <p>{{ 'PLANS.PLAN_ACTIVATED' | translate }}</p>
-      </div>
+      <!-- Contenedor con posición relativa para superponer estados -->
+      <div class="payment-container">
 
-      <!-- Payment Form -->
-      <form *ngIf="!paymentSuccess && !isProcessingPayment"
-            [formGroup]="paymentForm"
-            (ngSubmit)="processPayment()"
-            class="payment-form">
+        <!-- Formulario - siempre en el DOM, oculto con CSS cuando sea necesario -->
+        <form [formGroup]="paymentForm"
+              class="payment-form"
+              [class.form-hidden]="paymentSuccess || isProcessingPayment">
 
-        <!-- Order Summary -->
-        <div class="order-summary">
-          <h4>{{ 'PLANS.ORDER_SUMMARY' | translate }}</h4>
-          <div class="summary-item">
-            <span>{{ 'PLANS.CORPORATE_PLAN' | translate }}</span>
-            <span><strong>${{ getTargetPlan()?.price }}/{{ 'PLANS.MONTH' | translate }}</strong></span>
+          <!-- Order Summary - CORREGIDO -->
+          <div class="order-summary">
+            <div class="summary-header">
+              <h4>{{ 'PLANS.ORDER_SUMMARY' | translate }}</h4>
+            </div>
+            <div class="summary-content">
+              <div class="summary-item">
+                <span class="item-name">
+                  {{ selectedPlanForPayment === 'basic' ? ('PLANS.BASIC_PLAN' | translate) : ('PLANS.CORPORATE_PLAN' | translate) }}
+                </span>
+                <span class="item-price">
+                  ${{ selectedPlanForPayment === 'basic' ? '9.99' : '49.99' }}
+                </span>
+              </div>
+              <div class="summary-period">{{ 'PLANS.PER_MONTH' | translate }}</div>
+            </div>
           </div>
+
+          <!-- Payment Section -->
+          <div class="form-section">
+            <h4 class="section-title">{{ 'PLANS.PAYMENT_METHOD' | translate }}</h4>
+
+            <!-- Stripe Card Element -->
+            <div class="form-group">
+              <label class="form-label">{{ 'PLANS.CARD_DETAILS' | translate }}</label>
+              <div id="card-element" class="card-element">
+                <!-- Stripe monta aquí su elemento -->
+              </div>
+              <div id="card-errors" class="card-errors" role="alert"></div>
+            </div>
+
+            <!-- Card Holder -->
+            <div class="form-group">
+              <label class="form-label">{{ 'PLANS.CARD_HOLDER' | translate }} *</label>
+              <input
+                type="text"
+                class="form-input"
+                formControlName="cardHolder"
+                placeholder="John Doe"
+                autocomplete="cc-name"
+                [disabled]="isProcessingPayment">
+            </div>
+          </div>
+
+          <!-- Billing Section -->
+          <div class="form-section">
+            <h4 class="section-title">{{ 'PLANS.BILLING_INFO' | translate }}</h4>
+
+            <div class="form-group">
+              <label class="form-label">{{ 'PLANS.BILLING_ADDRESS' | translate }} *</label>
+              <input
+                type="text"
+                class="form-input"
+                formControlName="billingAddress"
+                placeholder="123 Main Street"
+                autocomplete="street-address"
+                [disabled]="isProcessingPayment">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">{{ 'PLANS.BILLING_CITY' | translate }} *</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  formControlName="billingCity"
+                  placeholder="New York"
+                  autocomplete="address-level2"
+                  [disabled]="isProcessingPayment">
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'PLANS.BILLING_COUNTRY' | translate }} *</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  formControlName="billingCountry"
+                  placeholder="US"
+                  autocomplete="country"
+                  [disabled]="isProcessingPayment">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">{{ 'PLANS.BILLING_PHONE' | translate }} *</label>
+              <input
+                type="tel"
+                class="form-input"
+                formControlName="billingPhone"
+                placeholder="+1 (555) 123-4567"
+                autocomplete="tel"
+                [disabled]="isProcessingPayment">
+            </div>
+          </div>
+
+          <!-- Security Badge -->
+          <div class="security-badge">
+            <div class="security-icon">🔒</div>
+            <div class="security-text">
+              <span class="security-title">{{ 'PLANS.SECURE_PAYMENT' | translate }}</span>
+              <span class="security-subtitle">{{ 'PLANS.ENCRYPTED_PROTECTED' | translate }}</span>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button
+              type="button"
+              [disabled]="isProcessingPayment || !stripeElementReady || !paymentForm.valid"
+              (click)="processPayment()"
+              class="btn btn-primary btn-payment">
+              {{ 'PLANS.PAY_NOW' | translate }} ${{ selectedPlanForPayment === 'basic' ? '9.99' : '49.99' }}
+            </button>
+          </div>
+        </form>
+
+        <!-- Estado de procesamiento - superpuesto -->
+        <div *ngIf="isProcessingPayment && !paymentSuccess" class="payment-overlay payment-processing">
+          <div class="processing-spinner"></div>
+          <h4>{{ 'PLANS.PROCESSING_PAYMENT' | translate }}</h4>
+          <p>{{ 'PLANS.PLEASE_WAIT' | translate }}</p>
+          <p class="processing-note">{{ 'PLANS.DO_NOT_CLOSE' | translate }}</p>
         </div>
 
-        <!-- Payment Details -->
-        <div class="payment-section">
-          <h4>{{ 'PLANS.PAYMENT_METHOD' | translate }}</h4>
-
-          <div class="form-row">
-            <app-input
-              [label]="'PLANS.CARD_NUMBER' | translate"
-              formControlName="cardNumber"
-              [required]="true"
-              placeholder="4111-1111-1111-1111">
-            </app-input>
-          </div>
-
-          <div class="form-row-group">
-            <app-input
-              [label]="'PLANS.EXPIRY_DATE' | translate"
-              formControlName="expiryDate"
-              [required]="true"
-              placeholder="MM/YY">
-            </app-input>
-            <app-input
-              [label]="'PLANS.CVV' | translate"
-              formControlName="cvv"
-              [required]="true"
-              placeholder="123">
-            </app-input>
-          </div>
-
-          <div class="form-row">
-            <app-input
-              [label]="'PLANS.CARD_HOLDER' | translate"
-              formControlName="cardHolder"
-              [required]="true">
-            </app-input>
-          </div>
+        <!-- Estado de éxito - superpuesto -->
+        <div *ngIf="paymentSuccess" class="payment-overlay payment-success">
+          <div class="success-icon">✓</div>
+          <h4>{{ 'PLANS.PAYMENT_SUCCESS' | translate }}</h4>
+          <p>{{ 'PLANS.PLAN_ACTIVATED' | translate }}</p>
         </div>
 
-        <!-- Billing Information -->
-        <div class="billing-section">
-          <h4>{{ 'PLANS.BILLING_INFO' | translate }}</h4>
-
-          <div class="form-row">
-            <app-input
-              [label]="'PLANS.BILLING_ADDRESS' | translate"
-              formControlName="billingAddress"
-              [required]="true">
-            </app-input>
-          </div>
-
-          <div class="form-row-group">
-            <app-input
-              [label]="'PLANS.BILLING_CITY' | translate"
-              formControlName="billingCity"
-              [required]="true">
-            </app-input>
-            <app-input
-              [label]="'PLANS.BILLING_COUNTRY' | translate"
-              formControlName="billingCountry"
-              [required]="true">
-            </app-input>
-          </div>
-
-          <div class="form-row">
-            <app-input
-              [label]="'PLANS.BILLING_PHONE' | translate"
-              formControlName="billingPhone"
-              [required]="true">
-            </app-input>
-          </div>
-        </div>
-
-        <!-- Payment Actions -->
-        <div class="payment-actions">
-          <app-button
-            [label]="'COMMON.CANCEL' | translate"
-            variant="secondary"
-            type="button"
-            (click)="cancelModal()">
-          </app-button>
-          <app-button
-            [label]="'PLANS.COMPLETE_PAYMENT' | translate"
-            variant="primary"
-            type="button"
-            [disabled]="paymentForm.invalid">
-          </app-button>
-        </div>
-      </form>
-
-      <!-- Processing State -->
-      <div *ngIf="isProcessingPayment" class="payment-processing">
-        <div class="processing-spinner"></div>
-        <h4>{{ 'PLANS.PROCESSING_PAYMENT' | translate }}</h4>
-        <p>{{ 'PLANS.PLEASE_WAIT' | translate }}</p>
       </div>
     </div>
   </div>
