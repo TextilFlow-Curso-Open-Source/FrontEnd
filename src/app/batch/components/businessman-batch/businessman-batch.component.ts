@@ -127,24 +127,12 @@ export class BusinessmanBatchComponent implements OnInit {
   loadBatches(): void {
     this.isLoading = true;
 
-    this.batchService.getAll().subscribe({
+    this.batchService.getByBusinessmanId(this.currentUserId).subscribe({
       next: (batches: Batch[]) => {
-        console.log("Todos los lotes:", batches);
+        console.log("Lotes del businessman:", batches);
         console.log("ID de usuario actual:", this.currentUserId);
 
-        // Filtrar lotes del usuario actual o sin businessmanId
-        this.batches = batches.filter(batch => {
-          if (!batch.businessmanId) {
-            const user = this.authService.getCurrentUser();
-            if (user && user.name && batch.client === user.name) {
-              return true;
-            }
-            return false;
-          }
-          return batch.businessmanId === this.currentUserId;
-        });
-
-        console.log("Lotes filtrados:", this.batches);
+        this.batches = batches;
         this.filteredBatches = [...this.batches];
         this.filterBatches();
         this.isLoading = false;
