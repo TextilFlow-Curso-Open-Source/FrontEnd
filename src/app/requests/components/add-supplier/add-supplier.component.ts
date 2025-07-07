@@ -524,8 +524,21 @@ export class AddSupplierComponent implements OnInit {
     this.isLoading = true;
     this.isBatchSubmitting = true; // Activar el bloqueo
 
-    // Crear el nuevo batch
-    this.batchService.create(this.newBatch).subscribe({
+    // Crear el nuevo batch usando el método createBatch del servicio
+    this.batchService.createBatch(
+      this.newBatch.code,
+      this.newBatch.client,
+      this.newBatch.businessmanId,
+      this.newBatch.supplierId,
+      this.newBatch.fabricType,
+      this.newBatch.color,
+      this.newBatch.price,
+      this.newBatch.quantity,
+      this.newBatch.observations || '',
+      this.newBatch.address,
+      this.newBatch.date,
+      this.newBatch.imageUrl
+    ).subscribe({
       next: () => {
         this.showNotification(
           this.translate.instant('ADD_SUPPLIER.BATCH_CREATED_SUCCESS'),
@@ -533,7 +546,7 @@ export class AddSupplierComponent implements OnInit {
         );
         this.showBatchForm = false;
         this.isLoading = false;
-        this.isBatchSubmitting = false; // Desactivar el bloqueo
+        this.isBatchSubmitting = false;
       },
       error: (error: any) => {
         console.error('Error al crear lote:', error);
@@ -542,7 +555,7 @@ export class AddSupplierComponent implements OnInit {
           'error'
         );
         this.isLoading = false;
-        this.isBatchSubmitting = false; // Desactivar el bloqueo
+        this.isBatchSubmitting = false;
       }
     });
   }
