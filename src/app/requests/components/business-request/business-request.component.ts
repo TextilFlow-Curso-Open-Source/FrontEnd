@@ -70,9 +70,9 @@ export class BusinessRequestsComponent implements OnInit {
         // Filtrar por estado dependiendo de la pestaña activa
         let filteredRequests = requests;
         if (this.activeTab === 'current') {
-          filteredRequests = requests.filter(req => req.status === 'accepted');
+          filteredRequests = requests.filter(req => req.status === 'ACCEPTED');
         } else {
-          filteredRequests = requests.filter(req => req.status === 'pending');
+          filteredRequests = requests.filter(req => req.status === 'PENDING');
         }
 
         // Usar un Set para evitar duplicados por ID

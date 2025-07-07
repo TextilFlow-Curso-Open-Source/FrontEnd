@@ -17,8 +17,8 @@ export const environment = {
 
   // Resto igual...
   batchesEndpointPath: '/batches',
-  supplierReviewEndpointPath: '/supplierReviews',
-  configurationEndpointPath: '/configuration',
+  supplierReviewEndpointPath: '/supplier-reviews',
+  configurationEndpointPath: '/configurationssuppl',
 
   //Payment endpoints
   paymentEndpointPath: '/payments',
