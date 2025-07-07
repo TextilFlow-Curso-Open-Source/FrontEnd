@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import {Router, RouterModule} from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConfigurationService} from '../../../configuration/services/configuration.service';
 import { PaymentService, PaymentIntentResponse } from '../../../configuration/services/payment.service';
@@ -54,6 +54,11 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
   showPaymentModal = false;
   isProcessingPayment = false;
   paymentSuccess = false;
+
+  // *** NUEVAS PROPIEDADES PARA SELECCIÓN DE PLAN ***
+  showPlanSelectionBanner = false;  // Mostrar banner de "elige tu plan"
+  selectedPlanForPayment: 'basic' | 'corporate' = 'basic'; // Plan seleccionado para pagar
+  isFirstTimeUser = false; // Si es la primera vez que necesita pagar
 
   // Stripe integration
   private stripe: Stripe | null = null;
@@ -110,7 +115,8 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
     private paymentService: PaymentService,
     private authService: AuthService,
     private fb: FormBuilder,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private router: Router
   ) {
     this.initPaymentForm();
     this.initStripe();
@@ -118,12 +124,25 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
-    console.log('🔍 DEBUG user from authService:', user);
 
     if (user && user.id) {
       this.currentUserId = user.id;
-      console.log('🔍 DEBUG currentUserId set to:', this.currentUserId, 'type:', typeof this.currentUserId);
-      this.loadCurrentPlan(); // ← ARREGLADO: Cargar plan actual, no forzar a corporate
+
+      // Cargar plan actual (que automáticamente verificará si mostrar selección de plan)
+      this.loadCurrentPlan();
+
+      // *** NUEVO: Verificar si viene de un registro reciente ***
+      const fromRegistration = sessionStorage.getItem('fromRegistration');
+      if (fromRegistration === 'true') {
+        sessionStorage.removeItem('fromRegistration');
+
+        setTimeout(() => {
+          this.showNotification(
+            '¡Bienvenido! Para comenzar a usar TextilFlow, selecciona y activa tu plan.',
+            'info'
+          );
+        }, 500);
+      }
     } else {
       console.error('❌ No user found or user.id is missing');
     }
@@ -133,17 +152,14 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
     this.fullStripeCleanup();
   }
 
-  /**
-   * Initialize Stripe
-   */
+  // ===================== MÉTODOS STRIPE (SIN CAMBIOS) =====================
+
   private async initStripe(): Promise<void> {
     try {
-      console.log('🔄 Initializing Stripe...');
       this.stripe = await loadStripe(environment.stripePublishableKey);
 
       if (this.stripe) {
         this.stripeLoaded = true;
-        console.log('✅ Stripe loaded successfully');
       } else {
         throw new Error('Failed to load Stripe');
       }
@@ -153,32 +169,24 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Create Stripe Elements for card input - ARREGLADO DEFINITIVAMENTE
-   */
   private createStripeElements(): void {
     if (!this.stripe) {
       console.error('❌ Stripe not loaded');
       return;
     }
 
-    // Si ya tenemos un elemento de tarjeta, NO crear otro
     if (this.cardElement) {
-      console.log('✅ Card element already exists, reusing it');
       this.stripeElementReady = true;
 
-      // Verificar que esté montado correctamente
       const cardContainer = document.getElementById('card-element');
       if (cardContainer && !cardContainer.querySelector('iframe')) {
-        console.log('🔄 Re-mounting existing card element...');
         this.cardElement.mount('#card-element');
       }
       return;
     }
 
-    console.log('🔄 Creating new Stripe elements...');
 
-    // Usar setTimeout para asegurar que el DOM esté listo
+
     setTimeout(() => {
       const cardContainer = document.getElementById('card-element');
       if (!cardContainer) {
@@ -188,20 +196,14 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
       }
 
       try {
-        // Limpiar el contenedor
         cardContainer.innerHTML = '';
 
-        // Crear elements SOLO si no existe
         if (!this.elements) {
-          console.log('🔄 Creating new Stripe Elements instance...');
           this.elements = this.stripe!.elements();
         } else {
-          console.log('✅ Reusing existing Stripe Elements instance');
         }
 
-        // Crear el elemento de tarjeta SOLO si no existe
         if (!this.cardElement) {
-          console.log('🔄 Creating new card element...');
           this.cardElement = this.elements.create('card' as any, {
             style: {
               base: {
@@ -228,15 +230,13 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
             hidePostalCode: true
           });
 
-          // Configurar eventos de Stripe UNA SOLA VEZ
           this.setupStripeEventListeners();
         }
 
-        // Montar el elemento
-        console.log('🔄 Mounting card element...');
+
         this.cardElement!.mount('#card-element');
 
-        console.log('✅ Stripe elements created and mounted successfully');
+
 
       } catch (error) {
         console.error('❌ Error creating Stripe elements:', error);
@@ -245,19 +245,15 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
     }, 800);
   }
 
-  /**
-   * Setup Stripe event listeners - SOLO UNA VEZ
-   */
   private setupStripeEventListeners(): void {
     if (!this.cardElement) return;
 
-    console.log('🔄 Setting up Stripe event listeners...');
+
 
     this.cardElement.on('ready', () => {
-      console.log('✅ Stripe card element ready for input');
+
       this.stripeElementReady = true;
 
-      // Hacer que el elemento sea visible
       const cardContainer = document.getElementById('card-element');
       if (cardContainer) {
         const stripeFrame = cardContainer.querySelector('iframe');
@@ -290,42 +286,30 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
     console.log('✅ Stripe event listeners configured');
   }
 
-  /**
-   * Destroy Stripe elements safely - MEJORADO
-   */
   private destroyStripeElements(): void {
     try {
       if (this.cardElement) {
         console.log('🔄 Destroying Stripe card element...');
 
-        // Unmount antes de destroy
         try {
           this.cardElement.unmount();
         } catch (e) {
           console.log('Element was not mounted, skipping unmount');
         }
 
-        // Destroy el elemento
         this.cardElement.destroy();
         this.cardElement = null;
       }
-
-      // NO destruir this.elements - reutilizarlo
-      // this.elements = null; ← NO hacer esto
 
       this.stripeElementReady = false;
       console.log('✅ Stripe card element destroyed (Elements instance preserved)');
     } catch (error) {
       console.error('❌ Error destroying Stripe elements:', error);
-      // Resetear manualmente si hay error
       this.cardElement = null;
       this.stripeElementReady = false;
     }
   }
 
-  /**
-   * Cleanup completo - SOLO en ngOnDestroy
-   */
   private fullStripeCleanup(): void {
     try {
       if (this.cardElement) {
@@ -333,7 +317,6 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
         this.cardElement = null;
       }
 
-      // Limpiar elements también
       this.elements = null;
       this.stripeElementReady = false;
 
@@ -343,11 +326,12 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ===================== MÉTODOS DE CONFIGURACIÓN =====================
+
   initPaymentForm(): void {
     const currentUser = this.authService.getCurrentUser();
 
     this.paymentForm = this.fb.group({
-      // Datos de facturación
       cardHolder: [currentUser?.name || '', [Validators.required, Validators.minLength(3)]],
       billingAddress: ['', [Validators.required]],
       billingCity: ['', [Validators.required]],
@@ -366,17 +350,144 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
         this.currentPlan = (this.configuration?.subscriptionPlan as 'basic' | 'corporate') || 'basic';
         this.updatePlansDisplay();
         this.isLoading = false;
+
+        // *** NUEVO: Verificar si debe mostrar selección de plan ***
+        this.checkAndShowPlanSelection();
       },
       error: (error) => {
         console.error('Error al cargar configuración:', error);
         this.currentPlan = 'basic';
         this.updatePlansDisplay();
         this.isLoading = false;
+
+        // *** NUEVO: Si hay error, asumir que necesita pagar ***
+        console.log('❌ Error loading configuration - showing plan selection as fallback');
+        this.showPlanSelectionFlow();
       }
     });
   }
 
+  // ===================== NUEVOS MÉTODOS PARA SELECCIÓN DE PLAN =====================
+
+  /**
+   * MÉTODO CORREGIDO: Verificar si debe mostrar selección de plan
+   */
+  private checkAndShowPlanSelection(): void {
+    console.log('🔍 === checkAndShowPlanSelection START ===');
+    console.log('Configuration:', this.configuration);
+    console.log('SubscriptionStatus:', this.configuration?.subscriptionStatus);
+    console.log('Type of status:', typeof this.configuration?.subscriptionStatus);
+
+    if (!this.configuration) {
+      console.log('⚠️ No configuration found - showing plan selection');
+      this.showPlanSelectionFlow();
+      return;
+    }
+
+    const status = this.configuration.subscriptionStatus;
+
+    // *** CORRECCIÓN: Verificar tanto mayúsculas como minúsculas ***
+    if (status === 'pending' || status === 'PENDING') {
+      console.log('⏳ Subscription status is PENDING - showing plan selection');
+      this.showPlanSelectionFlow();
+      return;
+    }
+
+    if (status === 'expired' || status === 'EXPIRED') {
+      console.log('⚠️ Subscription status is EXPIRED - showing plan selection');
+      this.showPlanSelectionFlow();
+      return;
+    }
+
+    if (status === 'active' || status === 'ACTIVE') {
+      console.log('✅ Subscription is ACTIVE - hiding plan selection');
+      this.showPlanSelectionBanner = false;
+      this.isFirstTimeUser = false;
+
+      // Mostrar notificación de bienvenida solo una vez
+      if (!sessionStorage.getItem('welcomeShown')) {
+        this.showNotification(
+          'Su suscripción está activa. ¡Bienvenido a TextilFlow!',
+          'success'
+        );
+        sessionStorage.setItem('welcomeShown', 'true');
+      }
+      return;
+    }
+
+    console.log('❓ Unknown subscription status:', status, '- showing plan selection by default');
+    this.showPlanSelectionFlow();
+    console.log('🔍 === checkAndShowPlanSelection END ===');
+  }
+
+  /**
+   * NUEVO MÉTODO: Mostrar flujo de selección de plan
+   */
+  private showPlanSelectionFlow(): void {
+    console.log('🎯 Starting plan selection flow...');
+
+    this.isFirstTimeUser = true;
+    this.showPlanSelectionBanner = true;
+
+    // Establecer plan por defecto (el que ya tiene)
+    this.selectedPlanForPayment = this.currentPlan;
+
+    // Actualizar display de selección
+    this.updatePlanSelectionDisplay();
+
+    // Mostrar mensaje informativo
+    this.showNotification(
+      'Bienvenido a TextilFlow. Para comenzar, selecciona y activa tu plan de suscripción.',
+      'info'
+    );
+  }
+
+  /**
+   * NUEVO MÉTODO: Usuario selecciona un plan para pagar
+   */
+  public selectPlanForPayment(planId: 'basic' | 'corporate'): void {
+    this.selectedPlanForPayment = planId;
+    this.updatePlanSelectionDisplay();
+  }
+
+  /**
+   * NUEVO MÉTODO: Proceder al pago con el plan seleccionado
+   */
+  public proceedToPayment(): void {
+
+    this.showPlanSelectionBanner = false;
+    this.showPaymentModal = true;
+    setTimeout(() => {
+      this.createStripeElements();
+    }, 800);
+  }
+
+  /**
+   * NUEVO MÉTODO: Actualizar display de selección de planes
+   */
+  private updatePlanSelectionDisplay(): void {
+    this.plans.forEach(plan => {
+      plan.isCurrentPlan = (plan.id === this.selectedPlanForPayment);
+
+      if (plan.id === this.selectedPlanForPayment) {
+        plan.buttonText = 'PLANS.SELECTED';
+        plan.buttonVariant = 'primary';
+      } else {
+        plan.buttonText = 'PLANS.SELECT_THIS_PLAN';
+        plan.buttonVariant = 'secondary';
+      }
+    });
+  }
+
+  // ===================== MÉTODOS MODIFICADOS =====================
+
   updatePlansDisplay(): void {
+    if (this.showPlanSelectionBanner) {
+      this.updatePlanSelectionDisplay();
+      return;
+    }
+
+    // Lógica original para usuarios con suscripción activa
     this.plans.forEach(plan => {
       plan.isCurrentPlan = plan.id === this.currentPlan;
 
@@ -398,75 +509,39 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
     });
   }
 
-  onPlanAction(planId: 'basic' | 'corporate'): void {
+  /**
+   * MÉTODO MODIFICADO: Manejar acción de plan
+   */
+  public onPlanAction(planId: 'basic' | 'corporate'): void {
+    // Si está en modo de selección de plan para primera vez
+    if (this.showPlanSelectionBanner) {
+      this.selectPlanForPayment(planId);
+      return;
+    }
+
+    // Lógica original para usuarios que ya tienen suscripción activa
     if (planId === this.currentPlan) {
       this.showCurrentPlanDetails();
       return;
     }
 
     if (this.currentPlan === 'basic' && planId === 'corporate') {
+      this.selectedPlanForPayment = 'corporate';
       this.showUpgradeModal = true;
     } else if (this.currentPlan === 'corporate' && planId === 'basic') {
+      this.selectedPlanForPayment = 'basic';
       this.showDowngradeModal = true;
     }
   }
 
-  showCurrentPlanDetails(): void {
-    const message = this.translateService.instant('PLANS.CURRENT_PLAN_INFO', {
-      plan: this.translateService.instant(`PLANS.${this.currentPlan.toUpperCase()}_PLAN`)
-    });
-    this.showNotification(message, 'info');
-  }
-
-  confirmUpgrade(): void {
-    this.showUpgradeModal = false;
-
-    // Mostrar modal de pago
-    setTimeout(() => {
-      this.showPaymentModal = true;
-
-      // Crear elementos de Stripe después de que el modal sea visible
-      setTimeout(() => {
-        this.createStripeElements();
-      }, 800); // Aumentado para dar más tiempo al DOM
-    }, 100);
-  }
-
-  confirmDowngrade(): void {
-    this.showDowngradeModal = false;
-    this.changePlan('basic');
-  }
-
-  cancelModal(): void {
-    console.log('🔄 Canceling modal...');
-
-    // Limpiar focus activo
-    const active = document.activeElement as HTMLElement;
-    if (active && typeof active.blur === 'function') {
-      active.blur();
-    }
-
-    // Ocultar modales
-    this.showUpgradeModal = false;
-    this.showDowngradeModal = false;
-    this.showPaymentModal = false;
-    this.paymentSuccess = false;
-
-    // SOLO destruir Stripe Elements si realmente estamos cerrando el modal de pago
-    if (!this.showPaymentModal) {
-      setTimeout(() => {
-        this.destroyStripeElements();
-      }, 100);
-    }
-  }
+  // ===================== MÉTODOS DE PAGO MODIFICADOS =====================
 
   /**
-   * Process payment with Stripe - VERSIÓN ULTRA DEFENSIVA
+   * MÉTODO MODIFICADO: Process payment (usar plan seleccionado)
    */
   async processPayment(): Promise<void> {
-    console.log('🔄 Starting payment process...');
+    console.log('🔄 Starting payment process for plan:', this.selectedPlanForPayment);
 
-    // Validaciones más estrictas
     const userId = parseInt(this.currentUserId, 10);
     if (isNaN(userId) || userId <= 0) {
       console.error('❌ Invalid userId:', this.currentUserId);
@@ -485,14 +560,12 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // VERIFICACIÓN CRÍTICA: Asegurar que el elemento existe y está montado
     if (!this.cardElement) {
       console.error('❌ Card element not available');
       this.showNotification('Payment form not ready, please wait and try again', 'error');
       return;
     }
 
-    // Verificar que el contenedor DOM existe
     const cardContainer = document.getElementById('card-element');
     if (!cardContainer) {
       console.error('❌ Card container not found in DOM');
@@ -500,7 +573,6 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Verificar que el iframe de Stripe existe
     const stripeIframe = cardContainer.querySelector('iframe');
     if (!stripeIframe) {
       console.error('❌ Stripe iframe not found');
@@ -508,25 +580,18 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('✅ All Stripe validations passed');
 
     this.isProcessingPayment = true;
 
     try {
-      console.log('🔄 Creating payment intent...');
 
-      // 1. Crear payment intent en el backend
-      const paymentIntentResponse = await this.createPaymentIntent(userId, 'corporate');
-      console.log('✅ Payment intent created:', paymentIntentResponse.clientSecret);
+      // *** USAR EL PLAN SELECCIONADO ***
+      const paymentIntentResponse = await this.createPaymentIntent(userId, this.selectedPlanForPayment);
 
-      console.log('🔄 Confirming payment with Stripe...');
-
-      // 2. VERIFICAR UNA VEZ MÁS que el elemento sigue disponible antes de usarlo
       if (!this.cardElement) {
         throw new Error('Card element was destroyed during payment process');
       }
 
-      // 3. Confirmar pago con Stripe
       const result = await this.stripe.confirmCardPayment(paymentIntentResponse.clientSecret, {
         payment_method: {
           card: this.cardElement,
@@ -546,20 +611,17 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
         throw new Error(result.error.message);
       }
 
-      console.log('✅ Payment successful:', result.paymentIntent);
 
       this.isProcessingPayment = false;
       this.paymentSuccess = true;
 
-      // Mostrar éxito y luego actualizar plan
       setTimeout(() => {
         this.showPaymentModal = false;
         this.paymentSuccess = false;
 
-        // SOLO destruir elementos DESPUÉS de que el pago sea exitoso
         this.destroyStripeElements();
 
-        // *** ARREGLADO: Actualizar plan después del pago exitoso ***
+        // *** ACTUALIZAR PLAN DESPUÉS DEL PAGO EXITOSO ***
         this.updatePlanAfterSuccessfulPayment();
 
       }, 2000);
@@ -567,8 +629,6 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
     } catch (error: any) {
       console.error('❌ Payment error:', error);
       this.isProcessingPayment = false;
-
-      // No destruir elementos si hay error - el usuario puede querer reintentar
 
       this.showNotification(
         error.message || this.translateService.instant('PLANS.PAYMENT_ERROR'),
@@ -578,63 +638,82 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * NUEVO MÉTODO: Actualizar plan después del pago exitoso
+   * MÉTODO MODIFICADO: Actualizar plan después del pago (usar plan seleccionado)
    */
   private async updatePlanAfterSuccessfulPayment(): Promise<void> {
     if (!this.configuration || !this.configuration.id) {
       console.error('❌ No se encontró configuración válida para actualizar');
       this.showNotification('Error: No se pudo actualizar el plan', 'error');
-      this.loadCurrentPlan(); // Fallback: solo recargar
+      this.loadCurrentPlan();
       return;
     }
 
-    const configId = parseInt(this.configuration.id, 10);
-    console.log('🔄 Actualizando plan a corporate para configId:', configId);
+    const userId = parseInt(this.currentUserId, 10);
 
-    this.configurationService.updateSubscriptionPlan(configId, 'corporate').subscribe({
+    // *** USAR EL PLAN QUE EL USUARIO SELECCIONÓ ***
+    this.configurationService.activateSubscription(userId, this.selectedPlanForPayment).subscribe({
       next: (updatedConfig) => {
-        console.log('✅ Plan actualizado exitosamente:', updatedConfig);
+
+        if (updatedConfig.subscriptionStatus !== 'active' && updatedConfig.subscriptionStatus !== 'ACTIVE') {
+          console.error('❌ WARNING: Backend no retornó status active:', updatedConfig.subscriptionStatus);
+        }
+
+        // Actualizar estado local
         this.configuration = updatedConfig;
-        this.currentPlan = 'corporate';
+        this.currentPlan = this.selectedPlanForPayment;
+        this.isFirstTimeUser = false;
+        this.showPlanSelectionBanner = false;
         this.updatePlansDisplay();
 
+        // Notificar éxito
         this.showNotification(
           this.translateService.instant('PLANS.PAYMENT_SUCCESS') + ' - ' +
           this.translateService.instant('PLANS.PLAN_ACTIVATED'),
           'success'
         );
+
+        // Redirigir al dashboard
+        setTimeout(() => {
+          this.router.navigate(['/businessman/inicio']).then(() => {
+          }).catch((error: any) => {
+            console.error('❌ Error redirecting:', error);
+            // Fallback: reload si la redirección falla
+            window.location.reload();
+          });
+        }, 2000);
       },
       error: (error) => {
-        console.error('❌ Error al actualizar el plan después del pago:', error);
+        console.error('❌ Error al activar suscripción después del pago:', error);
 
-        // Mostrar error pero recargar para verificar si el backend se actualizó
+        // *** DEBUGGING: Verificar qué error específico ***
+        console.error('   Error details:', {
+          status: error.status,
+          message: error.message,
+          error: error.error
+        });
+
         this.showNotification(
-          'Pago exitoso, pero hubo un problema actualizando la vista. Recargando...',
+          'Pago exitoso, pero hubo un problema activando la suscripción. Verificando...',
           'warning'
         );
-
-        // Recargar después de un momento
-        setTimeout(() => {
-          this.loadCurrentPlan();
-        }, 2000);
+        setTimeout(() => this.loadCurrentPlan(), 3000);
       }
     });
   }
 
   /**
-   * Create payment intent via backend
+   * MÉTODO MODIFICADO: Crear payment intent (usar plan seleccionado)
    */
-  private createPaymentIntent(userId: number, subscriptionPlan: 'corporate'): Promise<PaymentIntentResponse> {
-    console.log('🔍 Creating payment intent with userId:', userId);
+  private createPaymentIntent(userId: number, subscriptionPlan: 'basic' | 'corporate'): Promise<PaymentIntentResponse> {
 
     if (isNaN(userId) || userId <= 0) {
       return Promise.reject(new Error('Invalid user ID: ' + userId));
     }
 
     return new Promise((resolve, reject) => {
-      this.paymentService.createPaymentIntent(userId, subscriptionPlan).subscribe({
+      // *** USAR EL PLAN SELECCIONADO ***
+      this.paymentService.createPaymentIntent(userId, this.selectedPlanForPayment).subscribe({
         next: (response) => {
-          console.log('✅ Payment intent response:', response);
           resolve(response);
         },
         error: (error) => {
@@ -645,9 +724,52 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Change plan (for downgrades)
-   */
+  // ===================== MÉTODOS EXISTENTES SIN CAMBIOS =====================
+
+  showCurrentPlanDetails(): void {
+    const message = this.translateService.instant('PLANS.CURRENT_PLAN_INFO', {
+      plan: this.translateService.instant(`PLANS.${this.currentPlan.toUpperCase()}_PLAN`)
+    });
+    this.showNotification(message, 'info');
+  }
+
+  confirmUpgrade(): void {
+    this.showUpgradeModal = false;
+
+    setTimeout(() => {
+      this.showPaymentModal = true;
+
+      setTimeout(() => {
+        this.createStripeElements();
+      }, 800);
+    }, 100);
+  }
+
+  confirmDowngrade(): void {
+    this.showDowngradeModal = false;
+    this.changePlan('basic');
+  }
+
+  cancelModal(): void {
+    console.log('🔄 Canceling modal...');
+
+    const active = document.activeElement as HTMLElement;
+    if (active && typeof active.blur === 'function') {
+      active.blur();
+    }
+
+    this.showUpgradeModal = false;
+    this.showDowngradeModal = false;
+    this.showPaymentModal = false;
+    this.paymentSuccess = false;
+
+    if (!this.showPaymentModal) {
+      setTimeout(() => {
+        this.destroyStripeElements();
+      }, 100);
+    }
+  }
+
   private async changePlan(newPlan: 'basic' | 'corporate'): Promise<void> {
     if (!this.configuration || !this.configuration.id) {
       console.error('No se encontró configuración válida');
@@ -691,6 +813,35 @@ export class BusinessmanPlansComponent implements OnInit, OnDestroy {
   }
 
   formatPrice(price: number): string {
-    return `$${price.toFixed(2)}`;
+    return `${price.toFixed(2)}`;
+  }
+
+  // ===================== MÉTODO DE DEBUGGING =====================
+
+  /**
+   * MÉTODO TEMPORAL: Para debugging - verificar estado actual
+   */
+  public debugCurrentSubscriptionStatus(): void {
+    console.log('🔍 === DEBUGGING SUBSCRIPTION STATUS ===');
+    console.log('Configuration object:', this.configuration);
+    console.log('SubscriptionStatus value:', this.configuration?.subscriptionStatus);
+    console.log('SubscriptionStatus type:', typeof this.configuration?.subscriptionStatus);
+    console.log('ShowPlanSelectionBanner:', this.showPlanSelectionBanner);
+    console.log('IsFirstTimeUser:', this.isFirstTimeUser);
+    console.log('CurrentPlan:', this.currentPlan);
+    console.log('=======================================');
+
+    // Verificar si el problema está en el checkAndShowPlanSelection
+    if (this.configuration?.subscriptionStatus === 'ACTIVE' || this.configuration?.subscriptionStatus === 'active') {
+      console.log('✅ Status is ACTIVE - banner should be hidden');
+      if (this.showPlanSelectionBanner) {
+        console.error('❌ BUG: Banner is showing but status is ACTIVE!');
+        // Forzar ocultar banner
+        this.showPlanSelectionBanner = false;
+        this.isFirstTimeUser = false;
+      }
+    } else {
+      console.log('⚠️ Status is not ACTIVE:', this.configuration?.subscriptionStatus);
+    }
   }
 }
