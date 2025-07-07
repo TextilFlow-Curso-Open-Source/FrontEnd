@@ -71,7 +71,10 @@ export class SupplierRequestService extends BaseService<BusinessSupplierRequest>
   updateRequestStatus(requestId: string, status: 'accepted' | 'rejected'): Observable<BusinessSupplierRequest> {
     return this.httpClient.put<BusinessSupplierRequest>(
       `${this.serverBaseUrl}${this.resourceEndpoint}/${requestId}/status`,
-      { status }
+      {
+        status: status.toUpperCase(),
+        message: ''
+      }
     );
   }
 

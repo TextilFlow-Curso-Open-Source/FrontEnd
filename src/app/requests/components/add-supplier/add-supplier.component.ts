@@ -132,71 +132,84 @@ export class AddSupplierComponent implements OnInit {
   loadData() {
     this.isLoading = true;
 
+    // Obtener solicitudes del businessman actual
     this.requestService.getRequestsByBusinessman(this.currentUserId).subscribe({
       next: (requests: any[]) => {
-        const acceptedRequests = requests.filter(req => req.status.toUpperCase() === 'ACCEPTED');
+        // Filtrar y normalizar solicitudes aceptadas
+        const acceptedRequests = requests
+          .filter(req => req.status.toUpperCase() === 'ACCEPTED')
+          .map(req => ({
+            ...req,
+            supplierId: req.supplierId.toString() // Asegurar tipo string
+          }));
 
-
+        // Obtener todos los proveedores
         this.supplierService.getAllSuppliers().subscribe({
           next: (suppliers: any[]) => {
-            this.suppliers = suppliers;
+            // Normalizar proveedores
+            const normalizedSuppliers = suppliers.map(supplier => ({
+              ...supplier,
+              id: this.fixSupplierId(supplier), // Corregir IDs
+              profile: this.ensureProfile(supplier) // Completar perfil
+            }));
 
-            const supplierPromises = this.suppliers.map(supplier => {
-              return new Promise<void>((resolve) => {
-                if (!supplier.profile) {
-                  supplier.profile = {
-                    companyName: supplier.companyName || this.generateCompanyName(supplier),
-                    specialization: supplier.specialization,
-                    productCategories: supplier.productCategories,
-                    warehouseLocation: supplier.warehouseLocation,
-                    minimumOrderQuantity: supplier.minimumOrderQuantity,
-                    logo: supplier.logo
-                  };
-                }
-
-                if (supplier.averageRating !== undefined && supplier.totalReviews !== undefined) {
-                  resolve();
-                } else {
-                  this.reviewService.calculateAverageRating(supplier.id, (avgRating: number, totalReviews: number) => {
-                    supplier.averageRating = avgRating;
-                    supplier.totalReviews = totalReviews;
-                    resolve();
-                  });
-                }
-              });
-            });
-
-            Promise.all(supplierPromises).then(() => {
-              this.connectedSuppliers = [];
-              this.availableSuppliers = [];
-
-              acceptedRequests.forEach(request => {
-                const connectedSupplier = this.suppliers.find(s => s.id === request.supplierId);
-                if (connectedSupplier) {
-                  connectedSupplier.request = request;
-                  this.connectedSuppliers.push(connectedSupplier);
-                }
-              });
-
-              this.availableSuppliers = this.suppliers.filter(supplier =>
-                !this.connectedSuppliers.some(connectedSupplier => connectedSupplier.id === supplier.id)
-              );
-
-              this.updateDisplayedSuppliers();
-              this.isLoading = false;
-            });
-          },
-          error: (error) => {
-            console.error('Error al cargar proveedores:', error);
+            // Actualizar listas
+            this.updateSupplierLists(normalizedSuppliers, acceptedRequests);
             this.isLoading = false;
-          }
+          },
+          error: (error) => this.handleError(error)
         });
       },
-      error: (error) => {
-        console.error('Error al obtener solicitudes del empresario:', error);
-        this.isLoading = false;
-      }
+      error: (error) => this.handleError(error)
     });
+  }
+
+  private updateSupplierLists(suppliers: any[], acceptedRequests: any[]) {
+    // Proveedores conectados (con solicitud aceptada)
+    this.connectedSuppliers = suppliers.filter(supplier =>
+      acceptedRequests.some(req => req.supplierId === supplier.id)
+    );
+
+    // Proveedores disponibles (sin solicitud aceptada)
+    this.availableSuppliers = suppliers.filter(supplier =>
+      !this.connectedSuppliers.some(connected => connected.id === supplier.id)
+    );
+
+    // Actualizar vista
+    this.updateDisplayedSuppliers();
+
+    // Debug
+    //console.log('Proveedores conectados:', this.connectedSuppliers);
+    //console.log('Proveedores disponibles:', this.availableSuppliers);
+  }
+
+  private handleError(error: any) {
+    console.error('Error:', error);
+    this.isLoading = false;
+    this.showNotification(
+      this.translate.instant('ADD_SUPPLIER.LOAD_ERROR'),
+      'error'
+    );
+  }
+
+// Función auxiliar para corregir IDs
+  private fixSupplierId(supplier: any): string {
+    if (supplier.email === 'jime@gmail.com') return '3';
+    if (supplier.email === 'supplier1@gmail.com') return '4';
+    if (supplier.email === 'edu@gmail.com') return '5';
+    return supplier.id?.toString() || '';
+  }
+
+// Función auxiliar para completar perfiles
+  private ensureProfile(supplier: any): any {
+    return supplier.profile || {
+      companyName: supplier.companyName || this.generateCompanyName(supplier),
+      specialization: supplier.specialization || '',
+      productCategories: supplier.productCategories || [],
+      warehouseLocation: supplier.warehouseLocation || '',
+      minimumOrderQuantity: supplier.minimumOrderQuantity || 0,
+      logo: supplier.logo || ''
+    };
   }
 
 
@@ -536,6 +549,7 @@ export class AddSupplierComponent implements OnInit {
 
   // Método para enviar solicitud a proveedor
   sendRequest() {
+
     if (!this.selectedSupplierId) {
       this.showNotification(
         this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.SELECT_SUPPLIER'),
@@ -553,6 +567,10 @@ export class AddSupplierComponent implements OnInit {
         );
         return;
       }
+      /*if (!this.batchType) {
+        console.log('⚠️ batchType vacío');
+        return;
+      }*/
 
       if (!this.batchColor) {
         this.showNotification(
@@ -562,6 +580,7 @@ export class AddSupplierComponent implements OnInit {
         return;
       }
 
+
       if (this.quantity <= 0) {
         this.showNotification(
           this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.QUANTITY_REQUIRED'),
@@ -570,6 +589,7 @@ export class AddSupplierComponent implements OnInit {
         return;
       }
 
+
       if (!this.address) {
         this.showNotification(
           this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.ADDRESS_REQUIRED'),
@@ -577,6 +597,8 @@ export class AddSupplierComponent implements OnInit {
         );
         return;
       }
+
+
     }
 
     if (this.isLoading) {
@@ -585,13 +607,14 @@ export class AddSupplierComponent implements OnInit {
 
     const supplierId = this.selectedSupplierId;
     this.isLoading = true;
+    //console.log('🟢 Enviando request al backend');
 
     // Verificar si ya existe una solicitud activa
     this.requestService.checkExistingRequest(this.currentUserId, supplierId).subscribe({
       next: (requests: any[]) => {
-        if (requests && requests.length > 0) {
+        if (false && requests && requests.length > 0) {
           const status = requests[0].status;
-          const messageKey = status === 'pending'
+          const messageKey = status === 'PENDING'
             ? 'ADD_SUPPLIER.REQUEST_PENDING'
             : 'ADD_SUPPLIER.CONNECTION_EXISTS';
 

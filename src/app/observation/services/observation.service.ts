@@ -11,6 +11,7 @@ import { BaseService } from '../../core/services/base.service';
 export class ObservationService extends BaseService<Observation> {
   constructor() {
     super();
+    this.serverBaseUrl = environment.serverBaseUrl;
     this.resourceEndpoint = environment.observationEndpointPath;
   }
 
