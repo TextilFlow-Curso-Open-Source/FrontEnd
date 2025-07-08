@@ -81,15 +81,15 @@ export class AddSupplierComponent implements OnInit {
   canAddReview: boolean = false;
   selectedReviewSupplierId: string | null = null;
 
-  // Nuevo - Para la edición de reseñas
+
   isEditingReview: boolean = false;
   editingReviewId: string | null = null;
-  isSubmitting: boolean = false; // Evitar envío duplicado
-  hoverRatingValue: number = 0; // Para el hover de las estrellas
+  isSubmitting: boolean = false;
+  hoverRatingValue: number = 0;
 
   // Datos para mostrar en las pestañas
-  connectedSuppliers: any[] = []; // Proveedores con solicitudes aceptadas
-  availableSuppliers: any[] = []; // Proveedores disponibles para solicitar
+  connectedSuppliers: any[] = [];
+  availableSuppliers: any[] = [];
 
   // Colores disponibles para el formulario - define as readonly to prevent modification
   readonly colors: string[] = ['Rojo', 'Azul', 'Verde', 'Negro', 'Blanco', 'Amarillo', 'Morado', 'Naranja', 'Gris'];
@@ -315,7 +315,7 @@ export class AddSupplierComponent implements OnInit {
   }
 
   selectSupplier(supplierId: string) {
-    // Si ya está seleccionado, lo deseleccionamos
+
     if (this.selectedSupplierId === supplierId) {
       this.selectedSupplierId = null;
       return;
@@ -324,7 +324,6 @@ export class AddSupplierComponent implements OnInit {
     this.selectedSupplierId = supplierId;
     this.selectedSupplier = this.filteredSuppliers.find(s => s.id === supplierId);
 
-    // Cargar reviews si están disponibles
     this.loadReviews(supplierId);
   }
 
@@ -334,16 +333,16 @@ export class AddSupplierComponent implements OnInit {
       this.expandedSupplierId = null;
     } else {
       this.expandedSupplierId = supplierId;
-      // Cargar reviews para este proveedor
+
       this.loadReviews(supplierId);
 
-      // Verificar si el usuario puede dejar una reseña
+
       this.checkIfCanAddReview(supplierId);
     }
   }
 
   loadReviews(supplierId: string) {
-    console.log('🔍 Loading reviews for supplierId:', supplierId);
+
 
     if (!supplierId) {
       console.error('❌ supplierId is null or undefined');
@@ -356,7 +355,7 @@ export class AddSupplierComponent implements OnInit {
         review.canEdit = review.businessmanId === this.currentUserId;
       });
 
-      // AÑADIR ESTO: Calcular y actualizar rating automáticamente
+
       this.calculateAndUpdateRating(supplierId, reviews);
     });
   }
@@ -379,7 +378,7 @@ export class AddSupplierComponent implements OnInit {
     this.updateSupplierRatingInLists(supplierId, average, reviews.length);
   }
 
-// NUEVO MÉTODO: Actualiza el rating en todas las listas de suppliers
+
   updateSupplierRatingInLists(supplierId: string, avgRating: number, totalReviews: number) {
     // Buscar y actualizar en todas las listas
     const supplierInFiltered = this.filteredSuppliers.find(s => s.id === supplierId);
@@ -420,8 +419,7 @@ export class AddSupplierComponent implements OnInit {
       rating: 5,
       comment: ''
     };
-    // NO resetear selectedReviewSupplierId aquí inmediatamente
-    // this.selectedReviewSupplierId = null; ← COMENTAR ESTA LÍNEA
+
   }
 
   submitReview() {
@@ -440,7 +438,7 @@ export class AddSupplierComponent implements OnInit {
     this.isLoading = true;
     this.isSubmitting = true;
 
-    // Guardar el ID antes de cerrar el formulario
+
     const currentSelectedReviewSupplierId = this.selectedReviewSupplierId;
 
     if (this.isEditingReview && this.editingReviewId) {
