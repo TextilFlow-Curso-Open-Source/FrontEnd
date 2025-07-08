@@ -51,6 +51,8 @@ export class BusinessRequestsComponent implements OnInit {
     }
   }
 
+
+// Llamar este método en ngOnInit() temporalmente
   ngOnInit() {
     this.loadRequests();
   }

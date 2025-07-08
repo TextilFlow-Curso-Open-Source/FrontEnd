@@ -1,4 +1,3 @@
-// /src/app/requests/components/add-supplier/add-supplier.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -28,22 +27,15 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
   styleUrls: ['./add-supplier.component.css']
 })
 export class AddSupplierComponent implements OnInit {
-  // Control de pestañas
   activeTab: 'current' | 'add' = 'current';
-
-  // Búsqueda
   searchTerm: string = '';
   suppliers: any[] = [];
   filteredSuppliers: any[] = [];
   isLoading: boolean = false;
-
-  // Selección y detalles de proveedor
   selectedSupplierId: string | null = null;
   currentUserId: string = '';
   currentUserName: string = '';
   isBatchSubmitting: boolean = false;
-
-  // Modal de solicitud
   showRequestForm: boolean = false;
   selectedSupplier: any = null;
   batchType: string = '';
@@ -51,8 +43,6 @@ export class AddSupplierComponent implements OnInit {
   quantity: number = 0;
   address: string = '';
   requestMessage: string = '';
-
-  // Modal para batch
   showBatchForm: boolean = false;
   newBatch: Batch = new Batch({
     code: '',
@@ -69,8 +59,6 @@ export class AddSupplierComponent implements OnInit {
     status: STATUS.POR_ENVIAR,
     imageUrl: ''
   });
-
-  // Reseñas
   reviews: any[] = [];
   showReviewForm: boolean = false;
   expandedSupplierId: string | null = null;
@@ -80,21 +68,13 @@ export class AddSupplierComponent implements OnInit {
   };
   canAddReview: boolean = false;
   selectedReviewSupplierId: string | null = null;
-
-  // Nuevo - Para la edición de reseñas
   isEditingReview: boolean = false;
   editingReviewId: string | null = null;
-  isSubmitting: boolean = false; // Evitar envío duplicado
-  hoverRatingValue: number = 0; // Para el hover de las estrellas
-
-  // Datos para mostrar en las pestañas
-  connectedSuppliers: any[] = []; // Proveedores con solicitudes aceptadas
-  availableSuppliers: any[] = []; // Proveedores disponibles para solicitar
-
-  // Colores disponibles para el formulario - define as readonly to prevent modification
+  isSubmitting: boolean = false;
+  hoverRatingValue: number = 0;
+  connectedSuppliers: any[] = [];
+  availableSuppliers: any[] = [];
   readonly colors: string[] = ['Rojo', 'Azul', 'Verde', 'Negro', 'Blanco', 'Amarillo', 'Morado', 'Naranja', 'Gris'];
-
-  // Notificación
   notification = {
     show: false,
     message: '',
@@ -132,55 +112,46 @@ export class AddSupplierComponent implements OnInit {
   loadData() {
     this.isLoading = true;
 
-    // Obtener solicitudes del businessman actual
     this.requestService.getRequestsByBusinessman(this.currentUserId).subscribe({
       next: (requests: any[]) => {
-        // Filtrar y normalizar solicitudes aceptadas
-        const acceptedRequests = requests
-          .filter(req => req.status.toUpperCase() === 'ACCEPTED')
-          .map(req => ({
-            ...req,
-            supplierId: req.supplierId.toString() // Asegurar tipo string
-          }));
+        const acceptedRequests = requests.filter(req => req.status.toUpperCase() === 'ACCEPTED');
 
-        // Obtener todos los proveedores
         this.supplierService.getAllSuppliers().subscribe({
           next: (suppliers: any[]) => {
-            // Normalizar proveedores
-            const normalizedSuppliers = suppliers.map(supplier => ({
-              ...supplier,
-              id: this.fixSupplierId(supplier), // Corregir IDs
-              profile: this.ensureProfile(supplier) // Completar perfil
-            }));
+            const normalizedSuppliers = suppliers.map((supplier) => {
+              const realId = supplier.userId || supplier.id;
+              return {
+                ...supplier,
+                id: realId.toString(),
+                originalId: supplier.id,
+                originalUserId: supplier.userId,
+                profile: this.ensureProfile(supplier)
+              };
+            });
 
-            // Actualizar listas
             this.updateSupplierLists(normalizedSuppliers, acceptedRequests);
             this.isLoading = false;
           },
-          error: (error) => this.handleError(error)
+          error: (error) => {
+            this.handleError(error);
+          }
         });
       },
-      error: (error) => this.handleError(error)
+      error: (error) => {
+        this.handleError(error);
+      }
     });
   }
 
   private updateSupplierLists(suppliers: any[], acceptedRequests: any[]) {
-    // Proveedores conectados (con solicitud aceptada)
-    this.connectedSuppliers = suppliers.filter(supplier =>
-      acceptedRequests.some(req => req.supplierId === supplier.id)
+    const connectedSupplierIds = new Set(
+      acceptedRequests.map(req => req.supplierId?.toString())
+        .filter(id => id && id !== 'undefined' && id !== 'null')
     );
 
-    // Proveedores disponibles (sin solicitud aceptada)
-    this.availableSuppliers = suppliers.filter(supplier =>
-      !this.connectedSuppliers.some(connected => connected.id === supplier.id)
-    );
-
-    // Actualizar vista
+    this.connectedSuppliers = suppliers.filter(supplier => connectedSupplierIds.has(supplier.id?.toString()));
+    this.availableSuppliers = suppliers.filter(supplier => !connectedSupplierIds.has(supplier.id?.toString()));
     this.updateDisplayedSuppliers();
-
-    // Debug
-    //console.log('Proveedores conectados:', this.connectedSuppliers);
-    //console.log('Proveedores disponibles:', this.availableSuppliers);
   }
 
   private handleError(error: any) {
@@ -192,15 +163,6 @@ export class AddSupplierComponent implements OnInit {
     );
   }
 
-// Función auxiliar para corregir IDs
-  private fixSupplierId(supplier: any): string {
-    if (supplier.email === 'jime@gmail.com') return '3';
-    if (supplier.email === 'supplier1@gmail.com') return '4';
-    if (supplier.email === 'edu@gmail.com') return '5';
-    return supplier.id?.toString() || '';
-  }
-
-// Función auxiliar para completar perfiles
   private ensureProfile(supplier: any): any {
     return supplier.profile || {
       companyName: supplier.companyName || this.generateCompanyName(supplier),
@@ -212,36 +174,25 @@ export class AddSupplierComponent implements OnInit {
     };
   }
 
-
-  /**
-   * Genera un nombre de empresa descriptivo cuando no existe companyName
-   */
   private generateCompanyName(supplier: any): string {
-    // Si hay email, usar la parte antes del @
     if (supplier.email) {
       const emailPart = supplier.email.split('@')[0];
       const cleanName = emailPart.charAt(0).toUpperCase() + emailPart.slice(1);
       return `${cleanName} Company`;
     }
 
-    // Si hay nombre de usuario, usarlo
     if (supplier.name) {
       return `${supplier.name} Enterprise`;
     }
 
-    // Fallback genérico
     return 'Empresa sin nombre';
   }
 
   updateDisplayedSuppliers() {
-    // Actualizar los proveedores mostrados según la pestaña activa
-    if (this.activeTab === 'current') {
-      this.filteredSuppliers = [...this.connectedSuppliers];
-    } else {
-      this.filteredSuppliers = [...this.availableSuppliers];
-    }
+    this.filteredSuppliers = this.activeTab === 'current'
+      ? [...this.connectedSuppliers]
+      : [...this.availableSuppliers];
 
-    // Si hay una búsqueda activa, aplicarla
     if (this.searchTerm.trim()) {
       this.searchSuppliers();
     }
@@ -249,17 +200,15 @@ export class AddSupplierComponent implements OnInit {
 
   searchSuppliers() {
     if (!this.searchTerm.trim()) {
-      this.updateDisplayedSuppliers(); // Restablecer según la pestaña activa
+      this.updateDisplayedSuppliers();
       return;
     }
 
     this.isLoading = true;
+    const suppliersToFilter = this.activeTab === 'current'
+      ? this.connectedSuppliers
+      : this.availableSuppliers;
 
-    // Determinar qué lista de proveedores filtrar según la pestaña activa
-    const suppliersToFilter = this.activeTab === 'current' ?
-      this.connectedSuppliers : this.availableSuppliers;
-
-    // Filtrar localmente - buscar en companyName directo y email
     this.filteredSuppliers = suppliersToFilter.filter(supplier =>
       supplier.email?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
       supplier.companyName?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
@@ -277,7 +226,6 @@ export class AddSupplierComponent implements OnInit {
   }
 
   selectSupplier(supplierId: string) {
-    // Si ya está seleccionado, lo deseleccionamos
     if (this.selectedSupplierId === supplierId) {
       this.selectedSupplierId = null;
       return;
@@ -285,32 +233,25 @@ export class AddSupplierComponent implements OnInit {
 
     this.selectedSupplierId = supplierId;
     this.selectedSupplier = this.filteredSuppliers.find(s => s.id === supplierId);
-
-    // Cargar reviews si están disponibles
     this.loadReviews(supplierId);
   }
 
-  // Método para expandir un proveedor en la pestaña "Distribuidores Actuales"
   toggleSupplierExpansion(supplierId: string) {
     if (this.expandedSupplierId === supplierId) {
       this.expandedSupplierId = null;
     } else {
       this.expandedSupplierId = supplierId;
-      // Cargar reviews para este proveedor
       this.loadReviews(supplierId);
-
-      // Verificar si el usuario puede dejar una reseña
       this.checkIfCanAddReview(supplierId);
     }
   }
 
   loadReviews(supplierId: string) {
     this.reviewService.getReviewsForSupplier(supplierId, (reviews: any[]) => {
-      this.reviews = reviews;
-      // Marcar las reseñas que pertenecen al usuario actual
-      this.reviews.forEach(review => {
-        review.canEdit = review.businessmanId === this.currentUserId;
-      });
+      this.reviews = reviews.map(review => ({
+        ...review,
+        canEdit: review.businessmanId === this.currentUserId
+      }));
     });
   }
 
@@ -341,38 +282,22 @@ export class AddSupplierComponent implements OnInit {
     }
 
     this.isLoading = true;
-    this.isSubmitting = true; // Prevenir envíos duplicados
+    this.isSubmitting = true;
 
     if (this.isEditingReview && this.editingReviewId) {
-      // Actualizar reseña existente
       this.reviewService.updateReview(
         this.editingReviewId,
         this.newReview.rating,
         this.newReview.comment
       ).subscribe({
         next: () => {
-          this.showNotification(
-            this.translate.instant('ADD_SUPPLIER.REVIEW_UPDATED_SUCCESS'),
-            'success'
-          );
-          this.closeReviewForm();
-          this.loadReviews(this.selectedReviewSupplierId as string);
-          this.updateSupplierRating();
-          this.isLoading = false;
-          this.isSubmitting = false;
+          this.handleReviewSuccess('ADD_SUPPLIER.REVIEW_UPDATED_SUCCESS');
         },
         error: (error: any) => {
-          console.error('Error al actualizar reseña:', error);
-          this.showNotification(
-            this.translate.instant('ADD_SUPPLIER.REVIEW_ERROR'),
-            'error'
-          );
-          this.isLoading = false;
-          this.isSubmitting = false;
+          this.handleReviewError(error);
         }
       });
     } else {
-      // Crear nueva reseña
       this.reviewService.addReview(
         this.selectedReviewSupplierId,
         this.currentUserId,
@@ -381,31 +306,40 @@ export class AddSupplierComponent implements OnInit {
         this.currentUserName
       ).subscribe({
         next: () => {
-          this.showNotification(
-            this.translate.instant('ADD_SUPPLIER.REVIEW_ADDED_SUCCESS'),
-            'success'
-          );
-          this.closeReviewForm();
-          this.loadReviews(this.selectedReviewSupplierId as string);
-          this.updateSupplierRating();
+          this.handleReviewSuccess('ADD_SUPPLIER.REVIEW_ADDED_SUCCESS');
           this.canAddReview = false;
-          this.isLoading = false;
-          this.isSubmitting = false;
         },
         error: (error: any) => {
-          console.error('Error al agregar reseña:', error);
-          this.showNotification(
-            this.translate.instant('ADD_SUPPLIER.REVIEW_ERROR'),
-            'error'
-          );
-          this.isLoading = false;
-          this.isSubmitting = false;
+          this.handleReviewError(error);
         }
       });
     }
   }
 
-  // Método auxiliar para actualizar la calificación del proveedor
+  private handleReviewSuccess(messageKey: string) {
+    this.showNotification(
+      this.translate.instant(messageKey),
+      'success'
+    );
+    this.closeReviewForm();
+    if (this.selectedReviewSupplierId) {
+      this.loadReviews(this.selectedReviewSupplierId);
+      this.updateSupplierRating();
+    }
+    this.isLoading = false;
+    this.isSubmitting = false;
+  }
+
+  private handleReviewError(error: any) {
+    console.error('Error en reseña:', error);
+    this.showNotification(
+      this.translate.instant('ADD_SUPPLIER.REVIEW_ERROR'),
+      'error'
+    );
+    this.isLoading = false;
+    this.isSubmitting = false;
+  }
+
   updateSupplierRating() {
     if (this.selectedReviewSupplierId) {
       this.reviewService.calculateAverageRating(
@@ -421,13 +355,10 @@ export class AddSupplierComponent implements OnInit {
     }
   }
 
-  // Métodos para la solicitud de proveedor
   showRequestFormFor(supplier: any) {
     this.selectedSupplier = supplier;
     this.selectedSupplierId = supplier.id;
     this.showRequestForm = true;
-
-    // Reset form values
     this.batchType = '';
     this.batchColor = '';
     this.quantity = 0;
@@ -444,16 +375,13 @@ export class AddSupplierComponent implements OnInit {
     this.requestMessage = '';
   }
 
-  // Métodos para la creación de batch
   showBatchFormFor(supplier: any) {
     this.selectedSupplier = supplier;
     this.selectedSupplierId = supplier.id;
     this.showBatchForm = true;
 
-    // Inicializar el nuevo batch
-    const today = new Date().toISOString().split('T')[0];
     this.newBatch = {
-      code: 'L-' + Math.floor(1000 + Math.random() * 9000), // Código aleatorio
+      code: 'L-' + Math.floor(1000 + Math.random() * 9000),
       client: this.currentUserName,
       businessmanId: this.currentUserId,
       supplierId: supplier.id,
@@ -463,7 +391,7 @@ export class AddSupplierComponent implements OnInit {
       price: 0,
       observations: '',
       address: '',
-      date: today,
+      date: new Date().toISOString().split('T')[0],
       status: STATUS.PENDIENTE,
       imageUrl: ''
     };
@@ -475,12 +403,10 @@ export class AddSupplierComponent implements OnInit {
   }
 
   createBatch() {
-    // Agregar esta validación al inicio
     if (this.isBatchSubmitting) {
-      return; // Evitar múltiples envíos
+      return;
     }
 
-    // Validaciones con traducciones
     if (!this.newBatch.fabricType) {
       this.showNotification(
         this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.FABRIC_TYPE_REQUIRED'),
@@ -522,9 +448,8 @@ export class AddSupplierComponent implements OnInit {
     }
 
     this.isLoading = true;
-    this.isBatchSubmitting = true; // Activar el bloqueo
+    this.isBatchSubmitting = true;
 
-    // Crear el nuevo batch usando el método createBatch del servicio
     this.batchService.createBatch(
       this.newBatch.code,
       this.newBatch.client,
@@ -560,9 +485,7 @@ export class AddSupplierComponent implements OnInit {
     });
   }
 
-  // Método para enviar solicitud a proveedor
   sendRequest() {
-
     if (!this.selectedSupplierId) {
       this.showNotification(
         this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.SELECT_SUPPLIER'),
@@ -571,7 +494,6 @@ export class AddSupplierComponent implements OnInit {
       return;
     }
 
-    // Validaciones del formulario con traducciones
     if (this.showRequestForm) {
       if (!this.batchType) {
         this.showNotification(
@@ -580,10 +502,6 @@ export class AddSupplierComponent implements OnInit {
         );
         return;
       }
-      /*if (!this.batchType) {
-        console.log('⚠️ batchType vacío');
-        return;
-      }*/
 
       if (!this.batchColor) {
         this.showNotification(
@@ -593,7 +511,6 @@ export class AddSupplierComponent implements OnInit {
         return;
       }
 
-
       if (this.quantity <= 0) {
         this.showNotification(
           this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.QUANTITY_REQUIRED'),
@@ -602,7 +519,6 @@ export class AddSupplierComponent implements OnInit {
         return;
       }
 
-
       if (!this.address) {
         this.showNotification(
           this.translate.instant('ADD_SUPPLIER.VALIDATION_ERRORS.ADDRESS_REQUIRED'),
@@ -610,8 +526,6 @@ export class AddSupplierComponent implements OnInit {
         );
         return;
       }
-
-
     }
 
     if (this.isLoading) {
@@ -619,10 +533,17 @@ export class AddSupplierComponent implements OnInit {
     }
 
     const supplierId = this.selectedSupplierId;
-    this.isLoading = true;
-    //console.log('🟢 Enviando request al backend');
+    if (supplierId === this.currentUserId) {
+      this.showNotification(
+        this.translate.instant('ADD_SUPPLIER.REQUEST_SELF_ERROR'),
+        'error'
+      );
+      this.isLoading = false;
+      return;
+    }
 
-    // Verificar si ya existe una solicitud activa
+    this.isLoading = true;
+
     this.requestService.checkExistingRequest(this.currentUserId, supplierId).subscribe({
       next: (requests: any[]) => {
         if (false && requests && requests.length > 0) {
@@ -639,7 +560,6 @@ export class AddSupplierComponent implements OnInit {
           return;
         }
 
-        // Crear nueva solicitud
         this.requestService.createRequest(
           this.currentUserId,
           supplierId,
@@ -655,14 +575,8 @@ export class AddSupplierComponent implements OnInit {
               'success'
             );
             this.showRequestForm = false;
-            this.batchType = '';
-            this.batchColor = '';
-            this.quantity = 0;
-            this.address = '';
-            this.requestMessage = '';
+            this.resetRequestForm();
             this.isLoading = false;
-
-            // Recargar datos para actualizar las listas
             this.loadData();
           },
           error: (error: any) => {
@@ -686,6 +600,14 @@ export class AddSupplierComponent implements OnInit {
     });
   }
 
+  private resetRequestForm() {
+    this.batchType = '';
+    this.batchColor = '';
+    this.quantity = 0;
+    this.address = '';
+    this.requestMessage = '';
+  }
+
   showNotification(message: string, type: 'success' | 'error' | 'warning' | 'info') {
     this.notification = {
       show: true,
@@ -698,9 +620,6 @@ export class AddSupplierComponent implements OnInit {
     this.notification.show = false;
   }
 
-  // Estrellas estáticas - sin funciones auxiliares
-
-  // Métodos actualizados para el rating clickeable
   setRating(rating: number) {
     this.newReview.rating = rating;
   }
@@ -709,35 +628,31 @@ export class AddSupplierComponent implements OnInit {
     this.hoverRatingValue = rating;
   }
 
-  // Actualizar el método openReviewForm para resetear el hover
   openReviewForm(supplierId: string) {
     this.selectedReviewSupplierId = supplierId;
     this.showReviewForm = true;
     this.isEditingReview = false;
     this.editingReviewId = null;
-    this.hoverRatingValue = 0; // Resetear hover
+    this.hoverRatingValue = 0;
     this.newReview = {
       rating: 5,
       comment: ''
     };
   }
 
-  // Actualizar el método editReview para resetear el hover
   editReview(review: any) {
     this.selectedReviewSupplierId = review.supplierId;
     this.editingReviewId = review.id;
     this.isEditingReview = true;
     this.showReviewForm = true;
-    this.hoverRatingValue = 0; // Resetear hover
+    this.hoverRatingValue = 0;
     this.newReview = {
       rating: review.rating,
       comment: review.comment
     };
   }
 
-  // Añadir estos métodos a tu clase del componente
   onSearchInput(): void {
-    // Opcional: búsqueda en tiempo real
     if (this.searchTerm.length > 2 || this.searchTerm.length === 0) {
       this.searchSuppliers();
     }

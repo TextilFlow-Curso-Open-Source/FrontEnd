@@ -61,12 +61,18 @@ export class SupplierService extends BaseService<Supplier> {
   /**
    * Transforma respuesta del backend al formato del frontend
    */
+  /**
+   * Transforma respuesta del backend al formato del frontend
+   */
   private transformBackendToFrontend(backendResponse: any, currentUser: any): Supplier {
     const user = currentUser || this.authService.getCurrentUser();
 
     return new Supplier({
+      // 🔧 CORRECCIÓN: Usar SIEMPRE backendResponse.userId como ID
+      // El currentUser es el businessman logueado, NO el supplier que estamos procesando
+      id: backendResponse.userId?.toString() || backendResponse.id?.toString(),
+
       // Datos personales: Priorizar backend, luego currentUser
-      id: user?.id || backendResponse.userId?.toString(),
       name: backendResponse.name || user?.name || '',
       email: backendResponse.email || user?.email || '',
       role: 'supplier',
