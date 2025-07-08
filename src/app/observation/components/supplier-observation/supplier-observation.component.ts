@@ -76,8 +76,9 @@ export class SupplierObservationComponent implements OnInit {
 
         // Filtrar observaciones del proveedor actual
         this.observations = observations.filter(obs =>
-          obs.supplierId === this.currentSupplierId
+          obs.supplierId.toString() === this.currentSupplierId
         );
+
 
         console.log("Observaciones filtradas:", this.observations);
         this.filteredObservations = [...this.observations];
