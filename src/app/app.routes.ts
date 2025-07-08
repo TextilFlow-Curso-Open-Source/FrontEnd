@@ -5,7 +5,7 @@ import { UserLoginComponent } from './auth/views/user-login/user-login.component
 import { UserRegisterComponent } from './auth/views/user-register/user-register.component';
 import { UserRoleSelectorComponent } from './auth/views/user-role-selector/user-role-selector.component';
 import { ForgotPasswordComponent } from './auth/views/forgot-password/forgot-password.component';
-
+import { ResetPasswordComponent } from './auth/views/reset-password/reset-password.component';
 // *** NUEVO: Import del Subscription Guard ***
 import { SubscriptionGuard } from './core/guards/subscription.guard';
 
@@ -65,6 +65,10 @@ export const routes: Routes = [
   {
     path: 'forgot-password',
     component: ForgotPasswordComponent
+  },
+  {
+    path: 'reset-password',
+    component: ResetPasswordComponent
   },
 
   // *** UPDATED: Rutas para Businessman con SubscriptionGuard ***

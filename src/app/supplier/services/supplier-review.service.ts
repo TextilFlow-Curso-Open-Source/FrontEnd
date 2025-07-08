@@ -4,7 +4,7 @@ import { BaseService } from '../../core/services/base.service';
 import { SupplierReview } from '../models/supplier-review.entity';
 import { BusinessmanService } from '../../businessman/services/businessman.service';
 import { environment } from '../../../environments/environment';
-import { map, Observable, forkJoin, of } from 'rxjs';
+import {map, Observable, forkJoin, of, catchError} from 'rxjs';
 
 const supplierReviewEndpointPath = environment.supplierReviewEndpointPath;
 
@@ -158,44 +158,65 @@ export class SupplierReviewService extends BaseService<SupplierReview> {
    * Enriches reviews with businessman names
    * @param reviews Array of backend reviews
    */
+  /**
+   * Enriquece las reseñas con los nombres e imágenes de los businessmen
+   * @param reviews Array de reseñas del backend
+   */
   private enrichReviewsWithBusinessmanNames(reviews: any[]): Observable<SupplierReview[]> {
     if (!reviews || reviews.length === 0) {
       return of([]);
     }
 
-    // Get unique businessman IDs
+    // Obtener IDs únicos de businessmen
     const businessmanIds = [...new Set(reviews.map(review => this.transformIdToString(review.businessmanId)))];
 
-    // Create observables to get information for each businessman
+    // Crear observables para obtener información de cada businessman
     const businessmanRequests = businessmanIds.map(id =>
       this.businessmanService.getProfileByUserId(id).pipe(
-        map(businessman => ({ id, name: businessman.name })),
-        // If getting a businessman fails, continue with default name
-        map(result => result),
-        // In case of error, return object with default name
+        map(businessman => ({
+          id,
+          name: businessman.name,
+          logo: businessman.logo || 'assets/default-avatar.png' // AÑADIR LOGO
+        })),
+        // En caso de error, devolver objeto con datos por defecto
+        catchError(() => of({
+          id,
+          name: 'Usuario',
+          logo: 'assets/default-avatar.png'
+        }))
       )
     );
 
-    // Execute all requests in parallel
+    // Ejecutar todas las peticiones en paralelo
     return forkJoin(businessmanRequests).pipe(
       map(businessmanInfos => {
-        // Create map of ID -> name for fast lookup
-        const businessmanNameMap = new Map<string, string>();
+        // Crear map de ID -> datos para búsqueda rápida
+        const businessmanDataMap = new Map<string, {name: string, logo: string}>();
         businessmanInfos.forEach(info => {
-          if (info && info.name) {
-            businessmanNameMap.set(info.id, info.name);
+          if (info) {
+            businessmanDataMap.set(info.id, {
+              name: info.name,
+              logo: info.logo
+            });
           }
         });
 
-        // Transform reviews with names
+        // Transformar reseñas con nombres e imágenes
         return reviews.map(review => {
           const businessmanId = this.transformIdToString(review.businessmanId);
-          const businessmanName = businessmanNameMap.get(businessmanId) || 'User';
-          return this.transformBackendToFrontend(review, businessmanName);
+          const businessmanData = businessmanDataMap.get(businessmanId) || {
+            name: 'Usuario',
+            logo: 'assets/default-avatar.png'
+          };
+
+          const transformedReview = this.transformBackendToFrontend(review, businessmanData.name);
+          // AÑADIR LA IMAGEN A LA RESEÑA
+          transformedReview.businessmanLogo = businessmanData.logo;
+          return transformedReview;
         });
       }),
-      // If the entire operation fails, return basic reviews
-      map(enrichedReviews => enrichedReviews || reviews.map(review => this.transformBackendToFrontend(review)))
+      // Si falla toda la operación, devolver reseñas básicas
+      catchError(() => of(reviews.map(review => this.transformBackendToFrontend(review))))
     );
   }
 

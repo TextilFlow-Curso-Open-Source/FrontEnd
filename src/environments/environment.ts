@@ -3,8 +3,9 @@ export const environment = {
 
   // Backend real URL
   serverBaseUrl: 'http://3.135.127.195:5001/api/v1',
+  //Production URL
+  //serverBaseUrl: 'https://analyses-engagement-berkeley-orange.trycloudflare.com/api/v1'
 
-  // Endpoints que coinciden con tu backend Spring Boot
   authEndpointPath: '/authentication',
   userEndpointPath: '/users',
   businessmanEndpointPath: '/businessmen',
