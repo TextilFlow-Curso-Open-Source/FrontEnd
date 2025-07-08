@@ -372,6 +372,37 @@ export class AuthService extends BaseService<User> {
 
     return this.customRequest<any>(`/profiles/${currentUser.id}`, 'GET');
   }
+  /**
+   * Solicita restablecimiento de contraseña
+   * @param email Email del usuario
+   */
+  forgotPassword(email: string): Observable<any> {
+    const requestBody = { email: email };
 
+    // Usar la URL del environment + el endpoint de auth
+    const url = `${environment.serverBaseUrl}${environment.authEndpointPath}/forgot-password`;
 
+    return this.http.post(url, requestBody, {
+      responseType: 'text'
+    });
+  }
+
+  /**
+   * Restablece la contraseña con token
+   * @param token Token de restablecimiento
+   * @param newPassword Nueva contraseña
+   */
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    const requestBody = {
+      token: token,
+      newPassword: newPassword
+    };
+
+    // Usar la URL del environment + el endpoint de auth
+    const url = `${environment.serverBaseUrl}${environment.authEndpointPath}/reset-password`;
+
+    return this.http.post(url, requestBody, {
+      responseType: 'text'
+    });
+  }
 }

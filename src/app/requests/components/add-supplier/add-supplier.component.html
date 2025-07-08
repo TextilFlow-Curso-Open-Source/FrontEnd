@@ -118,7 +118,10 @@
           <div *ngIf="reviews.length > 0" class="reviews-list">
             <div *ngFor="let review of reviews" class="review-item">
               <div class="review-header">
-                <img [src]="'assets/default-avatar.png'" alt="reviewer" class="reviewer-avatar">
+                <img [src]="review.businessmanLogo || 'assets/default-avatar.png'"
+                     alt="reviewer"
+                     class="reviewer-avatar"
+                     onerror="this.src='assets/default-avatar.png'">
                 <div class="review-info">
                   <div class="review-email">{{ review.businessmanName || ('COMMON.USER' | translate) }}</div>
                   <!-- ARREGLADO: Lógica de estrellas simplificada -->

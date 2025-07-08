@@ -45,6 +45,10 @@
     "ERROR_LOAD": "Error al cargar la configuración"
   },
   "PLANS": {
+    "CARD_DETAILS": "Detalles de la tarjeta",
+    "PAY_NOW": "PAGAR AHORA",
+    "SECURE_PAYMENT": "Pago seguro",
+    "ENCRYPTED_PROTECTED": "Encriptado y protegido",
     "BASIC": "Plan Básico",
     "CORPORATE": "Plan Corporativo",
     "TITLE": "Planes de Suscripción",

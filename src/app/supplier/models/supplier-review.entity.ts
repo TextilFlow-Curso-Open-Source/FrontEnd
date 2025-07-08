@@ -6,6 +6,7 @@ export class SupplierReview {
   comment: string;
   createdAt: string;
   businessmanName?: string;
+  businessmanLogo?: string;
   canEdit?: boolean;
   constructor(data: {
     id?: string;
@@ -15,6 +16,7 @@ export class SupplierReview {
     comment?: string;
     createdAt?: string;
     businessmanName?: string;
+    businessmanLogo?: string;
     canEdit?: boolean;
   }) {
     this.id = data.id;
@@ -24,6 +26,7 @@ export class SupplierReview {
     this.comment = data.comment || '';
     this.createdAt = data.createdAt || new Date().toISOString();
     this.businessmanName = data.businessmanName;
+    this.businessmanLogo = data.businessmanLogo || 'assets/default-avatar.png';
     this.canEdit = data.canEdit || false;
   }
   /**
