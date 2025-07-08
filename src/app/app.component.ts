@@ -12,7 +12,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   imports: [
     CommonModule,
     RouterOutlet,
-    TranslateModule // Asegúrate de incluir esto
+    TranslateModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -22,7 +22,7 @@ export class AppComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private translateService: TranslateService // Inyecta el servicio
+    private translateService: TranslateService
   ) {
     // Inicializar el servicio de traducción
     this.translateService.setDefaultLang('es');
@@ -30,6 +30,6 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Resto del código
+
   }
 }
