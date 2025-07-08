@@ -82,18 +82,17 @@ export class SupplierBatchComponent implements OnInit {
 
   loadBatches(): void {
     console.log('Current User ID:', this.currentUserId);
-    this.batchService.getAll().subscribe(batches => {
-      console.log('All batches from backend:', batches);
-      
-      // Filtrar lotes del proveedor actual (TEMPORALMENTE INCLUIR PENDIENTES)
-      const supplierBatches = batches.filter(b => {
-        console.log(`Batch ${b.id}: supplierId=${b.supplierId} (${typeof b.supplierId}), currentUserId=${this.currentUserId} (${typeof this.currentUserId}), status=${b.status}`);
-        return b.supplierId === this.currentUserId;
-        // COMENTADO: && b.status !== STATUS.PENDIENTE;
+    this.batchService.getBySupplierId(this.currentUserId).subscribe(batches => {
+      console.log('Supplier batches from backend:', batches);
+
+      // Filtro adicional para asegurar que solo aparezcan lotes del supplier actual
+      const filteredBatches = batches.filter(batch => {
+        console.log(`Batch ${batch.id}: supplierId='${batch.supplierId}', currentUserId='${this.currentUserId}'`);
+        return batch.supplierId === this.currentUserId;
       });
-      
-      console.log('Filtered supplier batches:', supplierBatches);
-      this.dataSource = new MatTableDataSource(supplierBatches);
+
+      //console.log('Filtered batches for supplier:', filteredBatches);
+      this.dataSource = new MatTableDataSource(filteredBatches);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
     });

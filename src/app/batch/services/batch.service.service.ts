@@ -5,7 +5,7 @@ import { BaseService } from '../../core/services/base.service';
 import { Batch } from '../models/batch.entity';
 import {catchError, Observable, retry, map} from 'rxjs';
 import {environment} from '../../../environments/environment';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -70,15 +70,35 @@ export class BatchService extends BaseService<Batch> {
   }
 
   updateBatch(batchId: string, batch: Partial<Batch>): Observable<Batch> {
-    const updateRequest = {
-      status: batch.status,
-      observations: batch.observations,
-      imageUrl: batch.imageUrl
-    };
-
-    return this.customRequest<any>(`/batches/${batchId}`, 'PUT', updateRequest).pipe(
-      map(response => this.transformFromBackend(response))
-    );
+    console.log('UpdateBatch - BatchId:', batchId);
+    console.log('UpdateBatch - Batch data:', batch);
+    
+    const resourceId = parseInt(batchId);
+    
+    // Solo enviar los campos que realmente se actualizan
+    const updateData: any = {};
+    
+    if (batch.status !== undefined) {
+      updateData.status = batch.status;
+    }
+    
+    if (batch.observations !== undefined) {
+      updateData.observations = batch.observations;
+    }
+    
+    // Para la imagen, usar un endpoint separado si es muy grande
+    if (batch.imageUrl && !batch.imageUrl.startsWith('data:')) {
+      updateData.imageUrl = batch.imageUrl;
+    }
+    
+    console.log('UpdateBatch - Sending data:', updateData);
+    
+    return this.httpClient.put<any>(`${this.serverBaseUrl}${this.resourceEndpoint}/${resourceId}`, updateData, this.httpOptions)
+      .pipe(
+        map(response => this.transformFromBackend(response)),
+        retry(2),
+        catchError(this.handleError)
+      );
   }
 
   /**
@@ -93,22 +113,24 @@ export class BatchService extends BaseService<Batch> {
   }
 
   private transformToBackend(batch: Partial<Batch>): any {
-    return {
-      id: batch.id ? parseInt(batch.id) : undefined,
-      code: batch.code,
-      client: batch.client,
-      businessmanId: batch.businessmanId ? parseInt(batch.businessmanId) : undefined,
-      supplierId: batch.supplierId ? parseInt(batch.supplierId) : undefined,
-      fabricType: batch.fabricType,
-      color: batch.color,
-      quantity: batch.quantity,
-      price: batch.price,
-      observations: batch.observations,
-      address: batch.address,
-      date: batch.date,
-      status: batch.status,
-      imageUrl: batch.imageUrl
-    };
+    const result: any = {};
+    
+    if (batch.id !== undefined) result.id = parseInt(batch.id);
+    if (batch.code !== undefined) result.code = batch.code;
+    if (batch.client !== undefined) result.client = batch.client;
+    if (batch.businessmanId !== undefined) result.businessmanId = parseInt(batch.businessmanId);
+    if (batch.supplierId !== undefined) result.supplierId = parseInt(batch.supplierId);
+    if (batch.fabricType !== undefined) result.fabricType = batch.fabricType;
+    if (batch.color !== undefined) result.color = batch.color;
+    if (batch.quantity !== undefined) result.quantity = batch.quantity;
+    if (batch.price !== undefined) result.price = batch.price;
+    if (batch.observations !== undefined) result.observations = batch.observations;
+    if (batch.address !== undefined) result.address = batch.address;
+    if (batch.date !== undefined) result.date = batch.date;
+    if (batch.status !== undefined) result.status = batch.status;
+    if (batch.imageUrl !== undefined) result.imageUrl = batch.imageUrl;
+    
+    return result;
   }
 
   private transformFromBackend(backendData: any): Batch {
@@ -154,5 +176,24 @@ export class BatchService extends BaseService<Batch> {
       updatedAt: backendData.updatedAt,
       imageUrl: backendData.imageUrl
     });
+  }
+
+  uploadBatchImage(batchId: string, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const url = `${this.resourceEndpoint}/${batchId}/image`;
+    return this.httpClient.post<any>(`${this.serverBaseUrl}${url}`, formData, {
+      headers: new HttpHeaders({
+        'Authorization': this.httpOptions.headers.get('Authorization') || ''
+      }),
+      reportProgress: true
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  deleteBatchImage(batchId: string): Observable<void> {
+    return this.customRequest<void>(`${this.resourceEndpoint}/${batchId}/image`, 'DELETE');
   }
 }

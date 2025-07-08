@@ -104,10 +104,13 @@ export class SupplierRegisterBatchComponent implements OnInit {
     this.batchService.getBySupplierId(this.currentUserId).subscribe({
       next: (batches: Batch[]) => {
         console.log('SupplierRegisterBatch - All batches for supplier:', batches);
-        // TEMPORALMENTE: Mostrar TODOS los batches sin filtrar
+        
+        // Filtrar solo los lotes que pertenecen al supplier actual
+        this.pendingBatches = batches.filter(batch => batch.supplierId === this.currentUserId);
+        
         console.log('STATUS.PENDIENTE:', STATUS.PENDIENTE);
         console.log('STATUS.POR_ENVIAR:', STATUS.POR_ENVIAR);
-        this.pendingBatches = batches; // SIN FILTRO
+        console.log('Lotes filtrados para el supplier:', this.pendingBatches);
 
         // Log individual de cada batch
         batches.forEach(batch => {
@@ -127,8 +130,7 @@ export class SupplierRegisterBatchComponent implements OnInit {
 
   selectBatch(batch: Batch): void {
     this.selectedBatch = batch;
-    this.imagePreview = ''; // Limpiar la vista previa
-    this.selectedImage = null;
+    this.clearImageData();
 
     // Cambiar a la pestaña de registro
     this.activeTab = 'register';
@@ -144,20 +146,34 @@ export class SupplierRegisterBatchComponent implements OnInit {
       observations: batch.observations || '',
       address: batch.address || '',
       date: batch.date,
-      status: batch.status, // Establecer el estado actual
-      imageUrl: '',
+      status: batch.status,
+      imageUrl: batch.imageUrl || '',
       additionalComments: ''
     });
+
+    // Si el batch ya tiene imagen, mostrarla
+    if (batch.imageUrl) {
+      this.imagePreview = batch.imageUrl;
+    }
   }
 
   setActiveTab(tab: 'pending' | 'register'): void {
     this.activeTab = tab;
     if (tab === 'pending') {
       this.selectedBatch = null;
-      this.imagePreview = '';
-      this.selectedImage = null;
+      this.clearImageData();
       this.form.reset();
       this.initForm();
+    }
+  }
+
+  private clearImageData(): void {
+    this.imagePreview = '';
+    this.selectedImage = null;
+    // Limpiar input de archivo si existe
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
     }
   }
 
@@ -181,60 +197,35 @@ export class SupplierRegisterBatchComponent implements OnInit {
 
   onFileChange(event: any): void {
     const file = event.target.files[0];
-    if (file && file.type.match(/image\/*/) && this.form) {
-      this.selectedImage = file;
+    if (!file) return;
 
-      // Crear vista previa
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.imagePreview = reader.result as string;
-      };
-      reader.readAsDataURL(file);
-
-      // También podrías comprimir aquí la imagen con canvas, pero para simplificar
-      // solo vamos a actualizar el valor del formulario
-      this.form.get('imageUrl')?.setValue(file.name);
+    // Validar tipo y tamaño de archivo
+    if (!file.type.startsWith('image/')) {
+      this.showNotification('Por favor seleccione un archivo de imagen válido', 'warning');
+      return;
     }
-  }
 
-  compressImage(base64: string, callback: (compressed: string) => void): void {
-    // Crear una imagen temporal para manipularla
-    const img = new Image();
-    img.src = base64;
+    if (file.size > 5 * 1024 * 1024) { // 5MB máximo
+      this.showNotification('La imagen no puede superar los 5MB', 'warning');
+      return;
+    }
 
-    img.onload = () => {
-      // Crear un canvas para la compresión
-      const canvas = document.createElement('canvas');
-      // Reducir el tamaño manteniendo la proporción
-      const MAX_WIDTH = 800;
-      const MAX_HEIGHT = 600;
-      let width = img.width;
-      let height = img.height;
+    this.selectedImage = file;
 
-      if (width > height) {
-        if (width > MAX_WIDTH) {
-          height *= MAX_WIDTH / width;
-          width = MAX_WIDTH;
-        }
-      } else {
-        if (height > MAX_HEIGHT) {
-          width *= MAX_HEIGHT / height;
-          height = MAX_HEIGHT;
-        }
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(img, 0, 0, width, height);
-        // Obtener la imagen comprimida (0.7 es un buen balance entre calidad y tamaño)
-        const compressed = canvas.toDataURL('image/jpeg', 0.7);
-        callback(compressed);
-      }
+    // Crear vista previa
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.imagePreview = reader.result as string;
     };
+    reader.onerror = () => {
+      this.showNotification('Error al cargar la imagen', 'error');
+    };
+    reader.readAsDataURL(file);
+
+    this.form.get('imageUrl')?.setValue(file.name);
   }
+
+
 
   onSubmit(): void {
     if (!this.selectedBatch) {
@@ -256,15 +247,7 @@ export class SupplierRegisterBatchComponent implements OnInit {
     }
 
     this.isLoading = true;
-
-    // Si hay una imagen seleccionada, procesarla
-    if (this.selectedImage && this.imagePreview) {
-      this.compressImage(this.imagePreview, (compressedImage) => {
-        this.updateBatch(newStatus, compressedImage);
-      });
-    } else {
-      this.updateBatch(newStatus);
-    }
+    this.updateBatch(newStatus);
   }
 
   updateBatch(newStatus: BatchStatus, imageData?: string): void {
@@ -276,20 +259,42 @@ export class SupplierRegisterBatchComponent implements OnInit {
       observations: this.form.get('additionalComments')?.value || this.selectedBatch.observations
     };
 
-    if (imageData) {
-      updatedBatch.imageUrl = imageData;
-    }
-
+    // Actualizar primero el batch sin la imagen
     this.batchService.updateBatch(this.selectedBatch.id as string, updatedBatch).subscribe({
       next: () => {
-        this.showNotification(`Lote actualizado y marcado como ${newStatus} correctamente`, 'success');
+        // Si hay imagen, subirla por separado
+        if (imageData && this.selectedImage) {
+          this.uploadImage();
+        } else {
+          this.showNotification(`Lote actualizado y marcado como ${newStatus} correctamente`, 'success');
+          this.loadPendingBatches();
+          this.setActiveTab('pending');
+          this.isLoading = false;
+        }
+      },
+      error: (error) => {
+        console.error('Error al actualizar el lote:', error);
+        this.showNotification('Error al actualizar el lote', 'error');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private uploadImage(): void {
+    if (!this.selectedBatch || !this.selectedImage) return;
+
+    this.batchService.uploadBatchImage(this.selectedBatch.id as string, this.selectedImage).subscribe({
+      next: () => {
+        this.showNotification('Lote e imagen actualizados correctamente', 'success');
         this.loadPendingBatches();
         this.setActiveTab('pending');
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error al actualizar el lote:', error);
-        this.showNotification('Error al actualizar el lote', 'error');
+        console.error('Error al subir la imagen:', error);
+        this.showNotification('Lote actualizado pero error al subir imagen', 'warning');
+        this.loadPendingBatches();
+        this.setActiveTab('pending');
         this.isLoading = false;
       }
     });
