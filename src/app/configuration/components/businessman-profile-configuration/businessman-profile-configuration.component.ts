@@ -451,14 +451,33 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
       return false;
     }
   }
+  debugForm() {
+    console.log('🔍 DEBUG COMPLETO DEL FORMULARIO:');
+    console.log('- Form valid:', this.form.valid);
+    console.log('- Form value:', this.form.value);
+    console.log('- Form raw value:', this.form.getRawValue());
 
+    Object.keys(this.form.controls).forEach(controlName => {
+      const control = this.form.get(controlName);
+      if (control && control.invalid) {
+        console.log(`❌ Control ${controlName}:`, {
+          value: control.value,
+          valid: control.valid,
+          errors: control.errors,
+          touched: control.touched,
+          dirty: control.dirty
+        });
+      }
+    });
+  }
   /**
-   * Guarda el perfil - SIMPLIFICADO (solo UPDATE)
+   * Save profile
    */
   async saveProfile() {
     console.log('🔄 Iniciando saveProfile...');
 
-    if (!this.form.valid || !this.validateForm() || this.isSaving) {
+    // CAMBIO: Solo usar validateForm() personalizada, NO this.form.valid
+    if (!this.validateForm() || this.isSaving) {
       console.log('❌ Formulario inválido o ya guardando');
       this.form.markAllAsTouched();
       return;
@@ -528,6 +547,7 @@ export class BusinessmanProfileConfigurationComponent implements OnInit {
       this.isSaving = false;
     }
   }
+
 
   /**
    * Navega de vuelta al dashboard
