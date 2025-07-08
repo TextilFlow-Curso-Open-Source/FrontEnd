@@ -45,6 +45,10 @@
     "ERROR_LOAD": "Error loading configuration"
   },
   "PLANS": {
+    "CARD_DETAILS": "Card details",
+    "PAY_NOW": "PAY NOW",
+    "SECURE_PAYMENT": "Secure payment",
+    "ENCRYPTED_PROTECTED": "Encrypted protected",
     "BASIC": "Basic Plan",
     "CORPORATE": "Corporate Plan",
     "TITLE": "Subscription Plans",
