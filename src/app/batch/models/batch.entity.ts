@@ -1,12 +1,12 @@
 // src/app/batch/models/batch.entity.ts
 
 export const STATUS = {
-  PENDIENTE: 'Pendiente',
-  ACEPTADO: 'Aceptado',
-  RECHAZADO: 'Rechazado',
-  COMPLETADO: 'Completado',
-  POR_ENVIAR: 'Por enviar',
-  ENVIADO: 'Enviado'
+  PENDIENTE: 'PENDIENTE',     // ← Cambiar de 'Pendiente' a 'PENDIENTE'
+  ACEPTADO: 'ACEPTADO',       // ← Cambiar de 'Aceptado' a 'ACEPTADO'
+  RECHAZADO: 'RECHAZADO',     // ← Cambiar de 'Rechazado' a 'RECHAZADO'
+  COMPLETADO: 'COMPLETADO',   // ← Cambiar de 'Completado' a 'COMPLETADO'
+  POR_ENVIAR: 'POR_ENVIAR',   // ← Cambiar de 'Por enviar' a 'POR_ENVIAR'
+  ENVIADO: 'ENVIADO'          // ← Cambiar de 'Enviado' a 'ENVIADO'
 } as const;
 
 export type BatchStatus = typeof STATUS[keyof typeof STATUS];
@@ -68,10 +68,10 @@ export class Batch {
 
 // También convertimos BatchRequest a clase
 export const REQUEST_STATUS = {
-  PENDIENTE: 'Pendiente',
-  ACEPTADO: 'Aceptado',
-  RECHAZADO: 'Rechazado',
-  COMPLETADO: 'Completado'
+  PENDIENTE: 'PENDIENTE',     // ← Cambiar de 'Pendiente' a 'PENDIENTE'
+  ACEPTADO: 'ACEPTADO',       // ← Cambiar de 'Aceptado' a 'ACEPTADO'
+  RECHAZADO: 'RECHAZADO',     // ← Cambiar de 'Rechazado' a 'RECHAZADO'
+  COMPLETADO: 'COMPLETADO'    // ← Cambiar de 'Completado' a 'COMPLETADO'
 } as const;
 
 export type BatchRequestStatus = typeof REQUEST_STATUS[keyof typeof REQUEST_STATUS];
