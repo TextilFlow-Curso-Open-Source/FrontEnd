@@ -1,18 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 
+// Importaciones de componentes personalizados
 import { AppInputComponent} from '../../../core/components/app-input/app-input.component';
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { SmartLogoComponent} from '../../../core/components/smart-logo/smart-logo.component';
 import { AuthService} from '../../services/auth.service';
 
 @Component({
-  selector: 'app-forgot-password',
+  selector: 'app-reset-password',
   standalone: true,
   imports: [
     CommonModule,
@@ -23,57 +24,88 @@ import { AuthService} from '../../services/auth.service';
     AppButtonComponent,
     SmartLogoComponent
   ],
-  templateUrl: './forgot-password.component.html',
-  styleUrls: ['./forgot-password.component.css']
+  templateUrl: './reset-password.component.html',
+  styleUrls: ['./reset-password.component.css']
 })
-export class ForgotPasswordComponent implements OnInit {
-  forgotPasswordForm!: FormGroup;
+export class ResetPasswordComponent implements OnInit {
+  resetPasswordForm!: FormGroup;
   isLoading = false;
   errorMessage = '';
   errorType = '';
   showSuccessMessage = false;
+  token = '';
+  showPassword = false;
+  showConfirmPassword = false;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService  // ← AGREGAR ESTE
+    private route: ActivatedRoute,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.initializeForm();
+    this.getTokenFromUrl();
   }
 
   private initializeForm(): void {
-    this.forgotPasswordForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]]
+    this.resetPasswordForm = this.fb.group({
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  private getTokenFromUrl(): void {
+    this.route.queryParams.subscribe(params => {
+      this.token = params['token'];
+      if (!this.token) {
+        this.showError('Token de restablecimiento no válido', 'invalid_token');
+      }
     });
   }
 
+  private passwordMatchValidator(form: FormGroup) {
+    const password = form.get('password');
+    const confirmPassword = form.get('confirmPassword');
+
+    if (password && confirmPassword && password.value !== confirmPassword.value) {
+      confirmPassword.setErrors({ passwordMismatch: true });
+      return { passwordMismatch: true };
+    }
+
+    if (confirmPassword?.errors?.['passwordMismatch']) {
+      delete confirmPassword.errors['passwordMismatch'];
+      if (Object.keys(confirmPassword.errors).length === 0) {
+        confirmPassword.setErrors(null);
+      }
+    }
+
+    return null;
+  }
+
   onSubmit(): void {
-    if (this.forgotPasswordForm.valid && !this.isLoading) {
+    if (this.resetPasswordForm.valid && !this.isLoading && this.token) {
       this.resetPassword();
     } else {
       this.markFormGroupTouched();
     }
   }
 
-  // ← REEMPLAZAR ESTE MÉTODO COMPLETO:
   private resetPassword(): void {
     this.isLoading = true;
     this.clearMessages();
 
-    const email = this.forgotPasswordForm.get('email')?.value;
+    const newPassword = this.resetPasswordForm.get('password')?.value;
 
-    // Llamada real al AuthService
-    this.authService.forgotPassword(email).subscribe({
+    this.authService.resetPassword(this.token, newPassword).subscribe({
       next: (response) => {
         this.isLoading = false;
         this.showSuccessMessage = true;
         setTimeout(() => {
           this.router.navigate(['/login'], {
             queryParams: {
-              message: 'check_email',
-              email: email
+              message: 'password_reset_success'
             }
           });
         }, 2500);
@@ -85,12 +117,11 @@ export class ForgotPasswordComponent implements OnInit {
     });
   }
 
-  // ← AGREGAR ESTE MÉTODO NUEVO:
   private handleResetPasswordError(error: any): void {
-    console.error('Error en forgot password:', error);
+    console.error('Error en reset password:', error);
 
     if (error.status === 400) {
-      this.showError('Error al procesar la solicitud', 'request_error');
+      this.showError('Token inválido o expirado. Solicita un nuevo enlace', 'invalid_token');
     } else if (error.status === 0) {
       this.showError('Error de conexión. Verifica tu internet e intenta de nuevo', 'network');
     } else {
@@ -98,11 +129,16 @@ export class ForgotPasswordComponent implements OnInit {
     }
   }
 
-  // ← ELIMINAR ESTE MÉTODO (ya no se usa):
-  // private handleResetPasswordResponse(email: string): void { ... }
-
   retrySubmit(): void {
     this.resetPassword();
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   private showError(message: string, type: string): void {
@@ -117,9 +153,17 @@ export class ForgotPasswordComponent implements OnInit {
   }
 
   private markFormGroupTouched(): void {
-    Object.keys(this.forgotPasswordForm.controls).forEach(key => {
-      const control = this.forgotPasswordForm.get(key);
+    Object.keys(this.resetPasswordForm.controls).forEach(key => {
+      const control = this.resetPasswordForm.get(key);
       control?.markAsTouched();
     });
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/login']);
+  }
+
+  requestNewToken(): void {
+    this.router.navigate(['/forgot-password']);
   }
 }

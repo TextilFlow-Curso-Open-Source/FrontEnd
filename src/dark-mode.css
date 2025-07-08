@@ -3404,4 +3404,566 @@
 [data-theme="dark"] .cdk-overlay-backdrop {
   background: rgba(0, 0, 0, 0.6) !important;
 }
+/* ===== BUSINESSMAN PLANS - DARK MODE ===== */
 
+/* ===== BASE CONTAINER ===== */
+[data-theme="dark"] .plans-container {
+  background: var(--background-color) !important;
+  color: var(--text-dark) !important;
+}
+
+/* ===== LOADING STATE ===== */
+[data-theme="dark"] .loading-state {
+  color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .spinner {
+  border-color: var(--border-color) !important;
+  border-top-color: var(--primary-color) !important;
+}
+
+/* ===== HEADER ===== */
+[data-theme="dark"] .plans-header h1 {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .plans-header p {
+  color: var(--text-light) !important;
+}
+
+/* ===== PLAN CARDS ===== */
+[data-theme="dark"] .plan-card {
+  background: var(--card-background) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow-light) !important;
+}
+
+[data-theme="dark"] .plan-card:hover {
+  box-shadow: var(--shadow-medium) !important;
+}
+
+[data-theme="dark"] .plan-basic {
+  border-color: var(--border-color) !important;
+  background: var(--card-background) !important;
+}
+
+[data-theme="dark"] .plan-corporate {
+  background: var(--primary-color) !important;
+  color: var(--text-dark) !important;
+  border-color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .plan-corporate * {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .current-plan {
+  border-color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .current-plan.plan-basic {
+  background: var(--card-background) !important;
+  box-shadow: 0 4px 20px rgba(166, 139, 107, 0.2) !important;
+}
+
+/* ===== CURRENT BADGE ===== */
+[data-theme="dark"] .current-badge {
+  background: var(--success-color) !important;
+  color: var(--background-color) !important;
+}
+
+/* ===== PLAN HEADER ===== */
+[data-theme="dark"] .plan-header h3 {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .plan-corporate .plan-header h3 {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .plan-basic .currency {
+  color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .plan-corporate .currency {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .plan-basic .amount {
+  color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .plan-corporate .amount {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .period {
+  color: var(--text-light) !important;
+}
+
+/* ===== PLAN FEATURES ===== */
+[data-theme="dark"] .feature-icon {
+  color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .plan-corporate .feature-icon {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .plan-basic .feature-text {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .plan-corporate .feature-text {
+  color: var(--text-dark) !important;
+}
+
+/* ===== PLAN BUTTONS ===== */
+[data-theme="dark"] .plan-button-basic {
+  background: var(--primary-color) !important;
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .plan-button-basic:hover:not(:disabled) {
+  background: var(--primary-dark) !important;
+}
+
+[data-theme="dark"] .plan-corporate .plan-button-corporate {
+  color: var(--primary-color) !important;
+  background: var(--card-background) !important;
+}
+
+[data-theme="dark"] .plan-button-corporate {
+  background: var(--card-background) !important;
+  color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .plan-button-corporate:hover:not(:disabled) {
+  background: var(--surface-color) !important;
+}
+
+/* ===== MODALS ===== */
+[data-theme="dark"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-theme="dark"] .modal-content {
+  background: var(--surface-color) !important;
+  box-shadow: var(--shadow-medium) !important;
+}
+
+/* ===== MODAL HEADER ===== */
+[data-theme="dark"] .modal-header {
+  border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .modal-header h3 {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .modal-close {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .modal-close:hover {
+  background: var(--card-background) !important;
+  color: var(--text-light) !important;
+}
+
+/* ===== MODAL BODY ===== */
+[data-theme="dark"] .modal-body p {
+  color: var(--text-light) !important;
+}
+
+/* ===== UPGRADE DETAILS ===== */
+[data-theme="dark"] .upgrade-details {
+  background: var(--card-background) !important;
+}
+
+/* ===== WARNING LIST ===== */
+[data-theme="dark"] .warning-list {
+  background: rgba(255, 212, 59, 0.1) !important;
+  border-color: var(--warning-color) !important;
+}
+
+[data-theme="dark"] .warning-list ul {
+  color: var(--warning-color) !important;
+}
+
+/* ===== MODAL ACTIONS ===== */
+[data-theme="dark"] .modal-actions {
+  border-top-color: var(--border-color) !important;
+}
+
+/* ===== ORDER SUMMARY ===== */
+[data-theme="dark"] .order-summary {
+  background: var(--card-background) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .summary-header h4 {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .item-name {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .item-price {
+  color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .summary-period {
+  color: var(--text-light) !important;
+}
+
+/* ===== FORM SECTIONS ===== */
+[data-theme="dark"] .form-section {
+  border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .section-title {
+  color: var(--text-dark) !important;
+}
+
+/* ===== FORM ELEMENTS ===== */
+[data-theme="dark"] .form-label {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .form-input {
+  border-color: var(--border-color) !important;
+  background: var(--input-background) !important;
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .form-input:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(166, 139, 107, 0.2) !important;
+}
+
+[data-theme="dark"] .form-input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .form-input:invalid {
+  border-color: var(--error-color) !important;
+}
+
+/* ===== STRIPE CARD ELEMENT ===== */
+[data-theme="dark"] .card-element {
+  border-color: var(--border-color) !important;
+  background: var(--input-background) !important;
+}
+
+[data-theme="dark"] .card-element:focus-within {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(166, 139, 107, 0.2) !important;
+}
+
+[data-theme="dark"] .card-element .StripeElement {
+  background: var(--input-background) !important;
+}
+
+[data-theme="dark"] .card-errors {
+  color: var(--error-color) !important;
+}
+
+/* ===== SECURITY BADGE ===== */
+[data-theme="dark"] .security-badge {
+  background: var(--card-background) !important;
+  border-top-color: var(--border-color) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .security-title {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .security-subtitle {
+  color: var(--text-light) !important;
+}
+
+/* ===== FORM ACTIONS ===== */
+[data-theme="dark"] .form-actions {
+  background: var(--surface-color) !important;
+}
+
+[data-theme="dark"] .btn-secondary {
+  background: var(--card-background) !important;
+  color: var(--text-dark) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .btn-secondary:hover:not(:disabled) {
+  background: var(--input-background) !important;
+}
+
+[data-theme="dark"] .btn-primary {
+  background: var(--primary-color) !important;
+  color: var(--text-dark) !important;
+  box-shadow: 0 2px 4px rgba(166, 139, 107, 0.3) !important;
+}
+
+[data-theme="dark"] .btn-primary:hover:not(:disabled) {
+  background: var(--primary-dark) !important;
+  box-shadow: 0 4px 8px rgba(166, 139, 107, 0.4) !important;
+}
+
+/* ===== PAYMENT SUCCESS ===== */
+[data-theme="dark"] .payment-success {
+  background: var(--surface-color) !important;
+}
+
+[data-theme="dark"] .success-icon {
+  background: var(--success-color) !important;
+  color: var(--background-color) !important;
+}
+
+[data-theme="dark"] .payment-success h4 {
+  color: var(--success-color) !important;
+}
+
+[data-theme="dark"] .payment-success p {
+  color: var(--text-light) !important;
+}
+
+/* ===== PAYMENT PROCESSING ===== */
+[data-theme="dark"] .payment-processing {
+  background: var(--surface-color) !important;
+}
+
+[data-theme="dark"] .processing-spinner {
+  border-color: var(--border-color) !important;
+  border-top-color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .payment-processing h4 {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .payment-processing p {
+  color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .processing-note {
+  color: var(--warning-color) !important;
+}
+
+/* ===== PAYMENT OVERLAYS ===== */
+[data-theme="dark"] .payment-overlay {
+  background: var(--surface-color) !important;
+}
+
+[data-theme="dark"] .payment-overlay.payment-processing .processing-spinner {
+  border-color: var(--border-color) !important;
+  border-top-color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .payment-overlay.payment-processing h4 {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .payment-overlay.payment-processing p {
+  color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .payment-overlay.payment-processing .processing-note {
+  color: var(--warning-color) !important;
+}
+
+[data-theme="dark"] .payment-overlay.payment-success .success-icon {
+  background: var(--success-color) !important;
+  color: var(--background-color) !important;
+}
+
+[data-theme="dark"] .payment-overlay.payment-success h4 {
+  color: var(--success-color) !important;
+}
+
+[data-theme="dark"] .payment-overlay.payment-success p {
+  color: var(--text-light) !important;
+}
+
+/* ===== SELECTED PLAN BADGE ===== */
+[data-theme="dark"] .selected-badge {
+  background: var(--primary-color) !important;
+  color: var(--text-dark) !important;
+  box-shadow: 0 2px 8px rgba(166, 139, 107, 0.4) !important;
+}
+
+/* ===== PLAN BUTTON SELECTED STATE ===== */
+[data-theme="dark"] .plan-button-selected {
+  background: var(--success-color) !important;
+  color: var(--background-color) !important;
+  box-shadow: 0 4px 12px rgba(81, 207, 102, 0.3) !important;
+}
+
+[data-theme="dark"] .plan-button-selected:hover {
+  background: #40c057 !important;
+  box-shadow: 0 6px 16px rgba(81, 207, 102, 0.4) !important;
+}
+
+/* ===== PLAN CARDS HIGHLIGHTING ===== */
+[data-theme="dark"] .plans-grid .plan-card:has(.plan-button-selected) {
+  border-color: var(--success-color) !important;
+  box-shadow: 0 8px 25px rgba(81, 207, 102, 0.2) !important;
+}
+
+/* ===== WELCOME BANNER ===== */
+[data-theme="dark"] .welcome-banner {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+  color: var(--text-dark) !important;
+  box-shadow: var(--shadow-medium) !important;
+}
+
+[data-theme="dark"] .welcome-title {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .welcome-description {
+  color: rgba(224, 224, 224, 0.9) !important;
+}
+
+/* ===== SELECTED PLAN INFO ===== */
+[data-theme="dark"] .selected-plan-info {
+  background: rgba(42, 42, 42, 0.8) !important;
+  border-color: rgba(166, 139, 107, 0.3) !important;
+}
+
+[data-theme="dark"] .selected-plan-label {
+  color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .selected-plan-name {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .selected-plan-price {
+  color: var(--text-dark) !important;
+}
+
+/* ===== PROCEED PAYMENT BUTTON ===== */
+[data-theme="dark"] .proceed-payment-btn {
+  background: var(--surface-color) !important;
+  color: var(--text-dark) !important;
+  box-shadow: var(--shadow-light) !important;
+}
+
+[data-theme="dark"] .proceed-payment-btn:hover {
+  background: var(--card-background) !important;
+  box-shadow: var(--shadow-medium) !important;
+}
+
+[data-theme="dark"] .welcome-note {
+  color: var(--text-light) !important;
+}
+/* ===== RESET PASSWORD DARK THEME ===== */
+[data-theme="dark"] .auth-layout {
+  background: var(--background-color) !important;
+}
+
+[data-theme="dark"] .content-col {
+  background: var(--background-color) !important;
+}
+
+[data-theme="dark"] .form-container h2 {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .form-container p {
+  color: var(--text-light) !important;
+}
+
+/* ===== LOADING OVERLAY DARK ===== */
+[data-theme="dark"] .loading-overlay {
+  background: rgba(18, 18, 18, 0.95) !important;
+}
+
+[data-theme="dark"] .loading-content {
+  color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .spinner {
+  border: 3px solid rgba(166, 139, 107, 0.2) !important;
+  border-top: 3px solid var(--primary-color) !important;
+}
+
+/* ===== SUCCESS TOAST DARK ===== */
+[data-theme="dark"] .success-toast {
+  background: var(--success-color) !important;
+  color: var(--background-color) !important;
+  box-shadow: 0 4px 12px rgba(81, 207, 102, 0.3) !important;
+}
+
+/* ===== PASSWORD INPUT DARK ===== */
+[data-theme="dark"] .password-toggle {
+  color: var(--text-light) !important;
+  background: transparent !important;
+}
+
+[data-theme="dark"] .password-toggle:hover {
+  color: var(--primary-color) !important;
+  background: rgba(166, 139, 107, 0.15) !important;
+}
+
+/* ===== SECURITY TIPS DARK ===== */
+[data-theme="dark"] .security-tips {
+  background: rgba(166, 139, 107, 0.1) !important;
+  border: 1px solid rgba(166, 139, 107, 0.3) !important;
+}
+
+[data-theme="dark"] .security-tips h4 {
+  color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .security-tips li {
+  color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .security-tips li:before {
+  color: var(--success-color) !important;
+}
+
+/* ===== ERROR MESSAGES DARK ===== */
+[data-theme="dark"] .error-message {
+  background: rgba(255, 107, 107, 0.1) !important;
+  border: 1px solid rgba(255, 107, 107, 0.3) !important;
+}
+
+[data-theme="dark"] .error-message .error-icon {
+  color: var(--error-color) !important;
+}
+
+[data-theme="dark"] .error-message .error-text {
+  color: var(--error-color) !important;
+}
+
+[data-theme="dark"] .action-button.secondary {
+  background: rgba(166, 139, 107, 0.15) !important;
+  color: var(--primary-color) !important;
+  border: 1px solid rgba(166, 139, 107, 0.4) !important;
+}
+
+[data-theme="dark"] .action-button.secondary:hover {
+  background: rgba(166, 139, 107, 0.25) !important;
+}
+
+[data-theme="dark"] .retry-button {
+  background: rgba(255, 107, 107, 0.1) !important;
+  color: var(--error-color) !important;
+  border: 1px solid rgba(255, 107, 107, 0.3) !important;
+}
+
+[data-theme="dark"] .retry-button:hover {
+  background: rgba(255, 107, 107, 0.2) !important;
+}
+
+/* ===== BACK TO LOGIN DARK ===== */
+[data-theme="dark"] .back-to-login a {
+  color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .back-to-login a:hover {
+  color: var(--primary-light) !important;
+}
