@@ -81,8 +81,9 @@ export class BusinessmanObservationComponent implements OnInit {
 
         // Filtrar observaciones del usuario actual
         this.observations = observations.filter(obs =>
-          obs.businessmanId === this.currentUserId
+          obs.businessmanId.toString() === this.currentUserId
         );
+
 
         console.log("Observaciones filtradas:", this.observations);
         this.filteredObservations = [...this.observations];
