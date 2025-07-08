@@ -2,11 +2,11 @@ export class SupplierReview {
   id?: string;
   supplierId: string;
   businessmanId: string;
-  rating: number;        // 1-5 stars
-  comment: string;       // Maps to 'reviewContent' in the backend
+  rating: number;
+  comment: string;
   createdAt: string;
-  businessmanName?: string;  // For UI display (obtained from BusinessmanService)
-  canEdit?: boolean;     // UI flag - indicates if current user can edit
+  businessmanName?: string;
+  canEdit?: boolean;
   constructor(data: {
     id?: string;
     supplierId: string;
