@@ -1,4 +1,5 @@
-// supplier-register-batch.component.ts
+// supplier-register-batch.component.ts - VERSIÓN COMPLETAMENTE CORREGIDA
+
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -12,7 +13,7 @@ import { AppInputComponent } from '../../../core/components/app-input/app-input.
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
 import { MatIconModule } from '@angular/material/icon';
-import {TranslateModule} from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-supplier-register-batch',
@@ -49,10 +50,10 @@ export class SupplierRegisterBatchComponent implements OnInit {
 
   // Estados disponibles para el selector (excluyendo PENDIENTE y COMPLETADO)
   availableStatuses = [
-    { label: 'Aceptado', value: STATUS.ACEPTADO },
-    { label: 'Rechazado', value: STATUS.RECHAZADO },
-    { label: 'Por Enviar', value: STATUS.POR_ENVIAR },
-    { label: 'Enviado', value: STATUS.ENVIADO }
+    { label: 'Aceptado', value: 'ACEPTADO' },
+    { label: 'Rechazado', value: 'RECHAZADO' },
+    { label: 'Por Enviar', value: 'POR_ENVIAR' },
+    { label: 'Enviado', value: 'ENVIADO' }
   ];
 
   // Variables para la carga de imágenes
@@ -77,22 +78,30 @@ export class SupplierRegisterBatchComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadPendingBatches();
+
+    // ✅ DEBUGGING: Monitorear cambios en el campo status
+    this.form.get('status')?.valueChanges.subscribe(value => {
+      console.log('🔍 Status field changed to:', value, typeof value);
+      if (value && typeof value === 'object') {
+        console.log('⚠️ Status is an object, should be string:', value);
+      }
+    });
   }
 
   initForm(): void {
     this.form = this.fb.group({
-      code: [{value: '', disabled: true}, Validators.required],
-      client: [{value: '', disabled: true}, Validators.required],
-      fabricType: [{value: '', disabled: true}, Validators.required],
-      color: [{value: '', disabled: true}, Validators.required],
-      quantity: [{value: 0, disabled: true}, [Validators.required, Validators.min(1)]],
-      price: [{value: 0, disabled: true}, [Validators.required, Validators.min(0)]],
-      observations: [{value: '', disabled: true}],
-      address: [{value: '', disabled: true}],
-      date: [{value: new Date().toISOString().slice(0, 10), disabled: true}, Validators.required],
-      status: [null, Validators.required], // Campo para seleccionar el estado
-      imageUrl: [''], // Subida de imágenes
-      additionalComments: [''] // Comentarios adicionales del proveedor
+      code: [{ value: '', disabled: true }, Validators.required],
+      client: [{ value: '', disabled: true }, Validators.required],
+      fabricType: [{ value: '', disabled: true }, Validators.required],
+      color: [{ value: '', disabled: true }, Validators.required],
+      quantity: [{ value: 0, disabled: true }, [Validators.required, Validators.min(1)]],
+      price: [{ value: 0, disabled: true }, [Validators.required, Validators.min(0)]],
+      observations: [{ value: '', disabled: true }],
+      address: [{ value: '', disabled: true }],
+      date: [{ value: new Date().toISOString().slice(0, 10), disabled: true }, Validators.required],
+      status: [null, Validators.required],
+      imageUrl: [''],
+      additionalComments: ['']
     });
   }
 
@@ -100,23 +109,15 @@ export class SupplierRegisterBatchComponent implements OnInit {
     this.isLoading = true;
     console.log('SupplierRegisterBatch - Current User ID:', this.currentUserId);
 
-    // Usar getBySupplierId en lugar de getBatchesBySupplier que no existe
     this.batchService.getBySupplierId(this.currentUserId).subscribe({
       next: (batches: Batch[]) => {
         console.log('SupplierRegisterBatch - All batches for supplier:', batches);
-        
-        // Filtrar solo los lotes que pertenecen al supplier actual
         this.pendingBatches = batches.filter(batch => batch.supplierId === this.currentUserId);
-        
-        console.log('STATUS.PENDIENTE:', STATUS.PENDIENTE);
-        console.log('STATUS.POR_ENVIAR:', STATUS.POR_ENVIAR);
-        console.log('Lotes filtrados para el supplier:', this.pendingBatches);
 
-        // Log individual de cada batch
         batches.forEach(batch => {
           console.log(`Batch ${batch.id}: status='${batch.status}', supplierId='${batch.supplierId}'`);
-          console.log('Status comparison:', batch.status === STATUS.PENDIENTE, batch.status === STATUS.POR_ENVIAR);
         });
+
         console.log('SupplierRegisterBatch - Filtered pending batches:', this.pendingBatches);
         this.isLoading = false;
       },
@@ -131,11 +132,8 @@ export class SupplierRegisterBatchComponent implements OnInit {
   selectBatch(batch: Batch): void {
     this.selectedBatch = batch;
     this.clearImageData();
-
-    // Cambiar a la pestaña de registro
     this.activeTab = 'register';
 
-    // Llenar el formulario con los datos del lote seleccionado
     this.form.patchValue({
       code: batch.code,
       client: batch.client,
@@ -151,7 +149,6 @@ export class SupplierRegisterBatchComponent implements OnInit {
       additionalComments: ''
     });
 
-    // Si el batch ya tiene imagen, mostrarla
     if (batch.imageUrl) {
       this.imagePreview = batch.imageUrl;
     }
@@ -170,14 +167,12 @@ export class SupplierRegisterBatchComponent implements OnInit {
   private clearImageData(): void {
     this.imagePreview = '';
     this.selectedImage = null;
-    // Limpiar input de archivo si existe
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
     }
   }
 
-  // Método para obtener el icono según el estado
   getStatusIcon(status: string): string {
     switch (status) {
       case STATUS.PENDIENTE:
@@ -199,20 +194,18 @@ export class SupplierRegisterBatchComponent implements OnInit {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Validar tipo y tamaño de archivo
     if (!file.type.startsWith('image/')) {
       this.showNotification('Por favor seleccione un archivo de imagen válido', 'warning');
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB máximo
+    if (file.size > 5 * 1024 * 1024) {
       this.showNotification('La imagen no puede superar los 5MB', 'warning');
       return;
     }
 
     this.selectedImage = file;
 
-    // Crear vista previa
     const reader = new FileReader();
     reader.onload = () => {
       this.imagePreview = reader.result as string;
@@ -225,8 +218,28 @@ export class SupplierRegisterBatchComponent implements OnInit {
     this.form.get('imageUrl')?.setValue(file.name);
   }
 
+  // ✅ MÉTODO PARA VALIDAR Y LIMPIAR EL ESTADO SELECCIONADO
+  private getCleanStatus(statusValue: any): BatchStatus {
+    console.log('🔍 Status received from form:', statusValue, typeof statusValue);
 
+    // Si es un objeto con value, extraer el value
+    if (statusValue && typeof statusValue === 'object' && statusValue.value) {
+      console.log('📋 Extracting value from object:', statusValue.value);
+      return statusValue.value as BatchStatus;
+    }
 
+    // Si es un string directo, usarlo
+    if (typeof statusValue === 'string') {
+      console.log('📋 Using string value:', statusValue);
+      return statusValue as BatchStatus;
+    }
+
+    // Fallback a PENDIENTE si no se puede determinar
+    console.warn('⚠️ Could not determine status, using PENDIENTE as fallback');
+    return 'PENDIENTE' as BatchStatus;
+  }
+
+  // ✅ MÉTODO onSubmit MEJORADO
   onSubmit(): void {
     if (!this.selectedBatch) {
       this.showNotification('Debe seleccionar un lote pendiente primero', 'warning');
@@ -239,31 +252,115 @@ export class SupplierRegisterBatchComponent implements OnInit {
       return;
     }
 
-    // Verificar que se haya seleccionado un estado
-    const newStatus = this.form.get('status')?.value as BatchStatus | null;
-    if (!newStatus) {
-      this.showNotification('Por favor seleccione un estado para el lote', 'warning');
+    // ✅ LIMPIAR Y VALIDAR EL ESTADO SELECCIONADO
+    const rawStatus = this.form.get('status')?.value;
+    const cleanStatus = this.getCleanStatus(rawStatus);
+
+    console.log('🔍 Status validation:');
+    console.log('   Raw status from form:', rawStatus);
+    console.log('   Cleaned status:', cleanStatus);
+
+    if (!cleanStatus || cleanStatus === 'PENDIENTE') {
+      this.showNotification('Por favor seleccione un estado válido para el lote', 'warning');
       return;
     }
 
     this.isLoading = true;
-    this.updateBatch(newStatus);
+    this.updateBatch(cleanStatus);
   }
 
+  // ✅ MÉTODO updateBatch COMPLETAMENTE CORREGIDO
   updateBatch(newStatus: BatchStatus, imageData?: string): void {
-    if (!this.selectedBatch) return;
+    if (!this.selectedBatch) {
+      console.error('❌ No selected batch');
+      return;
+    }
 
-    // Solo enviar los campos que se pueden actualizar
-    const updatedBatch: Partial<Batch> = {
-      status: newStatus,
-      observations: this.form.get('additionalComments')?.value || this.selectedBatch.observations
+    console.log('🚀 Starting batch update process...');
+    console.log('   Selected Batch:', this.selectedBatch);
+    console.log('   New Status (cleaned):', newStatus, typeof newStatus);
+
+    // ✅ VALIDAR QUE EL ESTADO SEA VÁLIDO ANTES DE CONTINUAR
+    const validStatuses: BatchStatus[] = ['ACEPTADO', 'RECHAZADO', 'POR_ENVIAR', 'ENVIADO'];
+    if (!validStatuses.includes(newStatus)) {
+      console.error('❌ Invalid status:', newStatus);
+      this.showNotification(`Estado inválido: ${newStatus}`, 'error');
+      this.isLoading = false;
+      return;
+    }
+
+    // ✅ FUNCIÓN PARA LIMPIAR STRINGS Y EVITAR CARACTERES PROBLEMÁTICOS
+    const cleanString = (str: string): string => {
+      if (!str) return '';
+      return str.toString()
+        .replace(/\n/g, ' ')    // Cambiar saltos de línea por espacios
+        .replace(/\r/g, ' ')    // Cambiar retornos de carro por espacios
+        .replace(/\s+/g, ' ')   // Múltiples espacios por uno solo
+        .trim();
     };
 
-    // Actualizar primero el batch sin la imagen
+    // ✅ PREPARAR OBSERVACIONES LIMPIANDO CARACTERES PROBLEMÁTICOS
+    const additionalComments = this.form.get('additionalComments')?.value || '';
+    const existingObservations = this.selectedBatch.observations || '';
+
+    let combinedObservations: string;
+    if (additionalComments.trim()) {
+      combinedObservations = cleanString(`${existingObservations} ${additionalComments}`);
+    } else {
+      combinedObservations = cleanString(existingObservations) || 'Sin observaciones';
+    }
+
+    const updatedBatch: Partial<Batch> = {
+      // ✅ Estado limpio y validado
+      status: newStatus,
+      observations: combinedObservations,
+
+      // ✅ CAMPOS REQUERIDOS - Todos limpiados
+      code: cleanString(this.selectedBatch.code || ''),
+      client: cleanString(this.selectedBatch.client || ''),
+      businessmanId: this.selectedBatch.businessmanId?.toString() || '0',
+      supplierId: this.selectedBatch.supplierId?.toString() || '0',
+      fabricType: cleanString(this.selectedBatch.fabricType || ''),
+      color: cleanString(this.selectedBatch.color || ''),
+      quantity: Number(this.selectedBatch.quantity) || 1,
+      price: Number(this.selectedBatch.price) || 0,
+      address: cleanString(this.selectedBatch.address || ''),
+      date: this.formatDateForBackend(this.selectedBatch.date)
+    };
+
+    // ✅ VALIDACIONES ADICIONALES
+    if (!updatedBatch.code) updatedBatch.code = `BATCH-${Date.now()}`;
+    if (!updatedBatch.client) updatedBatch.client = 'Cliente no especificado';
+    if (!updatedBatch.fabricType) updatedBatch.fabricType = 'No especificado';
+    if (!updatedBatch.color) updatedBatch.color = 'No especificado';
+    if (!updatedBatch.observations) updatedBatch.observations = 'Sin observaciones';
+    if (!updatedBatch.address) updatedBatch.address = 'Sin dirección';
+
+    console.log('🚀 Sending cleaned batch data:');
+    console.log('   Batch ID:', this.selectedBatch.id);
+    console.log('   Update Data:', JSON.stringify(updatedBatch, null, 2));
+
+    // ✅ VERIFICAR DATOS ANTES DE ENVIAR
+    console.log('🔍 Pre-send verification:');
+    console.log('   Status type:', typeof updatedBatch.status);
+    console.log('   Status value:', updatedBatch.status);
+
+    Object.entries(updatedBatch).forEach(([key, value]) => {
+      if (typeof value === 'string' && (value.includes('\n') || value.includes('\r'))) {
+        console.warn(`⚠️ Found line break in ${key}:`, value);
+      }
+      if (typeof value === 'object' && value !== null) {
+        console.warn(`⚠️ Found object in ${key}:`, value);
+      }
+    });
+
+    // ✅ ACTUALIZAR EL BATCH
     this.batchService.updateBatch(this.selectedBatch.id as string, updatedBatch).subscribe({
-      next: () => {
-        // Si hay imagen, subirla por separado
-        if (imageData && this.selectedImage) {
+      next: (updatedBatchResponse) => {
+        console.log('✅ Batch updated successfully:', updatedBatchResponse);
+
+        if (this.selectedImage) {
+          console.log('📷 Uploading image...');
           this.uploadImage();
         } else {
           this.showNotification(`Lote actualizado y marcado como ${newStatus} correctamente`, 'success');
@@ -273,11 +370,47 @@ export class SupplierRegisterBatchComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Error al actualizar el lote:', error);
-        this.showNotification('Error al actualizar el lote', 'error');
+        console.error('❌ Error updating batch:', error);
+
+        let errorMessage = 'Error desconocido';
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        } else if (typeof error.error === 'string') {
+          errorMessage = error.error;
+        }
+
+        this.showNotification(`Error al actualizar el lote: ${errorMessage}`, 'error');
         this.isLoading = false;
       }
     });
+  }
+
+  // ✅ MÉTODO AUXILIAR PARA FORMATEAR FECHA
+  private formatDateForBackend(dateString: string): string {
+    if (!dateString) {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    // Si ya está en formato YYYY-MM-DD, usar tal cual
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      return dateString;
+    }
+
+    // Si viene con tiempo, extraer solo la fecha
+    if (dateString.includes('T')) {
+      return dateString.split('T')[0];
+    }
+
+    // Convertir cualquier otro formato a YYYY-MM-DD
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      console.warn('⚠️ Invalid date, using current date:', dateString);
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    return date.toISOString().slice(0, 10);
   }
 
   private uploadImage(): void {
@@ -306,7 +439,6 @@ export class SupplierRegisterBatchComponent implements OnInit {
     this.initForm();
   }
 
-  // Método auxiliar para marcar todos los campos como tocados (para mostrar errores)
   private markFormGroupTouched(): void {
     Object.keys(this.form.controls).forEach(key => {
       const control = this.form.get(key);
