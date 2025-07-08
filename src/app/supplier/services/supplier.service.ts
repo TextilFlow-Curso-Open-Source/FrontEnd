@@ -68,8 +68,7 @@ export class SupplierService extends BaseService<Supplier> {
     const user = currentUser || this.authService.getCurrentUser();
 
     return new Supplier({
-      // 🔧 CORRECCIÓN: Usar SIEMPRE backendResponse.userId como ID
-      // El currentUser es el businessman logueado, NO el supplier que estamos procesando
+
       id: backendResponse.userId?.toString() || backendResponse.id?.toString(),
 
       // Datos personales: Priorizar backend, luego currentUser
@@ -153,9 +152,7 @@ export class SupplierService extends BaseService<Supplier> {
     return this.uploadFile(endpoint, formData);
   }
 
-  /**
-   * Elimina logo del proveedor
-   */
+
   deleteLogo(userId: string): Observable<any> {
     const endpoint = `${environment.profileEndpointPath}/${userId}/images/logo`;
     return this.customRequest<any>(endpoint, 'DELETE');
