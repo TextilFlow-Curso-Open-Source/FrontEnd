@@ -18,8 +18,58 @@ export class AuthService extends BaseService<User> {
     super();
     this.resourceEndpoint = environment.userEndpointPath;
 
+    // ✅ NUEVO: Verificar y limpiar sesión anterior antes de inicializar
+    this.checkAndCleanPreviousSession();
+
     // Inicializar SessionService
     this.sessionService.init(this);
+  }
+
+  /**
+   * ✅ NUEVO: Verifica si hay datos de sesión anterior y los limpia si es necesario
+   */
+  private checkAndCleanPreviousSession(): void {
+    const sessionStart = sessionStorage.getItem('session_start');
+    const authToken = localStorage.getItem('auth_token');
+    const currentUser = localStorage.getItem('current_user');
+
+    // Si NO hay session_start pero SÍ hay datos de auth en localStorage,
+    // significa que es una nueva sesión del navegador con datos antiguos
+    if (!sessionStart && (authToken || currentUser)) {
+      console.log('🧹 Limpiando sesión anterior - Nueva sesión del navegador detectada');
+      this.clearAllSessionData();
+      return;
+    }
+
+    // Si hay session_start, verificar si la sesión ha expirado
+    if (sessionStart && authToken) {
+      const sessionStartTime = parseInt(sessionStart);
+      const currentTime = Date.now();
+      const MAX_SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 horas
+      const sessionElapsed = currentTime - sessionStartTime;
+
+      if (sessionElapsed >= MAX_SESSION_DURATION) {
+        console.log('🧹 Limpiando sesión anterior - Sesión expirada por tiempo');
+        this.clearAllSessionData();
+        return;
+      }
+    }
+  }
+
+  /**
+   * ✅ NUEVO: Limpia todos los datos de sesión
+   */
+  private clearAllSessionData(): void {
+    // Limpiar localStorage
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('current_user');
+    localStorage.removeItem('userLanguage'); // Si guardas idioma
+
+    // Limpiar sessionStorage
+    sessionStorage.removeItem('session_start');
+
+    // Cualquier otro dato de sesión que tengas
+    console.log('✅ Todos los datos de sesión anterior han sido limpiados');
   }
 
   /**
@@ -58,7 +108,6 @@ export class AuthService extends BaseService<User> {
       }
     });
   }
-
 
   /**
    * Registra un nuevo usuario con el backend real
@@ -222,8 +271,8 @@ export class AuthService extends BaseService<User> {
    * @param navigate Si debe navegar al login
    */
   logout(navigate: boolean = true): void {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('current_user');
+    // ✅ MEJORADO: Usar el método centralizado de limpieza
+    this.clearAllSessionData();
 
     // Finalizar sesión en el SessionService
     this.sessionService.endSession();
@@ -273,10 +322,6 @@ export class AuthService extends BaseService<User> {
 
   /**
    * Redirige basado en el rol del usuario
-   * @param role Rol del usuario
-   */
-  /**
-   * Redirige basado en el rol del usuario
    * *** UPDATED: Siempre redirige a /planes para obligar pago ***
    * @param role Rol del usuario
    */
@@ -320,11 +365,24 @@ export class AuthService extends BaseService<User> {
   }
 
   /**
-   * Verifica si el usuario está autenticado
+   * ✅ MEJORADO: Verifica si el usuario está autenticado Y tiene sesión activa
    */
   isAuthenticated(): boolean {
     const token = localStorage.getItem('auth_token');
-    return !!token && !token.startsWith('fake-jwt-token-') && !token.startsWith('temp-jwt-token-');
+    const sessionStart = sessionStorage.getItem('session_start');
+
+    // Debe tener token válido Y session_start (indica sesión activa del navegador)
+    const hasValidToken = !!token && !token.startsWith('fake-jwt-token-') && !token.startsWith('temp-jwt-token-');
+    const hasActiveSession = !!sessionStart;
+
+    // Si tiene token pero no sesión activa, limpiar datos
+    if (hasValidToken && !hasActiveSession) {
+      console.log('🧹 Token encontrado sin sesión activa - Limpiando datos');
+      this.clearAllSessionData();
+      return false;
+    }
+
+    return hasValidToken && hasActiveSession;
   }
 
   /**
@@ -370,6 +428,7 @@ export class AuthService extends BaseService<User> {
 
     return this.customRequest<any>(`/profiles/${currentUser.id}`, 'GET');
   }
+
   /**
    * Solicita restablecimiento de contraseña
    * @param email Email del usuario
