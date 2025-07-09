@@ -46,12 +46,10 @@ export class AuthService extends BaseService<User> {
 
     this.customRequest<any>('/authentication/sign-in', 'POST', signInRequest, false).subscribe({
       next: (response: any) => {
-        // Guardar token real
         this.saveSession(response.token, this.transformBackendUserToFrontend(response));
 
-        // Cargar y aplicar configuraciones del usuario
-        this.loadUserConfigurations(response.id.toString()).then(() => {
-          // Redirigir según rol después de aplicar configuraciones
+        // *** CAMBIO: Marcar como carga inicial ***
+        this.loadUserConfigurations(response.id.toString(), true).then(() => {
           this.redirectBasedOnRole(response.role);
         });
       },
@@ -163,11 +161,10 @@ export class AuthService extends BaseService<User> {
    * Carga y aplica las configuraciones del usuario
    * @param userId ID del usuario
    */
-  private async loadUserConfigurations(userId: string): Promise<void> {
+  private async loadUserConfigurations(userId: string, isInitialLoad: boolean = true): Promise<void> {
     try {
-      console.log('⚙️ Cargando configuraciones del usuario...');
+      console.log(`⚙️ Cargando configuraciones del usuario... (inicial: ${isInitialLoad})`);
 
-      // Importar servicios dinámicamente
       const [configModule, themeModule, translateModule] = await Promise.all([
         import('../../configuration/services/configuration.service'),
         import('../../core/services/theme.service'),
@@ -178,7 +175,6 @@ export class AuthService extends BaseService<User> {
       const themeService = this.injector.get(themeModule.ThemeService);
       const translateService = this.injector.get(translateModule.TranslateService);
 
-      // Cargar configuración del usuario
       configService.getByUserId(userId).subscribe({
         next: (configs: any) => {
           let userConfig = null;
@@ -192,17 +188,19 @@ export class AuthService extends BaseService<User> {
           if (userConfig) {
             console.log('📋 Aplicando configuraciones:', userConfig);
 
-            // Aplicar idioma del usuario
+            // Aplicar idioma siempre
             if (userConfig.language) {
               translateService.use(userConfig.language);
               localStorage.setItem('userLanguage', userConfig.language);
               console.log(`🌍 Idioma aplicado: ${userConfig.language}`);
             }
 
-            // Aplicar tema del usuario
-            if (userConfig.viewMode) {
+            // *** FIX CLAVE: Solo aplicar tema en carga inicial (login) ***
+            if (userConfig.viewMode && isInitialLoad) {
               themeService.setTheme(userConfig.viewMode);
-              console.log(`🎨 Tema aplicado: ${userConfig.viewMode}`);
+              console.log(`🎨 Tema aplicado (login inicial): ${userConfig.viewMode}`);
+            } else if (userConfig.viewMode && !isInitialLoad) {
+              console.log(`⚠️ Tema NO aplicado (recarga): ${userConfig.viewMode}`);
             }
 
             console.log('✅ Configuraciones aplicadas exitosamente');

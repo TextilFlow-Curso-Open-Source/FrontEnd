@@ -1,0 +1,156 @@
+<!-- src/app/shared/components/chatbot/chatbot.component.html -->
+<div class="chatbot-container">
+  <!-- Botón flotante -->
+  <button
+    class="chatbot-toggle-btn"
+    [class.active]="isOpen"
+    (click)="toggleChat()"
+    type="button"
+    [attr.aria-label]="'CHATBOT.OPEN_HELP_CHAT' | translate">
+    <svg *ngIf="!isOpen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <svg *ngIf="isOpen" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+
+  <!-- Ventana del chat -->
+  <div class="chatbot-window" [class.open]="isOpen">
+    <!-- Header -->
+    <div class="chatbot-header">
+      <div class="header-content">
+        <div class="bot-avatar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="10" x="3" y="11" rx="2"/>
+            <circle cx="12" cy="5" r="2"/>
+            <path d="m12 7 2 4h4l-2 4"/>
+          </svg>
+        </div>
+        <div class="header-text">
+          <h3>{{ 'CHATBOT.ASSISTANT_NAME' | translate }}</h3>
+          <span class="status">{{ 'CHATBOT.STATUS_ONLINE' | translate }}</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button
+          class="minimize-btn"
+          (click)="clearChat()"
+          type="button"
+          [title]="'CHATBOT.CLEAR_CHAT' | translate">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+            <path d="m8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+          </svg>
+        </button>
+        <button
+          class="close-btn"
+          (click)="minimizeChat()"
+          type="button"
+          [title]="'CHATBOT.CLOSE_CHAT' | translate">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mensajes -->
+    <div class="chatbot-messages" #messagesContainer (scroll)="onScroll()">
+      <div
+        *ngFor="let message of messages; trackBy: trackByMessageId"
+        class="message"
+        [class.user-message]="message.sender === 'user'"
+        [class.bot-message]="message.sender === 'bot'"
+        [class.typing-message]="message.isTyping">
+
+        <!-- Avatar -->
+        <div class="message-avatar" [ngClass]="getAvatarClass(message.sender)">
+          <!-- Por: -->
+          <img *ngIf="message.sender === 'user' && getUserProfileImage()"
+               [src]="getUserProfileImage()"
+               [alt]="currentUser?.name"
+               class="user-profile-img">
+          <span *ngIf="message.sender === 'user' && !getUserProfileImage()">{{ getUserInitial() }}</span>
+          <svg *ngIf="message.sender === 'bot'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="10" x="3" y="11" rx="2"/>
+            <circle cx="12" cy="5" r="2"/>
+            <path d="m12 7 2 4h4l-2 4"/>
+          </svg>
+        </div>
+
+        <!-- Contenido del mensaje -->
+        <div class="message-content">
+          <div class="message-bubble">
+            <!-- Indicador de escribiendo -->
+            <div *ngIf="message.isTyping" class="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+
+            <!-- Contenido normal -->
+            <div
+              *ngIf="!message.isTyping"
+              class="message-text"
+              [innerHTML]="formatMessageContent(message.content)">
+            </div>
+          </div>
+
+          <!-- Timestamp -->
+          <div *ngIf="!message.isTyping" class="message-time">
+            {{ formatTime(message.timestamp) }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de acceso rápido -->
+    <div class="quick-actions" *ngIf="messages.length <= 1 && !isTyping">
+      <div class="quick-actions-title">{{ 'CHATBOT.QUICK_ACTIONS.TITLE' | translate }}</div>
+      <button
+        *ngFor="let action of getQuickActions()"
+        class="quick-action-btn"
+        (click)="sendQuickMessage(action)"
+        type="button">
+        {{ action }}
+      </button>
+    </div>
+
+    <!-- Input de mensaje -->
+    <div class="chatbot-input">
+      <div class="input-container">
+        <input
+          #messageInput
+          type="text"
+          [(ngModel)]="currentMessage"
+          (keypress)="onKeyPress($event)"
+          [disabled]="isTyping"
+          [placeholder]="'CHATBOT.PLACEHOLDER_INPUT' | translate"
+          class="message-input"
+          maxlength="500">
+
+        <button
+          class="send-btn"
+          [disabled]="!currentMessage.trim() || isTyping"
+          (click)="sendMessage()"
+          type="button"
+          [title]="'CHATBOT.SEND_MESSAGE' | translate">
+          <svg *ngIf="!isTyping" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m22 2-7 20-4-9-9-4Z"/>
+            <path d="M22 2 11 13"/>
+          </svg>
+
+          <div *ngIf="isTyping" class="spinner"></div>
+        </button>
+      </div>
+
+      <div class="input-help">
+        <small>{{ 'CHATBOT.INPUT_HELP' | translate }}</small>
+      </div>
+    </div>
+  </div>
+</div>

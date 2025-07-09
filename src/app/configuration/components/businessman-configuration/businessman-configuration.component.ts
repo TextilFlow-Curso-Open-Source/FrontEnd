@@ -1,5 +1,5 @@
 // src/app/configuration/components/businessman-configuration/businessman-configuration.component.ts
-// CAMBIOS ESPECÍFICOS PARA CONECTAR CON EL BACKEND REAL
+// FIXED - Sin sobrescribir tema del usuario
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -49,9 +49,6 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
     { label: 'Corporativo', value: 'corporate' }
   ];
 
-  // ELIMINAR: batchCodeOptions ya no se usa
-  // batchCodeOptions = [...]
-
   // Estado de carga
   isLoading: boolean = false;
 
@@ -83,10 +80,14 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
       this.loadConfiguration();
     }
 
-    // CAMBIO: Suscribirse a cambios de tema del ThemeService
+    // *** MEJORADO: Solo sincronizar si NO estamos cargando ***
     this.subscriptions.add(
       this.themeService.theme$.subscribe((newTheme) => {
-        if (this.configuration && this.configuration.viewMode !== newTheme) {
+        if (this.configuration &&
+          this.configuration.viewMode !== newTheme &&
+          !this.isLoading) { // ← AGREGAR esta condición
+
+          console.log(`🎨 Tema cambiado externamente: ${this.configuration.viewMode} → ${newTheme}`);
           this.configuration.viewMode = newTheme;
           this.savePreferencesQuietly();
         }
@@ -116,9 +117,6 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ELIMINAR: updateTranslatedOptions() ya no se necesita
-  // updateTranslatedOptions(): void { ... }
-
   // CAMBIO 4: Actualizar loadConfiguration para usar nuevo servicio
   loadConfiguration(): void {
     this.isLoading = true;
@@ -129,6 +127,8 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
     this.configurationService.getConfigurationByUserId(userId).subscribe({
       next: (config) => {
         this.configuration = config;
+        // DIFERENCIA: Asegurar que sea businessman en frontend
+        this.configuration.userType = 'businessman';
         this.applyConfigurationSettings();
         this.isLoading = false;
       },
@@ -147,9 +147,6 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
           language: 'es',
           viewMode: 'auto',
           subscriptionPlan: 'basic'
-          // ELIMINAR: batchCodeFormat: 'automatic',
-          // ELIMINAR: createdAt: new Date().toISOString(),
-          // ELIMINAR: subscriptionStartDate: new Date().toISOString()
         });
       }
     });
@@ -176,18 +173,29 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
     localStorage.setItem('userLanguage', langCode);
   }
 
-  // CAMBIO 7: Actualizar saveConfiguration para usar nuevo backend
+  // *** FIXED: CAMBIO 7 - Actualizar saveConfiguration SIN sobrescribir tema ***
   saveConfiguration(): void {
     if (!this.configuration) return;
 
     this.isLoading = true;
 
-    // Sincronizar el tema actual con la configuración
-    this.configuration.viewMode = this.themeService.getThemeForConfiguration();
+    // *** ELIMINAR ESTA LÍNEA PROBLEMÁTICA ***
+    // this.configuration.viewMode = this.themeService.getThemeForConfiguration();
+
+    // *** MEJOR: Aplicar el tema seleccionado AL ThemeService ***
+    if (this.configuration.viewMode) {
+      this.themeService.setTheme(this.configuration.viewMode as any);
+    }
 
     if (this.configuration.id) {
       // Usar el nuevo método de actualización múltiple
       const configId = parseInt(this.configuration.id, 10);
+
+      console.log('💾 Guardando configuración:', {
+        language: this.configuration.language,
+        viewMode: this.configuration.viewMode,
+        subscriptionPlan: this.configuration.subscriptionPlan
+      });
 
       this.configurationService.updateMultiplePreferences(configId, {
         language: this.configuration.language,
@@ -195,7 +203,16 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
         subscriptionPlan: this.configuration.subscriptionPlan
       }).subscribe({
         next: (updatedConfig) => {
+          console.log('✅ Configuración guardada exitosamente:', updatedConfig);
+
           this.configuration = updatedConfig;
+          this.configuration.userType = 'businessman'; // Mantener tipo en frontend
+
+          // *** ASEGURAR que el tema se aplique después del guardado ***
+          if (updatedConfig.viewMode) {
+            this.themeService.setTheme(updatedConfig.viewMode as any);
+          }
+
           this.showNotification(
             this.translateService.instant('CONFIGURATION.SUCCESS_SAVE'),
             'success'
@@ -232,6 +249,7 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (updatedConfig) => {
         // Actualizar solo los datos necesarios sin mostrar notificación
+        this.configuration!.userType = 'businessman'; // Mantener tipo
         this.configuration!.subscriptionPlan = updatedConfig.subscriptionPlan;
         this.configuration!.updatedAt = updatedConfig.updatedAt;
       },
@@ -255,6 +273,7 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (updatedConfig) => {
         this.configuration = updatedConfig;
+        this.configuration.userType = 'businessman'; // Mantener tipo en frontend
         this.showNotification(
           this.translateService.instant('CONFIGURATION.SUCCESS_SAVE'),
           'success'
@@ -271,8 +290,6 @@ export class BusinessmanConfigurationComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-  // ELIMINAR: onThemeChange() ya no se necesita
 
   cancel(): void {
     this.loadConfiguration();

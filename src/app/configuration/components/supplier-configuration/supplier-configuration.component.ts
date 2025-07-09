@@ -83,10 +83,14 @@ export class SupplierConfigurationComponent implements OnInit, OnDestroy {
       this.loadConfiguration();
     }
 
-    // CAMBIO: Suscribirse a cambios de tema del ThemeService
+    // *** MEJORADO: Solo sincronizar si NO estamos cargando ***
     this.subscriptions.add(
       this.themeService.theme$.subscribe((newTheme) => {
-        if (this.configuration && this.configuration.viewMode !== newTheme) {
+        if (this.configuration &&
+          this.configuration.viewMode !== newTheme &&
+          !this.isLoading) { // ← AGREGAR esta condición
+
+          console.log(`🎨 Tema cambiado externamente: ${this.configuration.viewMode} → ${newTheme}`);
           this.configuration.viewMode = newTheme;
           this.savePreferencesQuietly();
         }
@@ -178,18 +182,27 @@ export class SupplierConfigurationComponent implements OnInit, OnDestroy {
     localStorage.setItem('userLanguage', langCode);
   }
 
-  // CAMBIO 7: Actualizar saveConfiguration para usar nuevo backend
   saveConfiguration(): void {
     if (!this.configuration) return;
 
     this.isLoading = true;
 
-    // Sincronizar el tema actual con la configuración
-    this.configuration.viewMode = this.themeService.getThemeForConfiguration();
+    // *** ELIMINAR ESTA LÍNEA PROBLEMÁTICA ***
+    // this.configuration.viewMode = this.themeService.getThemeForConfiguration();
+
+    // *** MEJOR: Aplicar el tema seleccionado AL ThemeService ***
+    if (this.configuration.viewMode) {
+      this.themeService.setTheme(this.configuration.viewMode as any);
+    }
 
     if (this.configuration.id) {
-      // Usar el nuevo método de actualización múltiple
       const configId = parseInt(this.configuration.id, 10);
+
+      console.log('💾 Guardando configuración:', {
+        language: this.configuration.language,
+        viewMode: this.configuration.viewMode,
+        subscriptionPlan: this.configuration.subscriptionPlan
+      });
 
       this.configurationService.updateMultiplePreferences(configId, {
         language: this.configuration.language,
@@ -197,8 +210,16 @@ export class SupplierConfigurationComponent implements OnInit, OnDestroy {
         subscriptionPlan: this.configuration.subscriptionPlan
       }).subscribe({
         next: (updatedConfig) => {
+          console.log('✅ Configuración guardada exitosamente:', updatedConfig);
+
           this.configuration = updatedConfig;
-          this.configuration.userType = 'supplier'; // Mantener tipo en frontend
+          this.configuration.userType = 'supplier';
+
+          // *** ASEGURAR que el tema se aplique después del guardado ***
+          if (updatedConfig.viewMode) {
+            this.themeService.setTheme(updatedConfig.viewMode as any);
+          }
+
           this.showNotification(
             this.translateService.instant('CONFIGURATION.SUCCESS_SAVE'),
             'success'
@@ -215,7 +236,6 @@ export class SupplierConfigurationComponent implements OnInit, OnDestroy {
         }
       });
     } else {
-      // CAMBIO 8: Ya no crear configuraciones, solo mostrar error
       console.warn('⚠️ Configuración sin ID - el backend debería crearla automáticamente');
       this.showNotification('Error: Configuración no encontrada', 'error');
       this.isLoading = false;

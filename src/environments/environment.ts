@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-
+  huggingFaceApiKey: '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',
   // Backend real URL
   serverBaseUrl: 'http://3.135.127.195:5001/api/v1',
   //Production URL

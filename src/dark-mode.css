@@ -3967,3 +3967,234 @@
 [data-theme="dark"] .back-to-login a:hover {
   color: var(--primary-light) !important;
 }
+/* ============================= */
+/* ===== CHATBOT DARK MODE ===== */
+/* ============================= */
+[data-theme="dark"] .chatbot-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+/* Botón flotante en dark mode */
+[data-theme="dark"] .chatbot-toggle-btn {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+  box-shadow: 0 4px 20px rgba(166, 139, 107, 0.4) !important;
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .chatbot-toggle-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(166, 139, 107, 0.6) !important;
+}
+
+[data-theme="dark"] .chatbot-toggle-btn.active {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%) !important;
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4) !important;
+}
+
+[data-theme="dark"] .chatbot-toggle-btn:before {
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%) !important;
+}
+
+/* Ventana del chat en dark mode */
+[data-theme="dark"] .chatbot-window {
+  background: var(--card-background) !important;
+  box-shadow: var(--shadow-medium) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Header en dark mode */
+[data-theme="dark"] .chatbot-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .bot-avatar {
+  background: rgba(166, 139, 107, 0.2) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+[data-theme="dark"] .header-text h3 {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .header-text .status {
+  color: rgba(224, 224, 224, 0.9) !important;
+}
+
+[data-theme="dark"] .header-text .status:before {
+  background: var(--success-color) !important;
+}
+
+[data-theme="dark"] .minimize-btn,
+[data-theme="dark"] .close-btn {
+  background: rgba(224, 224, 224, 0.1) !important;
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .minimize-btn:hover,
+[data-theme="dark"] .close-btn:hover {
+  background: rgba(224, 224, 224, 0.2) !important;
+}
+
+/* Área de mensajes en dark mode */
+[data-theme="dark"] .chatbot-messages {
+  background: var(--surface-color) !important;
+}
+
+[data-theme="dark"] .chatbot-messages::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+[data-theme="dark"] .chatbot-messages::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+[data-theme="dark"] .chatbot-messages::-webkit-scrollbar-thumb {
+  background: var(--primary-color) !important;
+  border-radius: 2px !important;
+}
+
+[data-theme="dark"] .chatbot-messages::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark) !important;
+}
+
+/* Avatares de mensajes en dark mode */
+[data-theme="dark"] .message-avatar.user-avatar {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .message-avatar.bot-avatar {
+  background: var(--border-light) !important;
+  color: var(--text-light) !important;
+}
+
+/* Burbujas de mensajes en dark mode */
+[data-theme="dark"] .message-bubble {
+  background: var(--input-background) !important;
+  color: var(--text-dark) !important;
+  box-shadow: var(--shadow-light) !important;
+}
+
+[data-theme="dark"] .user-message .message-bubble {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .message-text {
+  color: inherit !important;
+}
+
+[data-theme="dark"] .message-text strong {
+  color: inherit !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="dark"] .message-text em {
+  color: inherit !important;
+}
+
+[data-theme="dark"] .message-time {
+  color: var(--text-muted) !important;
+}
+
+/* Indicador de escritura en dark mode */
+[data-theme="dark"] .typing-indicator span {
+  background: var(--text-muted) !important;
+}
+
+/* Botones de acceso rápido en dark mode */
+[data-theme="dark"] .quick-actions {
+  background: var(--surface-color) !important;
+}
+
+[data-theme="dark"] .quick-actions-title {
+  color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .quick-action-btn {
+  background: var(--input-background) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .quick-action-btn:hover {
+  background: var(--border-light) !important;
+  border-color: var(--primary-color) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Input de mensaje en dark mode */
+[data-theme="dark"] .chatbot-input {
+  background: var(--card-background) !important;
+  border-top: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .input-container {
+  background: var(--surface-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .input-container:focus-within {
+  border-color: var(--primary-color) !important;
+  background: var(--input-background) !important;
+}
+
+[data-theme="dark"] .message-input {
+  background: transparent !important;
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .message-input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .message-input:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+[data-theme="dark"] .send-btn {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .send-btn:hover:not(:disabled) {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(166, 139, 107, 0.4) !important;
+}
+
+[data-theme="dark"] .send-btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .input-help small {
+  color: var(--text-muted) !important;
+}
+
+/* Spinner en dark mode */
+[data-theme="dark"] .spinner {
+  border: 2px solid rgba(224, 224, 224, 0.3) !important;
+  border-top: 2px solid var(--text-dark) !important;
+}
+
+/* Responsive dark mode */
+@media (max-width: 480px) {
+  [data-theme="dark"] .chatbot-window {
+    background: var(--card-background) !important;
+    border: 1px solid var(--border-color) !important;
+  }
+}
+
+/* Mejoras de scrollbar para el chatbot específicamente */
+[data-theme="dark"] .chatbot-messages {
+  scrollbar-color: var(--primary-color) var(--surface-color) !important;
+}
+
+/* Efecto de hover en mensajes */
+[data-theme="dark"] .message:hover .message-bubble {
+  box-shadow: var(--shadow-medium) !important;
+}
