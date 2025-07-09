@@ -108,8 +108,8 @@ export class ChatbotService {
    */
   private getBatchesInfo(userId: string, role: string): Observable<string> {
     const endpoint = role === 'businessman'
-      ? ${environment.batchesEndpointPath}/businessman/${userId}
-  : ${environment.batchesEndpointPath}/supplier/${userId};
+      ? `${environment.batchesEndpointPath}/businessman/${userId}`
+      : `${environment.batchesEndpointPath}/supplier/${userId}`;
 
     return this.makeApiCall(endpoint).pipe(
       map((batches: any[]) => {
@@ -125,7 +125,7 @@ export class ChatbotService {
         let response = this.translate.instant('CHATBOT.BATCHES.SUMMARY', { count: batches.length }) + '\n\n';
 
         Object.entries(statusCounts).forEach(([status, count]) => {
-          response += • ${status}: ${count} lote(s)\n;
+          response += `• ${status}: ${count} lote(s)\n`;
         });
 
         // Mostrar los últimos 3 lotes
@@ -135,7 +135,7 @@ export class ChatbotService {
         recentBatches.forEach(batch => {
           const code = batch.code || this.translate.instant('CHATBOT.BATCHES.NO_CODE');
           const client = batch.client || this.translate.instant('CHATBOT.BATCHES.NO_CLIENT');
-          response += • ${code} - ${batch.status} - ${client}\n;
+          response += `• ${code} - ${batch.status} - ${client}\n`;
         });
 
         return response;
@@ -182,8 +182,8 @@ export class ChatbotService {
    */
   private getRequestsInfo(userId: string, role: string): Observable<string> {
     const endpoint = role === 'businessman'
-      ? ${environment.businessSupplierRequests}/businessman/${userId}
-  : ${environment.businessSupplierRequests}/supplier/${userId};
+      ? `${environment.businessSupplierRequests}/businessman/${userId}`
+      : `${environment.businessSupplierRequests}/supplier/${userId}`;
 
     return this.makeApiCall(endpoint).pipe(
       map((requests: any[]) => {
@@ -199,7 +199,7 @@ export class ChatbotService {
         let response = this.translate.instant('CHATBOT.REQUESTS.SUMMARY', { count: requests.length }) + '\n\n';
 
         Object.entries(statusCounts).forEach(([status, count]) => {
-          response += • ${status}: ${count} solicitud(es)\n;
+          response += `• ${status}: ${count} solicitud(es)\n`;
         });
 
         return response;
@@ -213,8 +213,8 @@ export class ChatbotService {
    */
   private getObservationsInfo(userId: string, role: string): Observable<string> {
     const endpoint = role === 'businessman'
-      ? ${environment.observationEndpointPath}/businessman/${userId}
-  : ${environment.observationEndpointPath}/supplier/${userId};
+      ? `${environment.observationEndpointPath}/businessman/${userId}`
+      : `${environment.observationEndpointPath}/supplier/${userId}`;
 
     return this.makeApiCall(endpoint).pipe(
       map((observations: any[]) => {
@@ -228,7 +228,7 @@ export class ChatbotService {
         const recent = observations.slice(0, 3);
         recent.forEach(obs => {
           const code = obs.batchCode || this.translate.instant('CHATBOT.OBSERVATIONS.NO_CODE');
-          response += • Lote ${code} - ${obs.status}\n;
+          response += `• Lote ${code} - ${obs.status}\n`;
         });
 
         return response;
@@ -241,13 +241,13 @@ export class ChatbotService {
    * Realiza llamadas a tu API
    */
   private makeApiCall(endpoint: string): Observable<any> {
-    const url = ${environment.serverBaseUrl}${endpoint};
+    const url = `${environment.serverBaseUrl}${endpoint}`;
 
     let headers = new HttpHeaders();
     const token = localStorage.getItem(environment.tokenStorageKey);
 
     if (token && !token.startsWith('fake-jwt-token-') && !token.startsWith('temp-jwt-token-')) {
-      headers = headers.set('Authorization', ${environment.tokenPrefix}${token});
+      headers = headers.set('Authorization', `${environment.tokenPrefix}${token}`);
     }
 
     return this.http.get(url, { headers });
@@ -263,7 +263,7 @@ export class ChatbotService {
       let helpMessage = this.translate.instant('CHATBOT.PLATFORM_HELP.TITLE') + '\n\n';
       helpMessage += this.translate.instant('CHATBOT.PLATFORM_HELP.QUERIES_TITLE') + '\n';
       helpMessage += this.translate.instant('CHATBOT.PLATFORM_HELP.QUERIES_LIST') + '\n\n';
-      helpMessage += '💼 *Según tu rol:*\n';
+      helpMessage += '💼 **Según tu rol:**\n';
 
       if (currentUserRole === 'businessman') {
         helpMessage += this.translate.instant('CHATBOT.PLATFORM_HELP.ROLE_HELP_BUSINESSMAN');
@@ -306,7 +306,7 @@ export class ChatbotService {
    */
   private buildUserContext(message: string, currentUser: any): Observable<string> {
     if (!currentUser?.id) {
-      return of(Usuario no autenticado. Plataforma: TextilFlow - conecta businessmen con suppliers.);
+      return of(`Usuario no autenticado. Plataforma: TextilFlow - conecta businessmen con suppliers.`);
     }
 
     const intent = this.analyzeIntent(message);
@@ -315,8 +315,8 @@ export class ChatbotService {
     // Obtener datos relevantes según la consulta
     if (intent.intent === 'check_batches' || message.toLowerCase().includes('lote')) {
       const endpoint = currentUser.role === 'businessman'
-        ? ${environment.batchesEndpointPath}/businessman/${currentUser.id}
-    : ${environment.batchesEndpointPath}/supplier/${currentUser.id};
+        ? `${environment.batchesEndpointPath}/businessman/${currentUser.id}`
+        : `${environment.batchesEndpointPath}/supplier/${currentUser.id}`;
       contextPromises.push(this.makeApiCall(endpoint).pipe(catchError(() => of([]))));
     }
 
@@ -326,14 +326,14 @@ export class ChatbotService {
 
     if (intent.intent === 'check_requests' || message.toLowerCase().includes('solicitud')) {
       const endpoint = currentUser.role === 'businessman'
-        ? ${environment.businessSupplierRequests}/businessman/${currentUser.id}
-    : ${environment.businessSupplierRequests}/supplier/${currentUser.id};
+        ? `${environment.businessSupplierRequests}/businessman/${currentUser.id}`
+        : `${environment.businessSupplierRequests}/supplier/${currentUser.id}`;
       contextPromises.push(this.makeApiCall(endpoint).pipe(catchError(() => of([]))));
     }
 
     // Si no hay datos específicos que obtener, devolver contexto básico
     if (contextPromises.length === 0) {
-      return of(Usuario: ${currentUser.name}, Rol: ${currentUser.role}. Plataforma: TextilFlow para textiles.);
+      return of(`Usuario: ${currentUser.name}, Rol: ${currentUser.role}. Plataforma: TextilFlow para textiles.`);
     }
 
     // Combinar todos los datos
@@ -363,7 +363,7 @@ export class ChatbotService {
    */
   private callAIWithContext(message: string, context: string): Observable<string> {
     const headers = new HttpHeaders({
-      'Authorization': Bearer ${this.HF_API_KEY},
+      'Authorization': `Bearer ${this.HF_API_KEY}`,
       'Content-Type': 'application/json'
     });
 
@@ -454,7 +454,7 @@ INSTRUCCIONES:
 
     return Object.entries(counts)
       .slice(0, 3) // Solo mostrar top 3
-      .map(([key, value]) => ${key}(${value}))
-  .join(', ');
+      .map(([key, value]) => `${key}(${value})`)
+      .join(', ');
   }
 }
