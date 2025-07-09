@@ -9,6 +9,7 @@ import { AppInputComponent } from '../../../core/components/app-input/app-input.
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { SupplierService } from '../../../supplier/services/supplier.service';
 
 @Component({
   selector: 'app-businessman-observation',
@@ -51,7 +52,7 @@ export class BusinessmanObservationComponent implements OnInit {
   notification = {
     show: false,
     message: '',
-    type: 'success' as 'success' | 'error' | 'warning' | 'info'
+    type: 'success' as 'success' | 'error' | 'warning' | 'info' | 'contact'
   };
 
   // Constantes para estados
@@ -60,7 +61,8 @@ export class BusinessmanObservationComponent implements OnInit {
   constructor(
     private observationService: ObservationService,
     private authService: AuthService,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private supplierService: SupplierService
   ) {}
 
   ngOnInit(): void {
@@ -234,11 +236,16 @@ export class BusinessmanObservationComponent implements OnInit {
 
   // Iconos para estados
   getStatusIcon(status: string): string {
-    switch (status) {
-      case OBSERVATION_STATUS.PENDIENTE:
+    const normalizedStatus = status?.toUpperCase() || '';
+    switch (normalizedStatus) {
+      case 'PENDIENTE':
         return 'schedule';
-      case OBSERVATION_STATUS.VISTO:
-        return 'visibility';
+      case 'EN_REVISION':
+        return 'visibility';  // ← Icono de "visto"
+      case 'RESUELTA':
+        return 'check_circle';
+      case 'RECHAZADA':
+        return 'cancel';
       default:
         return 'help';
     }
@@ -246,11 +253,16 @@ export class BusinessmanObservationComponent implements OnInit {
 
   // Clase CSS para estados
   getStatusClass(status: string): string {
-    switch (status.toLowerCase()) {
-      case OBSERVATION_STATUS.PENDIENTE.toLowerCase():
+    const normalizedStatus = status?.toUpperCase() || '';
+    switch (normalizedStatus) {
+      case 'PENDIENTE':
         return 'status-pending';
-      case OBSERVATION_STATUS.VISTO.toLowerCase():
-        return 'status-viewed';
+      case 'EN_REVISION':
+        return 'status-viewed';  // ← Usar la clase de "visto"
+      case 'RESUELTA':
+        return 'status-resolved';
+      case 'RECHAZADA':
+        return 'status-rejected';
       default:
         return '';
     }
@@ -359,14 +371,68 @@ export class BusinessmanObservationComponent implements OnInit {
 
   // Obtener texto del estado en el idioma actual
   getStatusText(status: string): string {
-    switch (status) {
-      case OBSERVATION_STATUS.PENDIENTE:
+    const normalizedStatus = status?.toUpperCase() || '';
+    switch (normalizedStatus) {
+      case 'PENDIENTE':
         return this.translateService.instant('OBSERVATION.STATUS_PENDING');
-      case OBSERVATION_STATUS.VISTO:
-        return this.translateService.instant('OBSERVATION.STATUS_VIEWED');
+      case 'EN_REVISION':
+        return this.translateService.instant('OBSERVATION.STATUS_VIEWED'); // Usar "Visto"
+      case 'RESUELTA':
+        return this.translateService.instant('OBSERVATION.STATUS_RESOLVED');
+      case 'RECHAZADA':
+        return this.translateService.instant('OBSERVATION.STATUS_REJECTED');
       default:
         return status;
     }
+  }
+
+// Agregar variable de estado
+  isLoadingContact: boolean = false;
+  contactInfo: any = null;
+
+// Método con indicador de carga
+  // REEMPLAZAR el método showContactInfo existente
+  showContactInfo(observation: Observation): void {
+    if (observation.status?.toUpperCase() === 'EN_REVISION') {
+      this.isLoadingContact = true;
+
+      this.supplierService.getProfileById(observation.supplierId.toString()).subscribe({
+        next: (supplier) => {
+          this.isLoadingContact = false;
+
+          // Usar la nueva notificación de contacto
+          this.contactInfo = {
+            supplierName: supplier.name,
+            companyName: supplier.companyName || 'Sin nombre de empresa',
+            phone: supplier.phone || 'No disponible',
+            email: supplier.email,
+            location: this.formatLocation(supplier),
+            specialization: supplier.specialization || 'Especialización general',
+            description: supplier.description,
+            batchCode: observation.batchCode
+          };
+
+          this.notification = {
+            show: true,
+            message: '',
+            type: 'contact' as any
+          };
+        },
+        error: (error) => {
+          this.isLoadingContact = false;
+          console.error('Error:', error);
+          this.showNotification('Error al cargar información del proveedor', 'error');
+        }
+      });
+    }
+  }
+
+// Método auxiliar para formatear ubicación
+  private formatLocation(supplier: any): string {
+    const parts = [];
+    if (supplier.city) parts.push(supplier.city);
+    if (supplier.country) parts.push(supplier.country);
+    return parts.length > 0 ? parts.join(', ') : 'Ubicación no especificada';
   }
 
   // Verificar si es una observación reciente (menos de 24 horas)
@@ -376,4 +442,29 @@ export class BusinessmanObservationComponent implements OnInit {
     const hoursDiff = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60));
     return hoursDiff < 24;
   }
+  // AGREGAR estos métodos al final, antes del último }
+
+// Mapea el estado del backend a un label amigable para mostrar
+  getStatusDisplayLabel(status: string): string {
+    const normalizedStatus = status?.toUpperCase() || '';
+    switch (normalizedStatus) {
+      case 'PENDIENTE':
+        return 'Pendiente';
+      case 'EN_REVISION':
+        return 'Visto';  // ← Mostramos "Visto" pero internamente es "EN_REVISION"
+      case 'RESUELTA':
+        return 'Resuelta';
+      case 'RECHAZADA':
+        return 'Rechazada';
+      default:
+        return status;
+    }
+  }
+
+// Método para verificar si una observación fue vista
+  isObservationViewed(observation: Observation): boolean {
+    return observation.status?.toUpperCase() === 'EN_REVISION';
+  }
 }
+
+

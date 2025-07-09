@@ -58,11 +58,16 @@ export class SupplierObservationComponent implements OnInit {
     private authService: AuthService
   ) {}
 
+
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
+    console.log('Usuario actual:', user); // Debug
     if (user && user.id) {
       this.currentSupplierId = user.id;
+      console.log('Supplier ID:', this.currentSupplierId); // Debug
       this.loadObservations();
+    } else {
+      console.error('No se pudo obtener el usuario actual');
     }
   }
 
@@ -75,9 +80,11 @@ export class SupplierObservationComponent implements OnInit {
         console.log("ID de proveedor actual:", this.currentSupplierId);
 
         // Filtrar observaciones del proveedor actual
-        this.observations = observations.filter(obs =>
-          obs.supplierId.toString() === this.currentSupplierId
-        );
+
+        this.observations = observations.filter(obs => {
+          console.log('Comparando:', obs.supplierId.toString(), 'con', this.currentSupplierId);
+          return obs.supplierId.toString() === this.currentSupplierId;
+        });
 
 
         console.log("Observaciones filtradas:", this.observations);
@@ -95,26 +102,56 @@ export class SupplierObservationComponent implements OnInit {
 
   // Toggle estado de observación con un click
   toggleObservationStatus(observation: Observation): void {
-    if (!observation.id) return;
+    console.log('Intentando cambiar estado de:', observation);
 
-    // Cambiar estado entre PENDIENTE y VISTO
-    const newStatus = observation.status === OBSERVATION_STATUS.PENDIENTE
-      ? OBSERVATION_STATUS.VISTO
-      : OBSERVATION_STATUS.PENDIENTE;
+    if (!observation.id) {
+      console.error('Observación sin ID:', observation);
+      return;
+    }
+
+    console.log('Estado actual:', observation.status);
+
+    // Normalizar el estado actual para comparación
+    const currentStatus = observation.status?.toUpperCase() || '';
+    console.log('Estado normalizado:', currentStatus);
+
+    // Lógica de toggle: PENDIENTE ↔ EN_REVISION (que se muestra como "Visto")
+    let newStatus: string;
+    if (currentStatus === 'PENDIENTE') {
+      newStatus = 'EN_REVISION';  // Backend recibe EN_REVISION
+    } else if (currentStatus === 'EN_REVISION') {
+      newStatus = 'PENDIENTE';
+    } else {
+      // Si es otro estado, cambiar a EN_REVISION por defecto
+      console.warn('Estado no reconocido:', observation.status, 'cambiando a EN_REVISION');
+      newStatus = 'EN_REVISION';
+    }
+
+    console.log('Nuevo estado (backend):', newStatus);
+    console.log('Se mostrará como:', this.getStatusDisplayLabel(newStatus));
 
     const updatedObservation: Observation = {
       ...observation,
-      status: newStatus
+      status: newStatus as ObservationStatus
     };
 
+    console.log('Enviando actualización:', updatedObservation);
+
     this.observationService.update(observation.id, updatedObservation).subscribe({
-      next: () => {
-        const statusText = newStatus === OBSERVATION_STATUS.VISTO ? 'marcada como vista' : 'marcada como pendiente';
+      next: (response) => {
+        console.log('Respuesta del servidor:', response);
+        // Mostrar notificación con label amigable
+        const statusText = newStatus === 'EN_REVISION' ? 'marcada como vista' : 'marcada como pendiente';
         this.showNotification(`Observación ${statusText}`, 'success');
+
         this.loadObservations();
+
+        if (this.selectedObservation && this.selectedObservation.id === observation.id) {
+          this.selectedObservation = { ...this.selectedObservation, status: newStatus as ObservationStatus };
+        }
       },
       error: (error: any) => {
-        console.error('Error al actualizar observación:', error);
+        console.error('Error completo:', error);
         this.showNotification('Error al actualizar el estado', 'error');
       }
     });
@@ -131,9 +168,9 @@ export class SupplierObservationComponent implements OnInit {
     this.showQuickFilters = !this.showQuickFilters;
   }
 
-  // Filtrar por estado
-  setStatusFilter(status: ObservationStatus | null): void {
-    this.statusFilter = status;
+  // En lugar de usar las constantes del enum viejo, usa strings directamente
+  setStatusFilter(status: string | null): void {
+    this.statusFilter = status as ObservationStatus;
     this.filterObservations();
   }
 
@@ -219,17 +256,7 @@ export class SupplierObservationComponent implements OnInit {
     return hoursDiff < 24;
   }
 
-  // Iconos para estados
-  getStatusIcon(status: string): string {
-    switch (status) {
-      case OBSERVATION_STATUS.VISTO:
-        return 'visibility';
-      case OBSERVATION_STATUS.PENDIENTE:
-        return 'schedule';
-      default:
-        return 'help';
-    }
-  }
+
 
   // Vista de detalles
   viewObservationDetails(observation: Observation): void {
@@ -252,17 +279,7 @@ export class SupplierObservationComponent implements OnInit {
     };
   }
 
-  // Obtener clase de estado para colorear
-  getStatusClass(status: string): string {
-    switch (status.toLowerCase()) {
-      case OBSERVATION_STATUS.VISTO.toLowerCase():
-        return 'status-seen';
-      case OBSERVATION_STATUS.PENDIENTE.toLowerCase():
-        return 'status-pending';
-      default:
-        return '';
-    }
-  }
+
 
   // Formatear fecha
   formatDate(date: string): string {
@@ -274,6 +291,84 @@ export class SupplierObservationComponent implements OnInit {
       minute: '2-digit'
     });
   }
+  // Método para obtener el label del botón de toggle
+  getToggleButtonLabel(status: string): string {
+    const normalizedStatus = status?.toUpperCase() || '';
+    if (normalizedStatus === 'PENDIENTE') {
+      return 'OBSERVATION_SUPPLIER.MARK_AS_SEEN'; // "Marcar como vista"
+    } else if (normalizedStatus === 'EN_REVISION') {
+      return 'OBSERVATION_SUPPLIER.MARK_AS_PENDING'; // "Marcar como pendiente"
+    } else {
+      return 'OBSERVATION_SUPPLIER.MARK_AS_SEEN'; // Por defecto
+    }
+  }
+
+// Método para obtener el ícono del botón de toggle
+  getToggleButtonIcon(status: string): string {
+    const normalizedStatus = status?.toUpperCase() || '';
+    if (normalizedStatus === 'PENDIENTE') {
+      return 'visibility'; // Ícono para marcar como vista
+    } else if (normalizedStatus === 'EN_REVISION') {
+      return 'schedule'; // Ícono para marcar como pendiente
+    } else {
+      return 'visibility'; // Por defecto
+    }
+  }
+  // Agregar estos métodos a tu componente
+
+// Mapea el estado del backend a un label amigable para mostrar
+  getStatusDisplayLabel(status: string): string {
+    const normalizedStatus = status?.toUpperCase() || '';
+    switch (normalizedStatus) {
+      case 'PENDIENTE':
+        return 'Pendiente';
+      case 'EN_REVISION':
+        return 'Visto';  // ← Mostramos "Visto" pero internamente es "EN_REVISION"
+      case 'RESUELTA':
+        return 'Resuelta';
+      case 'RECHAZADA':
+        return 'Rechazada';
+      default:
+        return status;
+    }
+  }
+
+// Mapea el estado del backend a clases CSS
+  getStatusClass(status: string): string {
+    const normalizedStatus = status?.toUpperCase() || '';
+    switch (normalizedStatus) {
+      case 'EN_REVISION':
+        return 'status-seen';    // ← Usamos la clase de "visto"
+      case 'PENDIENTE':
+        return 'status-pending';
+      case 'RESUELTA':
+        return 'status-resolved';
+      case 'RECHAZADA':
+        return 'status-rejected';
+      default:
+        return '';
+    }
+  }
+
+// Mapea el estado del backend a iconos
+  getStatusIcon(status: string): string {
+    const normalizedStatus = status?.toUpperCase() || '';
+    switch (normalizedStatus) {
+      case 'EN_REVISION':
+        return 'visibility';     // ← Icono de "visto"
+      case 'PENDIENTE':
+        return 'schedule';
+      case 'RESUELTA':
+        return 'check_circle';
+      case 'RECHAZADA':
+        return 'cancel';
+      default:
+        return 'help';
+    }
+  }
+
+
+
 
   // Abrir modal de imagen
   openImageModal(imageUrl: string): void {

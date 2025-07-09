@@ -2,7 +2,8 @@
 
 export const OBSERVATION_STATUS = {
   PENDIENTE: 'Pendiente',
-  VISTO: 'Visto'
+  VISTO: 'Visto',
+  EN_REVISION: 'EN_REVISION'
 } as const;
 
 export type ObservationStatus = typeof OBSERVATION_STATUS[keyof typeof OBSERVATION_STATUS];

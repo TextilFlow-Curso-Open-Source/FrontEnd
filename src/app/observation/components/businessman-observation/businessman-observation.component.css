@@ -724,3 +724,167 @@
     align-items: stretch;
   }
 }
+/* Agregar estos estilos al final del CSS */
+
+/* Status clickable para mostrar contacto */
+.status-badge.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.status-badge.clickable:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.contact-icon {
+  font-size: 14px;
+  margin-left: 4px;
+  opacity: 0.7;
+}
+
+.status-badge.clickable:hover .contact-icon {
+  opacity: 1;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Sección de información de contacto */
+.contact-info-section {
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.contact-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.contact-header i {
+  color: #1976d2;
+  font-size: 24px;
+}
+
+.contact-header h3 {
+  margin: 0;
+  color: #1976d2;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.contact-content {
+  color: #1565c0;
+  line-height: 1.6;
+}
+
+.contact-content p {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+}
+
+/* Mejorar el estilo de status-viewed */
+.status-viewed.clickable {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+}
+
+.status-viewed.clickable:hover {
+  background: #1976d2;
+  color: white;
+  border-color: #1976d2;
+}
+
+
+/* Agregar al final del businessman-observation.component.css */
+
+/* Status clickable para mostrar contacto */
+.status-badge.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.status-badge.clickable:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.contact-icon {
+  font-size: 14px;
+  margin-left: 4px;
+  opacity: 0.7;
+}
+
+.status-badge.clickable:hover .contact-icon {
+  opacity: 1;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Sección de información de contacto */
+.contact-info-section {
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.contact-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.contact-header i {
+  color: #1976d2;
+  font-size: 24px;
+}
+
+.contact-header h3 {
+  margin: 0;
+  color: #1976d2;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.contact-content {
+  color: #1565c0;
+  line-height: 1.6;
+}
+
+.contact-content p {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+}
+
+/* Mejorar el estilo de status-viewed */
+.status-viewed.clickable {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+}
+
+.status-viewed.clickable:hover {
+  background: #1976d2;
+  color: white;
+  border-color: #1976d2;
+}

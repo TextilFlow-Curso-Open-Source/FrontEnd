@@ -78,3 +78,305 @@
   color: #866C52; /* tu color corporativo */
 }
 .app-notification--success .app-notification-icon { color: #866C52; }
+/* Agregar al final de app-notification.component.css */
+
+/* Estilos para notificación de contacto */
+.contact-notification {
+  padding: 20px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.contact-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 16px;
+}
+
+.contact-icon {
+  color: #3b82f6;
+  font-size: 28px;
+}
+
+.contact-header h3 {
+  flex: 1;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.batch-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f3f4f6;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.batch-info mat-icon {
+  color: #3b82f6;
+}
+
+.contact-grid {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.contact-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.contact-item mat-icon {
+  color: #6b7280;
+  font-size: 20px;
+  margin-top: 2px;
+}
+
+.contact-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contact-details strong {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.contact-details span {
+  color: #6b7280;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  background: #f3f4f6;
+  color: #3b82f6;
+}
+
+.contact-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+/* Responsivo mejorado - agregar al final de app-notification.component.css */
+
+/* Tablet y pantallas medianas */
+@media (max-width: 1024px) {
+  .app-notification {
+    width: 90%;
+    max-width: 450px;
+    padding: 1.25rem;
+  }
+
+  .contact-notification {
+    max-width: 450px;
+  }
+
+  .contact-grid {
+    gap: 12px;
+  }
+
+  .contact-item {
+    padding: 10px;
+  }
+}
+
+/* Móviles grandes */
+@media (max-width: 768px) {
+  .app-notification-overlay {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: 20vh;
+  }
+
+  .app-notification {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .contact-notification {
+    padding: 16px;
+    max-width: 100%;
+  }
+
+  .contact-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 12px;
+  }
+
+  .contact-header h3 {
+    font-size: 16px;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .contact-item {
+    padding: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .contact-item mat-icon {
+    align-self: flex-start;
+  }
+
+  .contact-details {
+    width: 100%;
+  }
+
+  .contact-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .contact-actions app-button {
+    width: 100%;
+  }
+
+  .copy-btn {
+    align-self: flex-end;
+    margin-top: -8px;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+  .app-notification-overlay {
+    padding: 8px;
+    padding-top: 15vh;
+  }
+
+  .app-notification {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .contact-notification {
+    padding: 12px;
+  }
+
+  .app-notification-content {
+    margin-bottom: 0.75rem;
+  }
+
+  .app-notification-icon {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+  }
+
+  .app-notification-message {
+    font-size: 0.9rem;
+  }
+
+  .contact-header {
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+  }
+
+  .contact-header h3 {
+    font-size: 14px;
+  }
+
+  .contact-icon {
+    font-size: 20px;
+  }
+
+  .batch-info {
+    padding: 8px;
+    margin-bottom: 16px;
+  }
+
+  .contact-item {
+    padding: 6px;
+  }
+
+  .contact-details strong {
+    font-size: 12px;
+  }
+
+  .contact-details span {
+    font-size: 12px;
+  }
+
+  .contact-actions {
+    padding-top: 12px;
+  }
+}
+
+/* Pantallas muy pequeñas */
+@media (max-width: 360px) {
+  .app-notification-overlay {
+    padding: 4px;
+    padding-top: 10vh;
+  }
+
+  .contact-notification {
+    padding: 8px;
+  }
+
+  .contact-header h3 {
+    font-size: 13px;
+  }
+
+  .contact-icon {
+    font-size: 18px;
+  }
+}
+
+/* Orientación landscape en móviles */
+@media (max-height: 600px) and (orientation: landscape) {
+  .app-notification-overlay {
+    padding-top: 5vh;
+    align-items: flex-start;
+  }
+
+  .app-notification {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .contact-notification {
+    max-height: calc(90vh - 40px);
+    overflow-y: auto;
+  }
+}

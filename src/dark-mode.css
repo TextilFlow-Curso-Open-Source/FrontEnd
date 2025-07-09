@@ -4198,3 +4198,524 @@
 [data-theme="dark"] .message:hover .message-bubble {
   box-shadow: var(--shadow-medium) !important;
 }
+/* ===== APP NOTIFICATION DARK MODE ===== */
+
+/* Overlay y contenedor principal */
+[data-theme="dark"] .app-notification-overlay {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+[data-theme="dark"] .app-notification {
+  background-color: var(--card-background) !important;
+  box-shadow: var(--shadow-medium) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Contenido de notificación normal */
+[data-theme="dark"] .app-notification-content {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .app-notification-message {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .app-notification-close {
+  color: var(--text-muted) !important;
+  background: transparent !important;
+}
+
+[data-theme="dark"] .app-notification-close:hover {
+  color: var(--text-dark) !important;
+  background: var(--surface-color) !important;
+}
+
+/* Iconos de estado en modo oscuro */
+[data-theme="dark"] .app-notification--error .app-notification-icon {
+  color: var(--error-color) !important;
+}
+
+[data-theme="dark"] .app-notification--warning .app-notification-icon {
+  color: var(--warning-color) !important;
+}
+
+[data-theme="dark"] .app-notification--info .app-notification-icon,
+[data-theme="dark"] .app-notification--success .app-notification-icon {
+  color: var(--primary-color) !important;
+}
+
+/* ===== NOTIFICACIÓN DE CONTACTO - DARK MODE ===== */
+
+/* Contenedor principal de contacto */
+[data-theme="dark"] .contact-notification {
+  background-color: var(--card-background) !important;
+  color: var(--text-dark) !important;
+}
+
+/* Header de contacto */
+[data-theme="dark"] .contact-header {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .contact-header h3 {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .contact-icon {
+  color: var(--primary-color) !important;
+}
+
+/* Información del lote */
+[data-theme="dark"] .batch-info {
+  background: var(--surface-color) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .batch-info mat-icon {
+  color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .batch-info span {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .batch-info strong {
+  color: var(--text-dark) !important;
+}
+
+/* Grid de contacto */
+[data-theme="dark"] .contact-item {
+  background: var(--surface-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .contact-item:hover {
+  background: var(--input-background) !important;
+  border-color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .contact-item mat-icon {
+  color: var(--text-light) !important;
+}
+
+/* Detalles de contacto */
+[data-theme="dark"] .contact-details strong {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .contact-details span {
+  color: var(--text-light) !important;
+}
+
+/* Botón de copiar */
+[data-theme="dark"] .copy-btn {
+  color: var(--text-muted) !important;
+  background: transparent !important;
+}
+
+[data-theme="dark"] .copy-btn:hover {
+  background: var(--surface-color) !important;
+  color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .copy-btn mat-icon {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .copy-btn:hover mat-icon {
+  color: var(--primary-color) !important;
+}
+
+/* Acciones de contacto */
+[data-theme="dark"] .contact-actions {
+  border-top: 1px solid var(--border-color) !important;
+}
+
+/* ===== ANIMACIONES EN DARK MODE ===== */
+[data-theme="dark"] .app-notification {
+  animation: slideUpDark 0.3s ease-out !important;
+}
+
+@keyframes slideUpDark {
+  from {
+    transform: translateY(20px) !important;
+    opacity: 0 !important;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0) !important;
+  }
+  to {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    box-shadow: var(--shadow-medium) !important;
+  }
+}
+
+/* ===== SCROLLBAR PARA NOTIFICACIONES LARGAS ===== */
+[data-theme="dark"] .contact-notification::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+[data-theme="dark"] .contact-notification::-webkit-scrollbar-track {
+  background: var(--surface-color) !important;
+}
+
+[data-theme="dark"] .contact-notification::-webkit-scrollbar-thumb {
+  background: var(--primary-color) !important;
+  border-radius: 3px !important;
+}
+
+[data-theme="dark"] .contact-notification::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark) !important;
+}
+
+/* ===== ESTADOS ESPECIALES ===== */
+
+/* Estado de carga */
+[data-theme="dark"] .contact-notification.loading {
+  opacity: 0.7 !important;
+}
+
+/* Transiciones suaves */
+[data-theme="dark"] .contact-item,
+[data-theme="dark"] .copy-btn,
+[data-theme="dark"] .app-notification-close {
+  transition: all 0.2s ease !important;
+}
+
+/* ===== ACCESIBILIDAD EN DARK MODE ===== */
+[data-theme="dark"] .contact-item:focus-within {
+  outline: 2px solid var(--primary-color) !important;
+  outline-offset: 2px !important;
+}
+
+[data-theme="dark"] .copy-btn:focus,
+[data-theme="dark"] .app-notification-close:focus {
+  outline: 2px solid var(--primary-color) !important;
+  outline-offset: 1px !important;
+}
+
+/* ===== MEJORAS VISUALES ===== */
+[data-theme="dark"] .contact-header {
+  position: relative !important;
+}
+
+[data-theme="dark"] .contact-header::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -1px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, transparent, var(--primary-color), transparent) !important;
+}
+
+[data-theme="dark"] .contact-actions {
+  position: relative !important;
+}
+
+[data-theme="dark"] .contact-actions::before {
+  content: '' !important;
+  position: absolute !important;
+  top: -1px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, transparent, var(--primary-color), transparent) !important;
+}
+
+/* ===== ELEMENTOS ADICIONALES ===== */
+
+/* Texto general dentro de notificaciones */
+[data-theme="dark"] .contact-notification p {
+  color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .contact-notification h1,
+[data-theme="dark"] .contact-notification h2,
+[data-theme="dark"] .contact-notification h3,
+[data-theme="dark"] .contact-notification h4,
+[data-theme="dark"] .contact-notification h5,
+[data-theme="dark"] .contact-notification h6 {
+  color: var(--text-dark) !important;
+}
+
+/* Material Icons específicos */
+[data-theme="dark"] .contact-notification mat-icon {
+  color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .contact-header mat-icon {
+  color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .batch-info mat-icon {
+  color: var(--primary-color) !important;
+}
+
+/* Dividers y separadores */
+[data-theme="dark"] .contact-grid {
+  border-color: var(--border-color) !important;
+}
+
+/* Estados de hover adicionales */
+[data-theme="dark"] .contact-item:hover mat-icon {
+  color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .contact-item:hover .contact-details strong {
+  color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .contact-item:hover .contact-details span {
+  color: var(--text-dark) !important;
+}
+/* ===== STATUS CLICKABLE DARK MODE ===== */
+
+/* Status badge clickeable */
+[data-theme="dark"] .status-badge.clickable {
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+}
+
+[data-theme="dark"] .status-badge.clickable:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Contact icon en dark mode */
+[data-theme="dark"] .contact-icon {
+  font-size: 14px !important;
+  margin-left: 4px !important;
+  opacity: 0.7 !important;
+  color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .status-badge.clickable:hover .contact-icon {
+  opacity: 1 !important;
+  animation: pulse 1s infinite !important;
+  color: var(--text-dark) !important;
+}
+
+/* Animación pulse en dark mode */
+@keyframes pulseDark {
+  0% {
+    transform: scale(1) !important;
+    color: var(--text-light) !important;
+  }
+  50% {
+    transform: scale(1.1) !important;
+    color: var(--primary-color) !important;
+  }
+  100% {
+    transform: scale(1) !important;
+    color: var(--text-light) !important;
+  }
+}
+
+[data-theme="dark"] .status-badge.clickable:hover .contact-icon {
+  animation: pulseDark 1s infinite !important;
+}
+
+/* ===== CONTACT INFO SECTION DARK MODE ===== */
+
+/* Sección de información de contacto */
+[data-theme="dark"] .contact-info-section {
+  background: var(--surface-color) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  margin-top: 24px !important;
+}
+
+/* Header de contacto */
+[data-theme="dark"] .contact-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 16px !important;
+}
+
+[data-theme="dark"] .contact-header i {
+  color: var(--primary-color) !important;
+  font-size: 24px !important;
+}
+
+[data-theme="dark"] .contact-header h3 {
+  margin: 0 !important;
+  color: var(--primary-color) !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+}
+
+/* Contenido de contacto */
+[data-theme="dark"] .contact-content {
+  color: var(--text-light) !important;
+  line-height: 1.6 !important;
+}
+
+[data-theme="dark"] .contact-content p {
+  margin: 0 0 16px 0 !important;
+  font-size: 14px !important;
+  color: var(--text-light) !important;
+}
+
+/* ===== STATUS VIEWED CLICKABLE DARK MODE ===== */
+
+/* Status viewed clickeable */
+[data-theme="dark"] .status-viewed.clickable {
+  background: var(--surface-color) !important;
+  color: var(--primary-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .status-viewed.clickable:hover {
+  background: var(--primary-color) !important;
+  color: var(--background-color) !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 4px 12px rgba(166, 139, 107, 0.3) !important;
+}
+
+/* ===== ESTADOS ADICIONALES DARK MODE ===== */
+
+/* Status pending clickeable */
+[data-theme="dark"] .status-pending.clickable {
+  background: var(--surface-color) !important;
+  color: var(--warning-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .status-pending.clickable:hover {
+  background: var(--warning-color) !important;
+  color: var(--background-color) !important;
+  border-color: var(--warning-color) !important;
+  box-shadow: 0 4px 12px rgba(255, 212, 59, 0.3) !important;
+}
+
+/* Status resolved clickeable */
+[data-theme="dark"] .status-resolved.clickable {
+  background: var(--surface-color) !important;
+  color: var(--success-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .status-resolved.clickable:hover {
+  background: var(--success-color) !important;
+  color: var(--background-color) !important;
+  border-color: var(--success-color) !important;
+  box-shadow: 0 4px 12px rgba(81, 207, 102, 0.3) !important;
+}
+
+/* Status rejected clickeable */
+[data-theme="dark"] .status-rejected.clickable {
+  background: var(--surface-color) !important;
+  color: var(--error-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .status-rejected.clickable:hover {
+  background: var(--error-color) !important;
+  color: var(--background-color) !important;
+  border-color: var(--error-color) !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3) !important;
+}
+
+/* ===== ICONOS EN STATUS BADGES DARK MODE ===== */
+
+/* Iconos dentro de status badges */
+[data-theme="dark"] .status-badge i,
+[data-theme="dark"] .status-badge mat-icon {
+  color: inherit !important;
+}
+
+[data-theme="dark"] .status-badge.clickable i,
+[data-theme="dark"] .status-badge.clickable mat-icon {
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="dark"] .status-badge.clickable:hover i,
+[data-theme="dark"] .status-badge.clickable:hover mat-icon {
+  color: inherit !important;
+  transform: scale(1.05) !important;
+}
+
+/* ===== EFECTOS ESPECIALES DARK MODE ===== */
+
+/* Glow effect para status clickeable en hover */
+[data-theme="dark"] .status-badge.clickable:hover {
+  position: relative !important;
+}
+
+[data-theme="dark"] .status-badge.clickable:hover::before {
+  content: '' !important;
+  position: absolute !important;
+  top: -2px !important;
+  left: -2px !important;
+  right: -2px !important;
+  bottom: -2px !important;
+  background: linear-gradient(45deg, var(--primary-color), transparent, var(--primary-color)) !important;
+  border-radius: inherit !important;
+  z-index: -1 !important;
+  opacity: 0.3 !important;
+  animation: rotateGlow 2s linear infinite !important;
+}
+
+@keyframes rotateGlow {
+  0% {
+    transform: rotate(0deg) !important;
+  }
+  100% {
+    transform: rotate(360deg) !important;
+  }
+}
+
+/* ===== ACCESIBILIDAD DARK MODE ===== */
+
+/* Focus states */
+[data-theme="dark"] .status-badge.clickable:focus {
+  outline: 2px solid var(--primary-color) !important;
+  outline-offset: 2px !important;
+}
+
+[data-theme="dark"] .contact-info-section:focus-within {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(166, 139, 107, 0.2) !important;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS DARK MODE ===== */
+
+/* Móviles */
+@media (max-width: 768px) {
+  [data-theme="dark"] .contact-info-section {
+    padding: 16px !important;
+    margin-top: 20px !important;
+  }
+
+  [data-theme="dark"] .contact-header h3 {
+    font-size: 16px !important;
+  }
+
+  [data-theme="dark"] .contact-header i {
+    font-size: 20px !important;
+  }
+
+  [data-theme="dark"] .contact-content p {
+    font-size: 13px !important;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+  [data-theme="dark"] .contact-info-section {
+    padding: 12px !important;
+    margin-top: 16px !important;
+  }
+
+  [data-theme="dark"] .status-badge.clickable {
+    font-size: 12px !important;
+  }
+
+  [data-theme="dark"] .contact-icon {
+    font-size: 12px !important;
+  }
+}

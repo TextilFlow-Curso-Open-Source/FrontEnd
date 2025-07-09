@@ -694,7 +694,12 @@
     "DELETE": "Delete",
     "OBSERVATION_DETAIL": "Observation Detail",
     "DATE_UPDATED": "Update Date",
-    "EVIDENCE_IMAGE": "Evidence Image"
+    "EVIDENCE_IMAGE": "Evidence Image",
+    "STATUS_RESOLVED": "Resolved",
+    "STATUS_REJECTED": "Rejected",
+    "CONTACT_INFO": "Contact Information",
+    "CONTACT_DESCRIPTION": "This observation has been viewed. You can contact the supplier:",
+    "SHOW_CONTACT": "View Supplier Contact"
   },
   "OBSERVATION_SUPPLIER": {
     "MY_OBSERVATIONS": "My Observations",

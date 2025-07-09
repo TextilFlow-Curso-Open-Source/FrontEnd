@@ -61,8 +61,8 @@
         </button>
         <button
           class="filter-chip"
-          [class.active]="statusFilter === OBSERVATION_STATUS.VISTO"
-          (click)="setStatusFilter(OBSERVATION_STATUS.VISTO)">
+          [class.active]="statusFilter === OBSERVATION_STATUS.EN_REVISION"
+          (click)="setStatusFilter(OBSERVATION_STATUS.EN_REVISION)">
           <span class="status-dot status-seen">●</span>
           {{ 'OBSERVATION_SUPPLIER.STATUS_SEEN' | translate }}
         </button>
@@ -140,13 +140,14 @@
               {{ observation.reason || 'N/A' }}
             </div>
           </td>
+          <!-- En la tabla, actualiza la celda de estado -->
           <td class="status-cell" (click)="toggleObservationStatus(observation)" title="{{ 'OBSERVATION_SUPPLIER.CLICK_TO_TOGGLE' | translate }}">
             <div class="status-container clickable-status">
-              <span [ngClass]="getStatusClass(observation.status)" class="status-badge clickable">
-                <i class="material-icons status-icon">{{ getStatusIcon(observation.status) }}</i>
-                {{ observation.status || 'N/A' }}
-                <i class="material-icons toggle-icon">sync</i>
-              </span>
+          <span [ngClass]="getStatusClass(observation.status)" class="status-badge clickable">
+           <i class="material-icons status-icon">{{ getStatusIcon(observation.status) }}</i>
+           {{ getStatusDisplayLabel(observation.status) }}
+           <i class="material-icons toggle-icon">sync</i>
+          </span>
             </div>
           </td>
           <td class="date-cell">
@@ -207,10 +208,10 @@
             {{ 'OBSERVATION_SUPPLIER.STATUS' | translate }}:
           </label>
           <div class="detail-value">
-            <span [ngClass]="getStatusClass(selectedObservation.status)" class="status-badge large">
-              <i class="material-icons status-icon">{{ getStatusIcon(selectedObservation.status) }}</i>
-              {{ selectedObservation.status }}
-            </span>
+           <span [ngClass]="getStatusClass(selectedObservation.status)" class="status-badge large">
+          <i class="material-icons status-icon">{{ getStatusIcon(selectedObservation.status) }}</i>
+           {{ getStatusDisplayLabel(selectedObservation.status) }}
+          </span>
           </div>
         </div>
 
@@ -238,9 +239,9 @@
       <!-- Botón de acción para cambiar estado -->
       <div class="action-buttons-detail">
         <app-button
-          [label]="selectedObservation.status === 'Pendiente' ? ('OBSERVATION_SUPPLIER.MARK_AS_SEEN' | translate) : ('OBSERVATION_SUPPLIER.MARK_AS_PENDING' | translate)"
+          [label]="getToggleButtonLabel(selectedObservation.status) | translate"
           variant="primary"
-          [icon]="selectedObservation.status === 'Pendiente' ? 'visibility' : 'schedule'"
+          [icon]="getToggleButtonIcon(selectedObservation.status)"
           (click)="toggleObservationStatus(selectedObservation)">
         </app-button>
       </div>

@@ -61,8 +61,8 @@
         </button>
         <button
           class="filter-chip"
-          [class.active]="statusFilter === OBSERVATION_STATUS.VISTO"
-          (click)="setStatusFilter(OBSERVATION_STATUS.VISTO)">
+          [class.active]="statusFilter === 'EN_REVISION'"
+          (click)="setStatusFilter('EN_REVISION')">
           <span class="status-dot status-viewed">●</span>
           {{ 'OBSERVATION.STATUS_VIEWED' | translate }}
         </button>
@@ -190,10 +190,15 @@
           </td>
           <td>
             <div class="status-container">
-              <span [ngClass]="getStatusClass(observation.status)" class="status-badge">
-                <i class="material-icons status-icon">{{ getStatusIcon(observation.status) }}</i>
-                {{ getStatusText(observation.status) }}
-              </span>
+    <span [ngClass]="getStatusClass(observation.status)"
+          class="status-badge"
+          [class.clickable]="isObservationViewed(observation)"
+          (click)="isObservationViewed(observation) ? showContactInfo(observation) : null; $event.stopPropagation()"
+          [title]="isObservationViewed(observation) ? 'Click para ver información de contacto' : ''">
+      <i class="material-icons status-icon">{{ getStatusIcon(observation.status) }}</i>
+      {{ getStatusDisplayLabel(observation.status) }}
+      <i *ngIf="isObservationViewed(observation)" class="material-icons contact-icon">phone</i>
+    </span>
             </div>
           </td>
           <td>
@@ -263,10 +268,14 @@
             {{ 'OBSERVATION.STATUS' | translate }}:
           </label>
           <div class="detail-value">
-            <span [ngClass]="getStatusClass(selectedObservation.status)" class="status-badge">
-              <i class="material-icons status-icon">{{ getStatusIcon(selectedObservation.status) }}</i>
-              {{ getStatusText(selectedObservation.status) }}
-            </span>
+           <span [ngClass]="getStatusClass(selectedObservation.status)"
+          class="status-badge"
+          [class.clickable]="isObservationViewed(selectedObservation)"
+          (click)="isObservationViewed(selectedObservation) ? showContactInfo(selectedObservation) : null">
+           <i class="material-icons status-icon">{{ getStatusIcon(selectedObservation.status) }}</i>
+          {{ getStatusDisplayLabel(selectedObservation.status) }}
+          <i *ngIf="isObservationViewed(selectedObservation)" class="material-icons contact-icon">phone</i>
+          </span>
           </div>
         </div>
 
@@ -307,6 +316,25 @@
              (click)="openImageModal(selectedObservation.imageUrl)">
       </div>
 
+      <div *ngIf="isObservationViewed(selectedObservation)" class="contact-info-section">
+        <div class="contact-header">
+          <i class="material-icons">support_agent</i>
+          <h3>{{ 'OBSERVATION.CONTACT_INFO' | translate }}</h3>
+        </div>
+        <div class="contact-content">
+          <p>{{ 'OBSERVATION.CONTACT_DESCRIPTION' | translate }}</p>
+          <app-button
+            label="{{ 'OBSERVATION.SHOW_CONTACT' | translate }}"
+            variant="primary"
+            icon="phone"
+            [loading]="isLoadingContact"
+            (click)="showContactInfo(selectedObservation)">
+          </app-button>
+        </div>
+      </div>
+
+
+
       <!-- Botones de acción -->
       <div class="detail-actions">
         <app-button
@@ -325,7 +353,8 @@
     [show]="notification.show"
     [message]="notification.message"
     [type]="notification.type"
-    [autoClose]="true"
-    (close)="notification.show = false">
+    [contactInfo]="contactInfo"
+    [autoClose]="notification.type !== 'info'"
+    (close)="notification.show = false; contactInfo = null">
   </app-notification>
 </div>

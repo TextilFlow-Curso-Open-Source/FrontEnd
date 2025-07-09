@@ -8,7 +8,8 @@
     [ngClass]="'app-notification--' + type"
     (click)="$event.stopPropagation()"
   >
-    <div class="app-notification-content">
+    <!-- TU CONTENIDO ACTUAL (NO TOCAR) -->
+    <div *ngIf="type !== 'contact'" class="app-notification-content">
       <div class="app-notification-icon">
         <mat-icon *ngIf="type === 'success'">check_circle</mat-icon>
         <mat-icon *ngIf="type === 'error'">cancel</mat-icon>
@@ -25,12 +26,109 @@
       </button>
     </div>
 
-    <div class="app-notification-actions">
+    <div *ngIf="type !== 'contact'" class="app-notification-actions">
       <app-button
         [label]="buttonText"
         variant="primary"
         (click)="handleClose()"
       ></app-button>
+    </div>
+
+    <!-- NUEVO CONTENIDO PARA CONTACTO (SOLO AGREGAR ESTO) -->
+    <div *ngIf="type === 'contact' && contactInfo" class="contact-notification">
+      <div class="contact-header">
+        <mat-icon class="contact-icon">support_agent</mat-icon>
+        <h3>Información de Contacto del Proveedor</h3>
+        <button class="app-notification-close" (click)="handleClose()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="contact-body">
+        <div class="batch-info">
+          <mat-icon>qr_code</mat-icon>
+          <span><strong>Lote:</strong> {{ contactInfo.batchCode }}</span>
+        </div>
+
+        <div class="contact-grid">
+          <div class="contact-item">
+            <mat-icon>business</mat-icon>
+            <div class="contact-details">
+              <strong>{{ contactInfo.companyName || 'Sin nombre de empresa' }}</strong>
+              <span>{{ contactInfo.supplierName }}</span>
+            </div>
+          </div>
+
+          <div class="contact-item" *ngIf="contactInfo.phone">
+            <mat-icon>phone</mat-icon>
+            <div class="contact-details">
+              <strong>Teléfono</strong>
+              <span>{{ contactInfo.phone }}</span>
+            </div>
+            <button class="copy-btn" (click)="copyToClipboard(contactInfo.phone)" title="Copiar">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
+
+          <div class="contact-item">
+            <mat-icon>email</mat-icon>
+            <div class="contact-details">
+              <strong>Email</strong>
+              <span>{{ contactInfo.email }}</span>
+            </div>
+            <button class="copy-btn" (click)="copyToClipboard(contactInfo.email)" title="Copiar">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
+
+          <div class="contact-item" *ngIf="contactInfo.location">
+            <mat-icon>location_on</mat-icon>
+            <div class="contact-details">
+              <strong>Ubicación</strong>
+              <span>{{ contactInfo.location }}</span>
+            </div>
+          </div>
+
+          <div class="contact-item" *ngIf="contactInfo.specialization">
+            <mat-icon>work</mat-icon>
+            <div class="contact-details">
+              <strong>Especialización</strong>
+              <span>{{ contactInfo.specialization }}</span>
+            </div>
+          </div>
+
+          <div class="contact-item full-width" *ngIf="contactInfo.description">
+            <mat-icon>description</mat-icon>
+            <div class="contact-details">
+              <strong>Descripción</strong>
+              <span>{{ contactInfo.description }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-actions">
+        <app-button
+          *ngIf="contactInfo.phone"
+          label="WhatsApp"
+          variant="primary"
+          icon="chat"
+          (click)="openWhatsApp()">
+        </app-button>
+
+        <app-button
+          label="Enviar Email"
+          variant="secondary"
+          icon="email"
+          (click)="openEmail()">
+        </app-button>
+
+        <app-button
+          label="Cerrar"
+          variant="text"
+          (click)="handleClose()">
+        </app-button>
+      </div>
     </div>
   </div>
 </div>
