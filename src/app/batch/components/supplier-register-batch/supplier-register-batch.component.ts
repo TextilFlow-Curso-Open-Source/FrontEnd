@@ -239,155 +239,110 @@ export class SupplierRegisterBatchComponent implements OnInit {
     return 'PENDIENTE' as BatchStatus;
   }
 
-  // ✅ MÉTODO onSubmit MEJORADO
+
   onSubmit(): void {
     if (!this.selectedBatch) {
       this.showNotification('Debe seleccionar un lote pendiente primero', 'warning');
       return;
     }
 
-    if (this.form.invalid) {
-      this.showNotification('Por favor complete todos los campos requeridos', 'warning');
-      this.markFormGroupTouched();
-      return;
-    }
-
-    // ✅ LIMPIAR Y VALIDAR EL ESTADO SELECCIONADO
-    const rawStatus = this.form.get('status')?.value;
-    const cleanStatus = this.getCleanStatus(rawStatus);
-
-    console.log('🔍 Status validation:');
-    console.log('   Raw status from form:', rawStatus);
-    console.log('   Cleaned status:', cleanStatus);
-
-    if (!cleanStatus || cleanStatus === 'PENDIENTE') {
+    if (!this.form.get('status')?.value) {
       this.showNotification('Por favor seleccione un estado válido para el lote', 'warning');
       return;
     }
 
     this.isLoading = true;
-    this.updateBatch(cleanStatus);
+    const newStatus = this.form.get('status')?.value as BatchStatus;
+
+    console.log('🚀 Starting update process with status:', newStatus);
+    this.updateBatch(newStatus);
   }
 
-  // ✅ MÉTODO updateBatch COMPLETAMENTE CORREGIDO
-  updateBatch(newStatus: BatchStatus, imageData?: string): void {
+
+  updateBatch(newStatus: BatchStatus): void {
     if (!this.selectedBatch) {
       console.error('❌ No selected batch');
       return;
     }
 
-    console.log('🚀 Starting batch update process...');
+    console.log('🚀 Starting sequential update process...');
     console.log('   Selected Batch:', this.selectedBatch);
-    console.log('   New Status (cleaned):', newStatus, typeof newStatus);
+    console.log('   New Status:', newStatus);
+    console.log('   Has new image:', !!this.selectedImage);
 
-    // ✅ VALIDAR QUE EL ESTADO SEA VÁLIDO ANTES DE CONTINUAR
-    const validStatuses: BatchStatus[] = ['ACEPTADO', 'RECHAZADO', 'POR_ENVIAR', 'ENVIADO'];
-    if (!validStatuses.includes(newStatus)) {
-      console.error('❌ Invalid status:', newStatus);
-      this.showNotification(`Estado inválido: ${newStatus}`, 'error');
-      this.isLoading = false;
-      return;
-    }
-
-    // ✅ FUNCIÓN PARA LIMPIAR STRINGS Y EVITAR CARACTERES PROBLEMÁTICOS
-    const cleanString = (str: string): string => {
-      if (!str) return '';
-      return str.toString()
-        .replace(/\n/g, ' ')    // Cambiar saltos de línea por espacios
-        .replace(/\r/g, ' ')    // Cambiar retornos de carro por espacios
-        .replace(/\s+/g, ' ')   // Múltiples espacios por uno solo
-        .trim();
-    };
-
-    // ✅ PREPARAR OBSERVACIONES LIMPIANDO CARACTERES PROBLEMÁTICOS
+    // ✅ PREPARAR DATOS DEL BATCH (sin imagen)
     const additionalComments = this.form.get('additionalComments')?.value || '';
-    const existingObservations = this.selectedBatch.observations || '';
+    let combinedObservations = this.selectedBatch.observations || '';
 
-    let combinedObservations: string;
     if (additionalComments.trim()) {
-      combinedObservations = cleanString(`${existingObservations} ${additionalComments}`);
-    } else {
-      combinedObservations = cleanString(existingObservations) || 'Sin observaciones';
+      combinedObservations = `${combinedObservations} ${additionalComments}`.trim();
     }
 
     const updatedBatch: Partial<Batch> = {
-      // ✅ Estado limpio y validado
       status: newStatus,
-      observations: combinedObservations,
-
-      // ✅ CAMPOS REQUERIDOS - Todos limpiados
-      code: cleanString(this.selectedBatch.code || ''),
-      client: cleanString(this.selectedBatch.client || ''),
-      businessmanId: this.selectedBatch.businessmanId?.toString() || '0',
-      supplierId: this.selectedBatch.supplierId?.toString() || '0',
-      fabricType: cleanString(this.selectedBatch.fabricType || ''),
-      color: cleanString(this.selectedBatch.color || ''),
-      quantity: Number(this.selectedBatch.quantity) || 1,
-      price: Number(this.selectedBatch.price) || 0,
-      address: cleanString(this.selectedBatch.address || ''),
-      date: this.formatDateForBackend(this.selectedBatch.date)
+      observations: combinedObservations
     };
 
-    // ✅ VALIDACIONES ADICIONALES
-    if (!updatedBatch.code) updatedBatch.code = `BATCH-${Date.now()}`;
-    if (!updatedBatch.client) updatedBatch.client = 'Cliente no especificado';
-    if (!updatedBatch.fabricType) updatedBatch.fabricType = 'No especificado';
-    if (!updatedBatch.color) updatedBatch.color = 'No especificado';
-    if (!updatedBatch.observations) updatedBatch.observations = 'Sin observaciones';
-    if (!updatedBatch.address) updatedBatch.address = 'Sin dirección';
+    console.log('🚀 Step 1: Updating batch data:', updatedBatch);
 
-    console.log('🚀 Sending cleaned batch data:');
-    console.log('   Batch ID:', this.selectedBatch.id);
-    console.log('   Update Data:', JSON.stringify(updatedBatch, null, 2));
-
-    // ✅ VERIFICAR DATOS ANTES DE ENVIAR
-    console.log('🔍 Pre-send verification:');
-    console.log('   Status type:', typeof updatedBatch.status);
-    console.log('   Status value:', updatedBatch.status);
-
-    Object.entries(updatedBatch).forEach(([key, value]) => {
-      if (typeof value === 'string' && (value.includes('\n') || value.includes('\r'))) {
-        console.warn(`⚠️ Found line break in ${key}:`, value);
-      }
-      if (typeof value === 'object' && value !== null) {
-        console.warn(`⚠️ Found object in ${key}:`, value);
-      }
-    });
-
-    // ✅ ACTUALIZAR EL BATCH
+    // ✅ PASO 1: Actualizar datos del batch
     this.batchService.updateBatch(this.selectedBatch.id as string, updatedBatch).subscribe({
       next: (updatedBatchResponse) => {
-        console.log('✅ Batch updated successfully:', updatedBatchResponse);
+        console.log('✅ Step 1 completed - Batch updated:', updatedBatchResponse);
 
+        // ✅ PASO 2: Si hay imagen nueva, subirla
         if (this.selectedImage) {
-          console.log('📷 Uploading image...');
-          this.uploadImage();
+          console.log('🚀 Step 2: Uploading new image...');
+          this.uploadImageSequential();
         } else {
-          this.showNotification(`Lote actualizado y marcado como ${newStatus} correctamente`, 'success');
-          this.loadPendingBatches();
-          this.setActiveTab('pending');
-          this.isLoading = false;
+          console.log('✅ No new image, process completed');
+          this.completeUpdateProcess(newStatus);
         }
       },
       error: (error) => {
-        console.error('❌ Error updating batch:', error);
-
-        let errorMessage = 'Error desconocido';
-        if (error.message) {
-          errorMessage = error.message;
-        } else if (error.error && error.error.message) {
-          errorMessage = error.error.message;
-        } else if (typeof error.error === 'string') {
-          errorMessage = error.error;
-        }
-
-        this.showNotification(`Error al actualizar el lote: ${errorMessage}`, 'error');
+        console.error('❌ Step 1 failed - Error updating batch:', error);
+        this.showNotification(`Error al actualizar el lote: ${error.message}`, 'error');
         this.isLoading = false;
       }
     });
   }
 
-  // ✅ MÉTODO AUXILIAR PARA FORMATEAR FECHA
+  private uploadImageSequential(): void {
+    if (!this.selectedBatch || !this.selectedImage) {
+      console.error('❌ Missing batch or image for upload');
+      return;
+    }
+
+    this.batchService.uploadBatchImage(this.selectedBatch.id as string, this.selectedImage).subscribe({
+      next: (imageResponse) => {
+        console.log('✅ Step 2 completed - Image uploaded:', imageResponse);
+        this.completeUpdateProcess(this.form.get('status')?.value, true);
+      },
+      error: (error) => {
+        console.error('❌ Step 2 failed - Error uploading image:', error);
+        // ✅ El batch ya se actualizó, solo falló la imagen
+        this.showNotification('Lote actualizado correctamente, pero hubo un error al subir la imagen', 'warning');
+        this.completeUpdateProcess(this.form.get('status')?.value, false);
+      }
+    });
+  }
+
+  /**
+   * ✅ MÉTODO para completar el proceso y limpiar UI
+   */
+  private completeUpdateProcess(newStatus: BatchStatus, imageSuccess: boolean = true): void {
+    const statusMessage = imageSuccess
+      ? `Lote actualizado y marcado como ${newStatus} correctamente`
+      : `Lote actualizado como ${newStatus} (imagen no se pudo subir)`;
+
+    const messageType = imageSuccess ? 'success' : 'warning';
+
+    this.showNotification(statusMessage, messageType);
+    this.loadPendingBatches();
+    this.setActiveTab('pending');
+    this.isLoading = false;
+  }
+
   private formatDateForBackend(dateString: string): string {
     if (!dateString) {
       return new Date().toISOString().slice(0, 10);

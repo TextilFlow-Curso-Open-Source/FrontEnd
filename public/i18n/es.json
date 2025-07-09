@@ -45,6 +45,7 @@
     "ERROR_LOAD": "Error al cargar la configuración"
   },
   "PLANS": {
+    "DO_NOT_CLOSE": "No cierre esta ventana",
     "CARD_DETAILS": "Detalles de la tarjeta",
     "PAY_NOW": "PAGAR AHORA",
     "SECURE_PAYMENT": "Pago seguro",
