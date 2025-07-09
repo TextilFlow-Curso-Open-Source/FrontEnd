@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ObservationService } from '../../services/observation.service';
 import { AuthService } from '../../../auth/services/auth.service';
-import { Observation, OBSERVATION_STATUS } from '../../models/observation.entity';
+import { Observation, OBSERVATION_STATUS, ObservationStatus } from '../../models/observation.entity';
 import { AppInputComponent } from '../../../core/components/app-input/app-input.component';
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { AppNotificationComponent } from '../../../core/components/app-notification/app-notification.component';
@@ -39,7 +39,7 @@ export class SupplierObservationComponent implements OnInit {
   // Búsqueda y filtros
   searchTerm: string = '';
   showQuickFilters: boolean = false;
-  statusFilter: string | null = null;
+  statusFilter: ObservationStatus | null = null;
   sortField: string = 'createdAt';
   sortDirection: 'asc' | 'desc' = 'desc';
 
@@ -132,7 +132,7 @@ export class SupplierObservationComponent implements OnInit {
   }
 
   // Filtrar por estado
-  setStatusFilter(status: string | null): void {
+  setStatusFilter(status: ObservationStatus | null): void {
     this.statusFilter = status;
     this.filterObservations();
   }
@@ -279,4 +279,6 @@ export class SupplierObservationComponent implements OnInit {
   openImageModal(imageUrl: string): void {
     window.open(imageUrl, '_blank');
   }
+
+  protected readonly OBSERVATION_STATUS = OBSERVATION_STATUS;
 }
