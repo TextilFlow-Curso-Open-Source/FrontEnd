@@ -7,7 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { AppInputComponent } from '../../../core/components/app-input/app-input.component';
 import { AppButtonComponent } from '../../../core/components/app-button/app-button.component';
 import { HttpClient } from '@angular/common/http';
-import {SmartLogoComponent} from '../../../core/components/smart-logo/smart-logo.component';
+import { SmartLogoComponent } from '../../../core/components/smart-logo/smart-logo.component';
 
 @Component({
   selector: 'app-user-register',
@@ -112,11 +112,42 @@ export class UserRegisterComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    // AuthService ahora maneja todo automáticamente
-    // Registra el usuario, inicia sesión y redirige
-    this.authService.register(this.registerForm.value);
+    // ✅ ACTUALIZADO: Usar el método registerUser que retorna Observable
+    this.authService.registerUser(this.registerForm.value).subscribe({
+      next: (success) => {
+        this.isLoading = false;
+        if (success) {
+          // El registro fue exitoso, AuthService se encarga de la redirección
+          console.log('✅ Registro exitoso');
+        }
+      },
+      error: (error) => {
+        this.isLoading = false;
 
-    // El loading se mantendrá hasta que el usuario sea redirigido
-    // AuthService maneja todo internamente
+        // ✅ NUEVO: Manejar diferentes tipos de errores
+        if (error.status === 400) {
+          if (error.error && typeof error.error === 'string') {
+            // Error específico del backend
+            if (error.error.includes('email') || error.error.toLowerCase().includes('already exists')) {
+              this.errorMessage = 'Este email ya está registrado. Intenta con otro.';
+            } else if (error.error.includes('password')) {
+              this.errorMessage = 'La contraseña no cumple con los requisitos de seguridad.';
+            } else {
+              this.errorMessage = error.error;
+            }
+          } else {
+            this.errorMessage = 'Algunos datos son incorrectos. Verifica la información ingresada.';
+          }
+        } else if (error.status === 500) {
+          this.errorMessage = 'Error interno del servidor. Intenta nuevamente en unos minutos.';
+        } else if (error.status === 0) {
+          this.errorMessage = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+        } else {
+          this.errorMessage = error.message || 'Ocurrió un error inesperado. Intenta nuevamente.';
+        }
+
+        console.error('❌ Error en registro:', error);
+      }
+    });
   }
 }

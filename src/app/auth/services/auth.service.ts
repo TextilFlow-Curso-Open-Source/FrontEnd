@@ -4,7 +4,7 @@ import { User } from '../models/user.entity';
 import { Router } from '@angular/router';
 import { SessionService } from './session.service';
 import { environment } from '../../../environments/environment';
-import { map, Observable } from 'rxjs';
+import { map, Observable, catchError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -85,35 +85,38 @@ export class AuthService extends BaseService<User> {
   }
 
   /**
-   * Inicia sesión con el backend real
+   * ✅ NUEVO: Inicia sesión y retorna Observable para manejo de errores
    * @param credentials Credenciales de login
    */
-  login(credentials: { email: string, password: string }): void {
+  loginUser(credentials: { email: string, password: string }): Observable<boolean> {
     const signInRequest = {
       email: credentials.email,
       password: credentials.password
     };
 
-    this.customRequest<any>('/authentication/sign-in', 'POST', signInRequest, false).subscribe({
-      next: (response: any) => {
+    return this.customRequest<any>('/authentication/sign-in', 'POST', signInRequest, false).pipe(
+      map((response: any) => {
         this.saveSession(response.token, this.transformBackendUserToFrontend(response));
 
-        // *** CAMBIO: Marcar como carga inicial ***
+        // Cargar configuraciones y redirigir
         this.loadUserConfigurations(response.id.toString(), true).then(() => {
           this.redirectBasedOnRole(response.role);
         });
-      },
-      error: (error) => {
-        console.error('Error en login:', error);
-      }
-    });
+
+        return true; // Login exitoso
+      }),
+      catchError((error) => {
+        console.error('❌ Error en login:', error);
+        throw error; // Re-lanzar el error para que lo maneje el componente
+      })
+    );
   }
 
   /**
-   * Registra un nuevo usuario con el backend real
+   * ✅ NUEVO: Registra un nuevo usuario y retorna Observable para manejo de errores
    * @param userData Datos del usuario a registrar
    */
-  register(userData: any): void {
+  registerUser(userData: any): Observable<boolean> {
     const signUpRequest = {
       email: userData.email,
       password: userData.password,
@@ -125,18 +128,62 @@ export class AuthService extends BaseService<User> {
       role: 'PENDING'
     };
 
-    this.customRequest<any>('/authentication/sign-up', 'POST', signUpRequest, false).subscribe({
-      next: (response: any) => {
+    return this.customRequest<any>('/authentication/sign-up', 'POST', signUpRequest, false).pipe(
+      map((response: any) => {
         console.log('Usuario registrado exitosamente:', response);
 
         // Hacer login automáticamente con las credenciales del registro
-        this.login({
+        this.loginUser({
           email: userData.email,
           password: userData.password
+        }).subscribe({
+          next: (success) => {
+            if (success) {
+              console.log('✅ Login automático exitoso después del registro');
+            }
+          },
+          error: (error) => {
+            console.error('❌ Error en login automático:', error);
+          }
         });
+
+        return true; // Registro exitoso
+      }),
+      catchError((error) => {
+        console.error('❌ Error en registro:', error);
+        throw error; // Re-lanzar el error para que lo maneje el componente
+      })
+    );
+  }
+
+  /**
+   * @deprecated Usar loginUser() en su lugar
+   * Inicia sesión con el backend real (método legacy)
+   * @param credentials Credenciales de login
+   */
+  login(credentials: { email: string, password: string }): void {
+    this.loginUser(credentials).subscribe({
+      next: (success) => {
+        console.log('Login completado');
       },
       error: (error) => {
-        console.error('Error en registro:', error);
+        console.error('Error en login (método legacy):', error);
+      }
+    });
+  }
+
+  /**
+   * @deprecated Usar registerUser() en su lugar
+   * Registra un nuevo usuario con el backend real (método legacy)
+   * @param userData Datos del usuario a registrar
+   */
+  register(userData: any): void {
+    this.registerUser(userData).subscribe({
+      next: (success) => {
+        console.log('Registro completado');
+      },
+      error: (error) => {
+        console.error('Error en registro (método legacy):', error);
       }
     });
   }
