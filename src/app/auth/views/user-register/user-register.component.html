@@ -87,14 +87,16 @@
           formControlName="phone">
         </app-input>
 
-        <div class="error-message" *ngIf="errorMessage">
-          {{ errorMessage }}
+        <!-- ✅ MEJORADO: Mensaje de error más visible -->
+        <div class="error-message" *ngIf="errorMessage"
+             style="background-color: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px; border-radius: 6px; margin: 16px 0; font-size: 14px;">
+          <strong>⚠️ Error:</strong> {{ errorMessage }}
         </div>
 
         <app-button
           label="Registrarse"
           [loading]="isLoading"
-          [disabled]="registerForm.invalid"
+          [disabled]="registerForm.invalid || isLoading"
           [fullWidth]="true"
           variant="primary"
           (click)="onSubmit()">

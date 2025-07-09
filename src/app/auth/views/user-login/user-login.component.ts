@@ -164,26 +164,49 @@ export class UserLoginComponent implements OnInit, OnDestroy {
     // Manejar credenciales recordadas
     this.handleRememberMe();
 
-    // Interceptar el comportamiento del AuthService para manejar errores
-    this.interceptAuthServiceLogin();
+    // ✅ ACTUALIZADO: Usar loginUser con manejo de errores
+    this.performLogin();
   }
 
   /**
-   * Intercepta el login del AuthService para manejar éxito y errores
+   * ✅ NUEVO: Realiza el login con manejo de errores
    */
-  private interceptAuthServiceLogin(): void {
+  private performLogin(): void {
     const credentials = this.loginForm.value;
 
-    // Usar directamente el AuthService
-    this.authService.login(credentials);
+    this.authService.loginUser(credentials).subscribe({
+      next: (success) => {
+        if (this.loginTimeout) {
+          clearTimeout(this.loginTimeout);
+        }
 
-    // Timeout de seguridad
-    setTimeout(() => {
-      if (this.isLoading) {
         this.isLoading = false;
-        this.errorMessage = 'Credenciales incorrectas. Intenta nuevamente.';
+        this.showSuccessMessage = true;
+
+        // El AuthService ya maneja la redirección
+        console.log('✅ Login exitoso');
+      },
+      error: (error) => {
+        if (this.loginTimeout) {
+          clearTimeout(this.loginTimeout);
+        }
+
+        // Manejar diferentes tipos de errores
+        if (error.status === 401 || error.status === 403) {
+          this.handleLoginError('credentials', 'Credenciales incorrectas. Verifica tu email y contraseña.');
+        } else if (error.status === 429) {
+          this.handleLoginError('blocked', 'Demasiados intentos. Espera unos minutos antes de intentar nuevamente.');
+        } else if (error.status === 0) {
+          this.handleLoginError('network', 'No se pudo conectar con el servidor. Verifica tu conexión a internet.');
+        } else if (error.status === 500) {
+          this.handleLoginError('generic', 'Error interno del servidor. Intenta nuevamente en unos minutos.');
+        } else {
+          this.handleLoginError('generic', error.message || 'Ocurrió un error inesperado. Intenta nuevamente.');
+        }
+
+        console.error('❌ Error en login:', error);
       }
-    }, 5000);
+    });
   }
 
   /**
