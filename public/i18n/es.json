@@ -719,6 +719,98 @@
     "EVIDENCE_IMAGE": "Imagen de Evidencia",
     "MARK_AS_SEEN": "Marcar como Visto",
     "MARK_AS_PENDING": "Marcar como Pendiente"
+  },
+  "CHATBOT": {
+    "ASSISTANT_NAME": "Asistente TextilFlow",
+    "STATUS_ONLINE": "En línea",
+    "PLACEHOLDER_INPUT": "Escribe tu consulta...",
+    "SEND_MESSAGE": "Enviar mensaje",
+    "CLEAR_CHAT": "Limpiar chat",
+    "CLOSE_CHAT": "Cerrar chat",
+    "OPEN_HELP_CHAT": "Abrir chat de ayuda",
+    "TYPING": "Escribiendo...",
+
+    "WELCOME": {
+      "GREETING": "¡Hola {{userName}}! 👋",
+      "INTRO": "Soy tu asistente virtual de TextilFlow. Estoy aquí para ayudarte con consultas rápidas sobre la plataforma.",
+      "BUSINESSMAN_HELP": "🔍 **Como businessman puedes preguntar:**\n• \"¿Cuáles son mis lotes?\"\n• \"Buscar proveedores de algodón\"\n• \"Estado de mis solicitudes\"\n• \"Mis observaciones pendientes\"",
+      "SUPPLIER_HELP": "🔍 **Como supplier puedes preguntar:**\n• \"¿Qué lotes tengo asignados?\"\n• \"Mis solicitudes recibidas\"\n• \"Observaciones de mis lotes\"",
+      "GENERAL_HELP": "🔍 **Puedes preguntar sobre:**\n• Estados de lotes y envíos\n• Información de proveedores\n• Solicitudes y observaciones",
+      "ADDITIONAL_HELP": "💬 **También puedo ayudarte con:**\n• Explicar cómo usar la plataforma\n• Resolver dudas generales\n• Guiarte a las secciones correctas",
+      "FINAL_QUESTION": "¿En qué puedo ayudarte hoy?"
+    },
+
+    "QUICK_ACTIONS": {
+      "TITLE": "Consultas rápidas:",
+      "BUSINESSMAN": {
+        "MY_BATCHES": "¿Cuáles son mis lotes?",
+        "FIND_SUPPLIERS": "Buscar proveedores",
+        "MY_REQUESTS": "Mis solicitudes",
+        "PLATFORM_HELP": "Ayuda con la plataforma"
+      },
+      "SUPPLIER": {
+        "ASSIGNED_BATCHES": "Mis lotes asignados",
+        "RECEIVED_REQUESTS": "Solicitudes recibidas",
+        "MY_OBSERVATIONS": "Mis observaciones",
+        "PLATFORM_HELP": "Ayuda con la plataforma"
+      },
+      "GENERAL": {
+        "PLATFORM_HELP": "Ayuda con la plataforma",
+        "GENERAL_INFO": "Información general"
+      }
+    },
+
+    "RESPONSES": {
+      "LOGIN_REQUIRED": "Por favor, inicia sesión para acceder a esta información.",
+      "NO_BATCHES": "No tienes lotes registrados actualmente.",
+      "NO_SUPPLIERS": "No hay proveedores registrados.",
+      "NO_REQUESTS": "No tienes solicitudes registradas.",
+      "NO_OBSERVATIONS": "No tienes observaciones registradas.",
+      "ERROR_BATCHES": "Error al obtener información de lotes. Intenta más tarde.",
+      "ERROR_SUPPLIERS": "Error al obtener información de proveedores.",
+      "ERROR_REQUESTS": "Error al obtener información de solicitudes.",
+      "ERROR_OBSERVATIONS": "Error al obtener observaciones.",
+      "ERROR_GENERAL": "Disculpa, ocurrió un error. ¿Puedes intentar de nuevo?",
+      "DEFAULT_HELP": "No entiendo tu consulta. ¿Puedes ser más específico?",
+      "AI_LOADING": "El modelo está cargando, por favor intenta en unos segundos...",
+      "AI_AUTH_ERROR": "Error de autenticación con la IA. Por favor contacta al administrador.",
+      "AI_RATE_LIMIT": "Demasiadas consultas, intenta más tarde.",
+      "AI_TEMP_ERROR": "Disculpa, hay un problema temporal. ¿Puedes preguntarme sobre tus lotes, proveedores o solicitudes?",
+      "AI_NO_RESPONSE": "No puedo procesar tu consulta en este momento. ¿Puedes ser más específico sobre lotes, proveedores o solicitudes?"
+    },
+
+    "BATCHES": {
+      "SUMMARY": "Tienes {{count}} lote(s) en total:",
+      "RECENT_TITLE": "🔗 Últimos lotes:",
+      "NO_CODE": "Sin código",
+      "NO_CLIENT": "Sin cliente"
+    },
+
+    "SUPPLIERS": {
+      "SUMMARY": "Hay {{count}} proveedor(es) disponible(s):",
+      "BY_SPECIALIZATION": "📋 {{specialization}}: {{count}} proveedor(es)",
+      "NO_SPECIALIZATION": "Sin especialización"
+    },
+
+    "REQUESTS": {
+      "SUMMARY": "Tienes {{count}} solicitud(es):"
+    },
+
+    "OBSERVATIONS": {
+      "SUMMARY": "Tienes {{count}} observación(es):",
+      "NO_CODE": "Sin código"
+    },
+
+    "PLATFORM_HELP": {
+      "TITLE": "¡Hola! Soy tu asistente de TextilFlow. Puedo ayudarte con:",
+      "QUERIES_TITLE": "🔍 **Consultas que puedes hacer:**",
+      "QUERIES_LIST": "• \"¿Cuáles son mis lotes?\" - Ver estado de tus envíos\n• \"Buscar proveedores\" - Encontrar suppliers disponibles\n• \"Mis solicitudes\" - Ver tus requests activas\n• \"Mis observaciones\" - Ver comentarios y notas",
+      "ROLE_HELP_BUSINESSMAN": "• Como businessman, puedes consultar tus lotes, buscar proveedores y revisar solicitudes",
+      "ROLE_HELP_SUPPLIER": "• Como supplier, puedes ver los lotes asignados y gestionar requests",
+      "FINAL_QUESTION": "¿En qué puedo ayudarte hoy?"
+    },
+
+    "INPUT_HELP": "Pregúntame sobre lotes, proveedores, solicitudes o ayuda general"
   }
 }
 

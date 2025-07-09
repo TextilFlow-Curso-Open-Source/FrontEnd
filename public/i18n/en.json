@@ -718,5 +718,97 @@
     "EVIDENCE_IMAGE": "Evidence Image",
     "MARK_AS_SEEN": "Mark as Seen",
     "MARK_AS_PENDING": "Mark as Pending"
+  },
+  "CHATBOT": {
+    "ASSISTANT_NAME": "TextilFlow Assistant",
+    "STATUS_ONLINE": "Online",
+    "PLACEHOLDER_INPUT": "Type your query...",
+    "SEND_MESSAGE": "Send message",
+    "CLEAR_CHAT": "Clear chat",
+    "CLOSE_CHAT": "Close chat",
+    "OPEN_HELP_CHAT": "Open help chat",
+    "TYPING": "Typing...",
+
+    "WELCOME": {
+      "GREETING": "Hello {{userName}}! 👋",
+      "INTRO": "I'm your TextilFlow virtual assistant. I'm here to help you with quick queries about the platform.",
+      "BUSINESSMAN_HELP": "🔍 **As a businessman you can ask:**\n• \"What are my batches?\"\n• \"Find cotton suppliers\"\n• \"Status of my requests\"\n• \"My pending observations\"",
+      "SUPPLIER_HELP": "🔍 **As a supplier you can ask:**\n• \"What batches are assigned to me?\"\n• \"My received requests\"\n• \"Observations on my batches\"",
+      "GENERAL_HELP": "🔍 **You can ask about:**\n• Batch and shipment status\n• Supplier information\n• Requests and observations",
+      "ADDITIONAL_HELP": "💬 **I can also help you with:**\n• Explain how to use the platform\n• Resolve general questions\n• Guide you to the right sections",
+      "FINAL_QUESTION": "How can I help you today?"
+    },
+
+    "QUICK_ACTIONS": {
+      "TITLE": "Quick queries:",
+      "BUSINESSMAN": {
+        "MY_BATCHES": "What are my batches?",
+        "FIND_SUPPLIERS": "Find suppliers",
+        "MY_REQUESTS": "My requests",
+        "PLATFORM_HELP": "Platform help"
+      },
+      "SUPPLIER": {
+        "ASSIGNED_BATCHES": "My assigned batches",
+        "RECEIVED_REQUESTS": "Received requests",
+        "MY_OBSERVATIONS": "My observations",
+        "PLATFORM_HELP": "Platform help"
+      },
+      "GENERAL": {
+        "PLATFORM_HELP": "Platform help",
+        "GENERAL_INFO": "General information"
+      }
+    },
+
+    "RESPONSES": {
+      "LOGIN_REQUIRED": "Please log in to access this information.",
+      "NO_BATCHES": "You have no registered batches currently.",
+      "NO_SUPPLIERS": "There are no registered suppliers.",
+      "NO_REQUESTS": "You have no registered requests.",
+      "NO_OBSERVATIONS": "You have no registered observations.",
+      "ERROR_BATCHES": "Error getting batch information. Try again later.",
+      "ERROR_SUPPLIERS": "Error getting supplier information.",
+      "ERROR_REQUESTS": "Error getting request information.",
+      "ERROR_OBSERVATIONS": "Error getting observations.",
+      "ERROR_GENERAL": "Sorry, an error occurred. Can you try again?",
+      "DEFAULT_HELP": "I don't understand your query. Can you be more specific?",
+      "AI_LOADING": "The model is loading, please try again in a few seconds...",
+      "AI_AUTH_ERROR": "Authentication error with AI. Please contact administrator.",
+      "AI_RATE_LIMIT": "Too many queries, try again later.",
+      "AI_TEMP_ERROR": "Sorry, there's a temporary issue. Can you ask me about your batches, suppliers or requests?",
+      "AI_NO_RESPONSE": "I can't process your query right now. Can you be more specific about batches, suppliers or requests?"
+    },
+
+    "BATCHES": {
+      "SUMMARY": "You have {{count}} batch(es) in total:",
+      "RECENT_TITLE": "🔗 Recent batches:",
+      "NO_CODE": "No code",
+      "NO_CLIENT": "No client"
+    },
+
+    "SUPPLIERS": {
+      "SUMMARY": "There are {{count}} supplier(s) available:",
+      "BY_SPECIALIZATION": "📋 {{specialization}}: {{count}} supplier(s)",
+      "NO_SPECIALIZATION": "No specialization"
+    },
+
+    "REQUESTS": {
+      "SUMMARY": "You have {{count}} request(s):"
+    },
+
+    "OBSERVATIONS": {
+      "SUMMARY": "You have {{count}} observation(s):",
+      "NO_CODE": "No code"
+    },
+
+    "PLATFORM_HELP": {
+      "TITLE": "Hello! I'm your TextilFlow assistant. I can help you with:",
+      "QUERIES_TITLE": "🔍 **Queries you can make:**",
+      "QUERIES_LIST": "• \"What are my batches?\" - View status of your shipments\n• \"Find suppliers\" - Find available suppliers\n• \"My requests\" - View your active requests\n• \"My observations\" - View comments and notes",
+      "ROLE_HELP_BUSINESSMAN": "• As a businessman, you can check your batches, find suppliers and review requests",
+      "ROLE_HELP_SUPPLIER": "• As a supplier, you can view assigned batches and manage requests",
+      "FINAL_QUESTION": "How can I help you today?"
+    },
+
+    "INPUT_HELP": "Ask me about batches, suppliers, requests or general help"
   }
 }
