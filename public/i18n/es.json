@@ -811,6 +811,21 @@
     },
 
     "INPUT_HELP": "Pregúntame sobre lotes, proveedores, solicitudes o ayuda general"
+  },
+  "HOME": {
+    "WELCOME": "Bienvenido",
+    "WELCOME_DESCRIPTION": "Aquí tienes un resumen de tu actividad actual en TextilFlow.",
+    "LOTS_TO_SEND": "Lotes por enviar",
+    "LOTS_SENT": "Lotes enviados",
+    "LOTS_CONFIRMED": "Lotes confirmados",
+    "LOTS": "lotes",
+    "PENDING_PLUS_TO_SEND": "Pendientes + Por enviar",
+    "ACCEPTED_PLUS_COMPLETED": "Aceptados + Completados",
+    "VIEW_DETAILS": "Ver detalles",
+    "SHOW_NOTIFICATIONS": "Mostrar notificaciones",
+    "RECENT_NOTIFICATIONS": "Notificaciones recientes",
+    "LOT": "Lote",
+    "VIEW_MORE_DETAILS": "Ver más detalles"
   }
 }
 

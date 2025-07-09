@@ -1,8 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { BatchService } from '../../../batch/services/batch.service.service';
 import { AuthService } from '../../../auth/services/auth.service';
-import { Batch, STATUS } from '../../../batch/models/batch.entity';
+import {Batch, STATUS} from '../../../batch/models/batch.entity';
+import {TranslateModule} from '@ngx-translate/core';
 
 interface LotSummary {
   pending: number;
@@ -18,13 +20,14 @@ interface Notification {
 @Component({
   selector: 'app-supplier-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,TranslateModule],
   templateUrl: './supplier-home.component.html',
   styleUrl: './supplier-home.component.css'
 })
 export class SupplierHomeComponent implements OnInit {
   private batchService = inject(BatchService);
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   supplierName = 'Telas del Sur';
   lotSummary: LotSummary = { pending: 0, sent: 0, confirmed: 0 };
@@ -52,14 +55,17 @@ export class SupplierHomeComponent implements OnInit {
       );
 
       for (const batch of sortedBatches) {
-        if (batch.status === STATUS.POR_ENVIAR) {
+        // Lotes por enviar: PENDIENTE + POR_ENVIAR
+        if (batch.status === STATUS.PENDIENTE || batch.status === STATUS.POR_ENVIAR) {
           summary.pending++;
 
           if (!notificationMap[batch.code]) {
             notificationMap[batch.code] = [];
           }
 
-          notificationMap[batch.code].push(`Recuerda enviar el lote ${batch.code} hoy.`);
+          if (batch.status === STATUS.POR_ENVIAR) {
+            notificationMap[batch.code].push(`Recuerda enviar el lote ${batch.code} hoy.`);
+          }
 
           if (batch.observations && batch.observations.trim() !== '') {
             notificationMap[batch.code].push(`Dejó una observación en el lote ${batch.code}.`);
@@ -68,9 +74,13 @@ export class SupplierHomeComponent implements OnInit {
           if (!batch.imageUrl || batch.imageUrl.trim() === '') {
             notificationMap[batch.code].push(`Falta evidencia en el lote ${batch.code}.`);
           }
-        } else if (batch.status === STATUS.ENVIADO) {
+        }
+        // Lotes enviados: solo ENVIADO
+        else if (batch.status === STATUS.ENVIADO) {
           summary.sent++;
-        } else {
+        }
+        // Lotes confirmados: ACEPTADO + COMPLETADO
+        else if (batch.status === STATUS.ACEPTADO || batch.status === STATUS.COMPLETADO) {
           summary.confirmed++;
         }
       }
@@ -85,11 +95,21 @@ export class SupplierHomeComponent implements OnInit {
   }
 
   viewDetails(type: string): void {
-    console.log(`Ver detalles de lotes ${type}`);
+    switch (type) {
+      case 'pendientes':
+        this.router.navigate(['/supplier/registrar-lotes']);
+        break;
+      case 'enviados':
+      case 'confirmados':
+        this.router.navigate(['/supplier/mis-lotes']);
+        break;
+      default:
+        console.log(`Vista no definida para: ${type}`);
+    }
   }
 
   viewMoreNotifications(): void {
-    console.log('Ver más notificaciones');
+    this.router.navigate(['/supplier/mis-lotes']);
   }
 
   closeNotifications(): void {

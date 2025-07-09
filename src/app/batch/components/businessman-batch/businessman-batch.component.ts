@@ -71,11 +71,9 @@ export class BusinessmanBatchComponent implements OnInit {
   ) {}
 
   createBatchObservation(batch: Batch): void {
-    // Si ya está en proceso de crear una observación, no hacer nada
     if (this.isCreatingObservation) return;
 
     this.isCreatingObservation = true;
-
     const now = new Date().toISOString();
 
     const observation: Observation = new Observation({
@@ -84,18 +82,21 @@ export class BusinessmanBatchComponent implements OnInit {
       businessmanId: this.currentUserId,
       supplierId: batch.supplierId,
       reason: this.rejectReason,
-      imageUrl: this.rejectImage || batch.imageUrl,
+      // ✅ USAR LA IMAGEN ORIGINAL DEL BATCH, no la base64
+      imageUrl: batch.imageUrl, // No this.rejectImage!
       status: OBSERVATION_STATUS.PENDIENTE,
       createdAt: now
     });
 
+    console.log('📝 Creando observación:', observation);
+
     this.observationService.create(observation).subscribe({
       next: () => {
-        console.log('Registro de observación creado correctamente');
+        console.log('✅ Observación creada correctamente');
         this.isCreatingObservation = false;
       },
       error: (error: any) => {
-        console.error('Error al crear registro de observación:', error);
+        console.error('❌ Error al crear observación:', error);
         this.isCreatingObservation = false;
       }
     });
@@ -308,12 +309,14 @@ export class BusinessmanBatchComponent implements OnInit {
 
     this.isLoading = true;
 
-    // Clonamos el objeto completo para no perder datos
-    const updatedBatch: Batch = {...this.selectedBatch};
-    // Cambiamos a COMPLETADO, no a ACEPTADO
-    updatedBatch.status = STATUS.COMPLETADO;
+    // ✅ IGUAL QUE EN SUPPLIER - Solo campos específicos
+    const updatedBatch: Partial<Batch> = {
+      id: this.selectedBatch.id,
+      status: STATUS.COMPLETADO,
+      businessmanId: this.selectedBatch.businessmanId // Preservar
+    };
 
-    this.batchService.update(this.selectedBatch.id!, updatedBatch).subscribe({
+    this.batchService.updateBatch(this.selectedBatch.id!, updatedBatch).subscribe({
       next: () => {
         this.showNotification('Lote aprobado correctamente', 'success');
         this.loadBatches();
@@ -438,26 +441,22 @@ export class BusinessmanBatchComponent implements OnInit {
 
   // Enviar rechazo
   submitReject(): void {
-    if (!this.selectedBatch) return;
-
-    if (!this.rejectReason.trim()) {
-      this.showNotification('Por favor ingrese el motivo del rechazo', 'warning');
-      return;
-    }
+    if (!this.selectedBatch || !this.rejectReason.trim()) return;
 
     this.isLoading = true;
 
-    // Clonamos el objeto completo para mantener todos los datos
-    const updatedBatch: Batch = {...this.selectedBatch};
-    updatedBatch.status = STATUS.RECHAZADO;
-    updatedBatch.observations = this.rejectReason;
-    updatedBatch.imageUrl = this.rejectImage || this.selectedBatch.imageUrl;
+    // ✅ IGUAL QUE EN SUPPLIER - Solo campos específicos
+    const updatedBatch: Partial<Batch> = {
+      id: this.selectedBatch.id,
+      status: STATUS.RECHAZADO,
+      businessmanId: this.selectedBatch.businessmanId // Preservar
+    };
 
-    // Ahora también creamos un registro de observación
-    this.createBatchObservation(updatedBatch);
-
-    this.batchService.update(this.selectedBatch.id!, updatedBatch).subscribe({
+    this.batchService.updateBatch(this.selectedBatch.id!, updatedBatch).subscribe({
       next: () => {
+        // Crear observación DESPUÉS del update exitoso
+        this.createBatchObservation(this.selectedBatch!);
+
         this.showNotification('Lote rechazado correctamente', 'success');
         this.loadBatches();
         this.backToTable();

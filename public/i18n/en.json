@@ -810,5 +810,20 @@
     },
 
     "INPUT_HELP": "Ask me about batches, suppliers, requests or general help"
+  },
+  "HOME": {
+    "WELCOME": "Welcome",
+    "WELCOME_DESCRIPTION": "Here's a summary of your current activity in TextilFlow.",
+    "LOTS_TO_SEND": "Lots to send",
+    "LOTS_SENT": "Lots sent",
+    "LOTS_CONFIRMED": "Lots confirmed",
+    "LOTS": "lots",
+    "PENDING_PLUS_TO_SEND": "Pending + To send",
+    "ACCEPTED_PLUS_COMPLETED": "Accepted + Completed",
+    "VIEW_DETAILS": "View details",
+    "SHOW_NOTIFICATIONS": "Show notifications",
+    "RECENT_NOTIFICATIONS": "Recent notifications",
+    "LOT": "Lot",
+    "VIEW_MORE_DETAILS": "View more details"
   }
 }

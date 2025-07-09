@@ -1,26 +1,28 @@
 <div class="dashboard-container">
   <div class="welcome-section">
-    <h1>Bienvenido, {{ supplierName }}</h1>
-    <p>Aquí tienes un resumen de tu actividad actual en TextilFlow.</p>
+    <h1>{{ 'HOME.WELCOME' | translate }}, {{ supplierName }}</h1>
+    <p>{{ 'HOME.WELCOME_DESCRIPTION' | translate }}</p>
   </div>
 
   <div class="stats-container">
     <div class="stat-card">
-      <h2>Lotes por enviar</h2>
-      <p class="stat-number">{{ lotSummary.pending }} lotes</p>
-      <button class="btn-details" (click)="viewDetails('pendientes')">Ver detalles</button>
+      <h2>{{ 'HOME.LOTS_TO_SEND' | translate }}</h2>
+      <p class="stat-number">{{ lotSummary.pending }} {{ 'HOME.LOTS' | translate }}</p>
+      <small class="stat-description">{{ 'HOME.PENDING_PLUS_TO_SEND' | translate }}</small>
+      <button class="btn-details" (click)="viewDetails('pendientes')">{{ 'HOME.VIEW_DETAILS' | translate }}</button>
     </div>
 
     <div class="stat-card">
-      <h2>Lotes enviados</h2>
-      <p class="stat-number">{{ lotSummary.sent }} lotes</p>
-      <button class="btn-details" (click)="viewDetails('enviados')">Ver detalles</button>
+      <h2>{{ 'HOME.LOTS_SENT' | translate }}</h2>
+      <p class="stat-number">{{ lotSummary.sent }} {{ 'HOME.LOTS' | translate }}</p>
+      <button class="btn-details" (click)="viewDetails('enviados')">{{ 'HOME.VIEW_DETAILS' | translate }}</button>
     </div>
 
     <div class="stat-card">
-      <h2>Lotes confirmados</h2>
-      <p class="stat-number">{{ lotSummary.confirmed }} lotes</p>
-      <button class="btn-details" (click)="viewDetails('confirmados')">Ver detalles</button>
+      <h2>{{ 'HOME.LOTS_CONFIRMED' | translate }}</h2>
+      <p class="stat-number">{{ lotSummary.confirmed }} {{ 'HOME.LOTS' | translate }}</p>
+      <small class="stat-description">{{ 'HOME.ACCEPTED_PLUS_COMPLETED' | translate }}</small>
+      <button class="btn-details" (click)="viewDetails('confirmados')">{{ 'HOME.VIEW_DETAILS' | translate }}</button>
     </div>
   </div>
 
@@ -30,7 +32,7 @@
     class="btn-show-notifications"
     (click)="openNotifications()"
   >
-    Mostrar notificaciones
+    {{ 'HOME.SHOW_NOTIFICATIONS' | translate }}
   </button>
 
   <!-- Sección de notificaciones -->
@@ -41,7 +43,7 @@
     <div class="notifications-header">
       <div class="notifications-title">
         <span class="notification-icon">ⓘ</span>
-        <h3>Notificaciones recientes</h3>
+        <h3>{{ 'HOME.RECENT_NOTIFICATIONS' | translate }}</h3>
       </div>
       <button class="close-btn" (click)="closeNotifications()">✕</button>
     </div>
@@ -49,7 +51,7 @@
     <ul class="notifications-list">
       <li *ngFor="let notification of notificationsGrouped">
         <div class="notification-item">
-          <strong>Lote {{ notification.code }}:</strong>
+          <strong>{{ 'HOME.LOT' | translate }} {{ notification.code }}:</strong>
           <ul>
             <li *ngFor="let message of notification.messages">{{ message }}</li>
           </ul>
@@ -58,8 +60,7 @@
     </ul>
 
     <button class="btn-more-details" (click)="viewMoreNotifications()">
-      Ver más detalles
+      {{ 'HOME.VIEW_MORE_DETAILS' | translate }}
     </button>
   </div>
 </div>
-
