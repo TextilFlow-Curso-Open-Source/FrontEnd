@@ -4,7 +4,13 @@
   margin: 0 auto;
   font-family: Arial, sans-serif;
 }
-
+.stat-description {
+  display: block;
+  color: #666;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
 .welcome-section {
   margin-bottom: 30px;
 }
