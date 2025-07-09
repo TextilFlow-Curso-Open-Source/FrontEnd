@@ -45,6 +45,7 @@
     "ERROR_LOAD": "Error loading configuration"
   },
   "PLANS": {
+    "DO_NOT_CLOSE": "Don`t close this window",
     "CARD_DETAILS": "Card details",
     "PAY_NOW": "PAY NOW",
     "SECURE_PAYMENT": "Secure payment",

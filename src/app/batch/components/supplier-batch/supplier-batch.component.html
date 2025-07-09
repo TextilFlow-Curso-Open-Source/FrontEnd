@@ -84,14 +84,17 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ACTIONS' | translate }}</th>
         <td mat-cell *matCellDef="let element">
-          <button mat-icon-button (click)="toggleStatus(element)" matTooltip="Cambiar estado">
-            <mat-icon>autorenew</mat-icon>
+          <!-- ✅ CAMBIAR: de toggleStatus a refreshBatch -->
+          <button mat-icon-button (click)="refreshBatch(element)" matTooltip="Refrescar datos del lote">
+            <mat-icon>refresh</mat-icon>
           </button>
+
           <button mat-icon-button (click)="editBatch(element)" matTooltip="Editar lote">
             <mat-icon>edit</mat-icon>
           </button>
         </td>
       </ng-container>
+
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>

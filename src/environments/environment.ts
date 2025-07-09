@@ -2,9 +2,9 @@ export const environment = {
   production: true,
 
   // Backend real URL
-  //serverBaseUrl: 'http://3.135.127.195:5001/api/v1',
+  serverBaseUrl: 'http://3.135.127.195:5001/api/v1',
   //Production URL
-  serverBaseUrl: 'https://analyses-engagement-berkeley-orange.trycloudflare.com/api/v1',
+  //serverBaseUrl: 'https://analyses-engagement-berkeley-orange.trycloudflare.com/api/v1',
 
   authEndpointPath: '/authentication',
   userEndpointPath: '/users',

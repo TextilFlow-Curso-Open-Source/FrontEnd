@@ -103,16 +103,28 @@ export class SupplierBatchComponent implements OnInit {
     this.dataSource.filter = filterValue;
   }
 
-  toggleStatus(batch: Batch): void {
-    const updatedStatus = batch.status === STATUS.ENVIADO ? STATUS.POR_ENVIAR : STATUS.ENVIADO;
+  refreshBatch(batch: Batch): void {
+    console.log('🔄 Refreshing batch data for:', batch.id);
 
-    const updatedBatch: Partial<Batch> = {
-      ...batch,
-      status: updatedStatus
-    };
+    // ✅ SOLO RECARGAR LOS DATOS DEL BATCH ESPECÍFICO
+    this.batchService.getBatchById(batch.id!).subscribe({
+      next: (updatedBatch) => {
+        console.log('✅ Batch refreshed:', updatedBatch);
 
-    this.batchService.updateBatch(batch.id!, updatedBatch).subscribe(() => {
-      this.loadBatches();
+        // ✅ ACTUALIZAR SOLO ESA FILA EN LA TABLA
+        const currentData = this.dataSource.data;
+        const index = currentData.findIndex(b => b.id === batch.id);
+
+        if (index !== -1) {
+          currentData[index] = updatedBatch;
+          this.dataSource.data = [...currentData]; // Trigger change detection
+          console.log(`✅ Updated row ${index} in table`);
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error refreshing batch:', error);
+        // Opcional: mostrar notificación de error
+      }
     });
   }
 

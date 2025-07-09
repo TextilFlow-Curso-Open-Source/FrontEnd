@@ -117,7 +117,7 @@ export class BatchService {
 // VERSIÓN CORREGIDA DEL updateBatch method en batch.service.service.ts
 
   /**
-   * ✅ ACTUALIZAR BATCH - VERSIÓN CORREGIDA COMPLETA
+   * ✅ MÉTODO updateBatch SIN imageUrl - Solo para datos del batch
    */
   updateBatch(batchId: string, batch: Partial<Batch>): Observable<Batch> {
     console.log('🔄 UpdateBatch - BatchId:', batchId);
@@ -127,118 +127,25 @@ export class BatchService {
 
     return this.getBatchById(batchId).pipe(
       switchMap(existingBatch => {
-
-        // ✅ FUNCIÓN PARA FORMATEAR FECHA CORRECTAMENTE
-        const formatDateForBackend = (dateString: string): string => {
-          if (!dateString) return new Date().toISOString().slice(0, 10);
-
-          // Si ya está en formato YYYY-MM-DD, usar tal cual
-          if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-            return dateString;
-          }
-
-          // Si viene con tiempo, extraer solo la fecha
-          if (dateString.includes('T')) {
-            return dateString.split('T')[0];
-          }
-
-          // Convertir cualquier otro formato a YYYY-MM-DD
-          const date = new Date(dateString);
-          if (isNaN(date.getTime())) {
-            return new Date().toISOString().slice(0, 10);
-          }
-          return date.toISOString().slice(0, 10);
-        };
-
-        // ✅ PREPARAR DATOS CON VALIDACIONES ESTRICTAS COMO EL BACKEND ESPERA
+        // ✅ PREPARAR DATOS SIN imageUrl (se maneja por separado)
         const updateData = {
-          code: (batch.code || existingBatch.code || '').toString().trim(),
-          client: (batch.client || existingBatch.client || '').toString().trim(),
+          batchId: resourceId,
+          code: batch.code || existingBatch.code,
+          client: batch.client || existingBatch.client,
           businessmanId: Number(batch.businessmanId || existingBatch.businessmanId),
           supplierId: Number(batch.supplierId || existingBatch.supplierId),
-          fabricType: (batch.fabricType || existingBatch.fabricType || '').toString().trim(),
-          color: (batch.color || existingBatch.color || '').toString().trim(),
-          quantity: Number(batch.quantity || existingBatch.quantity || 1),
-          price: Number(batch.price || existingBatch.price || 0),
-          observations: batch.observations !== undefined
-            ? batch.observations.toString().trim()
-            : (existingBatch.observations || 'Sin observaciones').toString().trim(),
-          address: (batch.address || existingBatch.address || 'Sin dirección').toString().trim(),
-          date: formatDateForBackend(batch.date || existingBatch.date),
+          fabricType: batch.fabricType || existingBatch.fabricType,
+          color: batch.color || existingBatch.color,
+          quantity: Number(batch.quantity || existingBatch.quantity),
+          price: Number(batch.price || existingBatch.price),
+          observations: batch.observations || existingBatch.observations || '',
+          address: batch.address || existingBatch.address || '',
+          date: this.formatDateForBackend(batch.date || existingBatch.date),
           status: batch.status || existingBatch.status,
-          imageUrl: batch.imageUrl || existingBatch.imageUrl || 'https://via.placeholder.com/300x200?text=No+Image'
+          imageUrl: existingBatch.imageUrl || '' // ✅ Mantener la imagen actual
         };
 
-        // ✅ VALIDACIONES CRÍTICAS ANTES DE ENVIAR
-        const validationErrors: string[] = [];
-
-        if (!updateData.code || updateData.code.length === 0) {
-          validationErrors.push('Code is required and cannot be empty');
-        }
-        if (!updateData.client || updateData.client.length === 0) {
-          validationErrors.push('Client is required and cannot be empty');
-        }
-        if (!updateData.fabricType || updateData.fabricType.length === 0) {
-          validationErrors.push('Fabric type is required and cannot be empty');
-        }
-        if (!updateData.color || updateData.color.length === 0) {
-          validationErrors.push('Color is required and cannot be empty');
-        }
-        if (!updateData.observations || updateData.observations.length === 0) {
-          updateData.observations = 'Sin observaciones'; // ✅ El backend requiere observations
-        }
-        if (!updateData.address || updateData.address.length === 0) {
-          updateData.address = 'Sin dirección'; // ✅ El backend requiere address
-        }
-        if (isNaN(updateData.quantity) || updateData.quantity <= 0) {
-          validationErrors.push('Quantity must be greater than zero');
-        }
-        if (isNaN(updateData.price) || updateData.price < 0) {
-          validationErrors.push('Price cannot be negative');
-        }
-        if (isNaN(updateData.businessmanId) || updateData.businessmanId <= 0) {
-          validationErrors.push('Valid businessman ID is required');
-        }
-        if (isNaN(updateData.supplierId) || updateData.supplierId <= 0) {
-          validationErrors.push('Valid supplier ID is required');
-        }
-        if (!updateData.status) {
-          validationErrors.push('Status is required');
-        }
-        if (!updateData.imageUrl || updateData.imageUrl.length === 0) {
-          updateData.imageUrl = 'https://via.placeholder.com/300x200?text=No+Image'; // ✅ El backend requiere imageUrl
-        }
-
-        // ✅ VALIDAR QUE EL STATUS SEA VÁLIDO
-        const validStatuses = ['PENDIENTE', 'ACEPTADO', 'RECHAZADO', 'COMPLETADO', 'POR_ENVIAR', 'ENVIADO'];
-        if (!validStatuses.includes(updateData.status)) {
-          validationErrors.push(`Invalid status: ${updateData.status}. Valid statuses: ${validStatuses.join(', ')}`);
-        }
-
-        // ✅ VALIDAR FECHA
-        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-        if (!dateRegex.test(updateData.date)) {
-          validationErrors.push(`Invalid date format: ${updateData.date}. Expected YYYY-MM-DD`);
-        }
-
-        // Si hay errores de validación, lanzar error
-        if (validationErrors.length > 0) {
-          console.error('❌ Validation errors:', validationErrors);
-          throw new Error(`Validation failed: ${validationErrors.join(', ')}`);
-        }
-
-        // ✅ LOGGING DETALLADO ANTES DE ENVIAR
-        console.log('🚀 REQUEST DETAILS:');
-        console.log('   URL:', `${this.serverBaseUrl}${this.resourceEndpoint}/${resourceId}`);
-        console.log('   Method: PUT');
-        console.log('   Headers:', this.httpOptions.headers);
-        console.log('   Body (formatted):', JSON.stringify(updateData, null, 2));
-
-        // ✅ Log cada campo individualmente para debugging
-        console.log('🔍 FIELD BY FIELD ANALYSIS:');
-        Object.entries(updateData).forEach(([key, value]) => {
-          console.log(`   ${key}: "${value}" (type: ${typeof value}, length: ${value?.toString().length || 0})`);
-        });
+        console.log('🚀 Sending batch update (without new image):', JSON.stringify(updateData, null, 2));
 
         return this.httpClient.put<any>(
           `${this.serverBaseUrl}${this.resourceEndpoint}/${resourceId}`,
@@ -247,68 +154,15 @@ export class BatchService {
         );
       }),
       map(response => {
-        console.log('✅ Update response received:', response);
-        return this.transformFromBackend(response);
-      }),
-      retry(1),
-      catchError((error) => {
-        console.error('💥 PUT REQUEST FAILED:');
-        console.error('   URL:', `${this.serverBaseUrl}${this.resourceEndpoint}/${resourceId}`);
-        console.error('   Status:', error.status);
-        console.error('   Status Text:', error.statusText);
-        console.error('   Error Body:', error.error);
-        console.error('   Full Error Object:', error);
-
-        // ✅ Intentar extraer mensaje de error más específico
-        let specificError = 'Unknown error occurred';
-        if (error.error) {
-          if (typeof error.error === 'string') {
-            specificError = error.error;
-          } else if (error.error.message) {
-            specificError = error.error.message;
-          } else if (error.error.error) {
-            specificError = error.error.error;
-          } else {
-            specificError = JSON.stringify(error.error);
-          }
-        }
-
-        console.error('💥 Specific error extracted:', specificError);
-        return this.handleError(error);
-      })
-    );
-  }
-
-  /**
-   * ✅ ACTUALIZAR SOLO LA IMAGEN (método separado como sugeriste)
-   */
-  updateBatchImage(batchId: string, imageUrl: string): Observable<Batch> {
-    console.log('🖼️ Updating batch image:', { batchId, imageUrl });
-
-    if (!imageUrl || imageUrl.trim() === '') {
-      return throwError(() => new Error('Image URL cannot be empty'));
-    }
-
-    const resourceId = parseInt(batchId);
-    const updateImageData = { imageUrl: imageUrl.trim() };
-
-    return this.httpClient.put<any>(
-      `${this.serverBaseUrl}${this.resourceEndpoint}/${resourceId}/image`,
-      updateImageData,
-      this.httpOptions
-    ).pipe(
-      map(response => {
-        console.log('✅ Image update response:', response);
+        console.log('✅ Batch update response:', response);
         return this.transformFromBackend(response);
       }),
       catchError(this.handleError)
     );
   }
-
-  /**
-   * Subir imagen de batch
-   */
   uploadBatchImage(batchId: string, file: File): Observable<any> {
+    console.log('🖼️ Uploading image for batch:', batchId);
+
     const formData = new FormData();
     formData.append('file', file);
 
@@ -316,12 +170,35 @@ export class BatchService {
       // No agregar Content-Type para FormData, el navegador lo hace automáticamente
     });
 
-    return this.httpClient.post<any>(`${this.serverBaseUrl}${this.resourceEndpoint}/${batchId}/image`, formData, {
-      headers: uploadHeaders,
-      reportProgress: true
-    }).pipe(
+    return this.httpClient.post<any>(
+      `${this.serverBaseUrl}${this.resourceEndpoint}/${batchId}/image`,
+      formData,
+      {
+        headers: uploadHeaders,
+        reportProgress: true
+      }
+    ).pipe(
+      map(response => {
+        console.log('✅ Image upload response:', response);
+        return response;
+      }),
       catchError(this.handleError)
     );
+  }
+  private formatDateForBackend(dateString: string): string {
+    if (!dateString) return new Date().toISOString().slice(0, 10);
+
+    // Si ya está en formato YYYY-MM-DD, usar tal cual
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+
+    // Si viene con tiempo, extraer solo la fecha
+    if (dateString.includes('T')) return dateString.split('T')[0];
+
+    // Convertir cualquier otro formato a YYYY-MM-DD
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ?
+      new Date().toISOString().slice(0, 10) :
+      date.toISOString().slice(0, 10);
   }
 
   /**
