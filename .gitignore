@@ -1,11 +1,11 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
 # Compiled output
-
+.env
 /tmp
 /out-tsc
 /bazel-out
-
+src/environments/environment.local.ts
 # Node
 /node_modules
 npm-debug.log

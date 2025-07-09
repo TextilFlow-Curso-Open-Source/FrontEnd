@@ -11,7 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm ci && npm run build
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Replace API key in production environment
+        run: |
+          sed -i 's/PLACEHOLDER_HUGGINGFACE_API_KEY/${{ secrets.HUGGINGFACE_API_KEY }}/g' src/environments/environment.prod.ts
+
+      - name: Build project
+        run: npm run build
+
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

@@ -283,11 +283,16 @@ export class ChatbotService {
    * Obtiene respuesta de IA con contexto de la plataforma y datos reales
    */
   private getAIResponseWithContext(message: string): Observable<string> {
+    console.log('🔍 API Key presente:', !!this.HF_API_KEY);
+    console.log('🔍 API Key válida:', this.HF_API_KEY !== 'hf_tu_token_real_aqui' && this.HF_API_KEY !== '');
+
     // Verificar si hay API key válida
-    if (!this.HF_API_KEY || this.HF_API_KEY === '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') {
+    if (!this.HF_API_KEY || this.HF_API_KEY === 'hf_tu_token_real_aqui' || this.HF_API_KEY === '') {
+      console.warn('❌ No AI API key available, using fallback response');
       return of(this.translate.instant('CHATBOT.RESPONSES.AI_NO_RESPONSE'));
     }
 
+    console.log('✅ Usando IA con contexto');
     const currentUser = this.authService.getCurrentUser();
 
     // Construir contexto con datos reales del usuario

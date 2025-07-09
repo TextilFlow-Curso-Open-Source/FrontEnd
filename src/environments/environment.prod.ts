@@ -1,10 +1,8 @@
 export const environment = {
-  production: false,
-  huggingFaceApiKey: '',
+  production: true,
+  huggingFaceApiKey: 'PLACEHOLDER_HUGGINGFACE_API_KEY', // ← Será reemplazado por GitHub Actions
 
-  // Backend real URL
-  //serverBaseUrl: 'http://3.135.127.195:5001/api/v1',
-  //Production URL
+  // Production URL
   serverBaseUrl: 'https://analyses-engagement-berkeley-orange.trycloudflare.com/api/v1',
 
   authEndpointPath: '/authentication',
@@ -14,21 +12,12 @@ export const environment = {
   profileEndpointPath: '/profiles',
   businessSupplierRequests: '/business-supplier-requests',
   observationEndpointPath: '/observations',
-
-  // Endpoints para imágenes de perfil - SIN placeholder
   profileImagesEndpointPath: '/profiles',
-
-  // Resto igual...
   batchesEndpointPath: '/batches',
   supplierReviewEndpointPath: '/supplier-reviews',
   configurationEndpointPath: '/configurationssuppl',
-
-  //Payment endpoints
   paymentEndpointPath: '/payments',
-
-  // Stripe configuration
   stripePublishableKey: 'pk_test_51RhjroQZmHfPn08lbpI7xgzkS3eDJngVHcp5MpJwKPhY80d43pnTt1Dt6H79Tki1draTZq1vpvfFbQrnZZDQqIYI00Rbq3vFvj',
-
   apiVersion: 'v1',
   tokenPrefix: 'Bearer ',
   tokenStorageKey: 'auth_token',
