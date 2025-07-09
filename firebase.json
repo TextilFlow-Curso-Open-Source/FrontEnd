@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist/textil-flow-front-end/browser",
+    "public": "dist",
     "ignore": [
       "firebase.json",
       "**/.*",
