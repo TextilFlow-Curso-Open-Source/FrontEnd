@@ -15,14 +15,41 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'  # ← Cambiar de '18' a '20'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Replace API key in production environment
+      - name: Create production environment with API key
         run: |
-          sed -i 's/PLACEHOLDER_HUGGINGFACE_API_KEY/${{ secrets.HUGGINGFACE_API_KEY }}/g' src/environments/environment.prod.ts
+          cat > src/environments/environment.prod.ts << 'EOF'
+          export const environment = {
+            production: true,
+            huggingFaceApiKey: '${{ secrets.HUGGINGFACE_API_KEY }}',
+            serverBaseUrl: 'https://analyses-engagement-berkeley-orange.trycloudflare.com/api/v1',
+            authEndpointPath: '/authentication',
+            userEndpointPath: '/users',
+            businessmanEndpointPath: '/businessmen',
+            supplierEndpointPath: '/suppliers',
+            profileEndpointPath: '/profiles',
+            businessSupplierRequests: '/business-supplier-requests',
+            observationEndpointPath: '/observations',
+            profileImagesEndpointPath: '/profiles',
+            batchesEndpointPath: '/batches',
+            supplierReviewEndpointPath: '/supplier-reviews',
+            configurationEndpointPath: '/configurationssuppl',
+            paymentEndpointPath: '/payments',
+            stripePublishableKey: 'pk_test_51RhjroQZmHfPn08lbpI7xgzkS3eDJngVHcp5MpJwKPhY80d43pnTt1Dt6H79Tki1draTZq1vpvfFbQrnZZDQqIYI00Rbq3vFvj',
+            apiVersion: 'v1',
+            tokenPrefix: 'Bearer ',
+            tokenStorageKey: 'auth_token',
+            httpTimeout: 30000,
+            httpRetries: 2
+          };
+          EOF
+          echo "✅ Archivo environment.prod.ts creado"
+          echo "🔍 Contenido del archivo:"
+          head -5 src/environments/environment.prod.ts
 
       - name: Build project
         run: npm run build
