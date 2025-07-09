@@ -54,15 +54,15 @@
         </button>
         <button
           class="filter-chip"
-          [class.active]="statusFilter === 'Pendiente'"
-          (click)="setStatusFilter('Pendiente')">
+          [class.active]="statusFilter === OBSERVATION_STATUS.PENDIENTE"
+          (click)="setStatusFilter(OBSERVATION_STATUS.PENDIENTE)">
           <span class="status-dot status-pending">●</span>
           {{ 'OBSERVATION_SUPPLIER.STATUS_PENDING' | translate }}
         </button>
         <button
           class="filter-chip"
-          [class.active]="statusFilter === 'Visto'"
-          (click)="setStatusFilter('Visto')">
+          [class.active]="statusFilter === OBSERVATION_STATUS.VISTO"
+          (click)="setStatusFilter(OBSERVATION_STATUS.VISTO)">
           <span class="status-dot status-seen">●</span>
           {{ 'OBSERVATION_SUPPLIER.STATUS_SEEN' | translate }}
         </button>

@@ -284,7 +284,7 @@ export class ChatbotService {
    */
   private getAIResponseWithContext(message: string): Observable<string> {
     // Verificar si hay API key válida
-    if (!this.HF_API_KEY || this.HF_API_KEY === 'hf_tu_token_real_aqui') {
+    if (!this.HF_API_KEY || this.HF_API_KEY === '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') {
       return of(this.translate.instant('CHATBOT.RESPONSES.AI_NO_RESPONSE'));
     }
 
